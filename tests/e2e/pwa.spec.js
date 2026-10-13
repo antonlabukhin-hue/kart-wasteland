@@ -10,7 +10,7 @@ test('установка на телефон: манифест, иконки, р
         const icons = await Promise.all(m.icons.map(async (i) => { const r = await fetch(new URL(i.src, href)); return r.ok && (await r.blob()).size > 1000; }));
         return { name: m.name, display: m.display, start: m.start_url, icons, maskable: m.icons.some(i => i.purpose === 'maskable') };
     });
-    expect(man.name).toBe('Дорожный прорыв');
+    expect(man.name).toBe('Дорожный прорыв: Пустошь');
     expect(man.display).toBe('fullscreen');
     expect(man.icons.every(Boolean)).toBe(true);
     expect(man.maskable).toBe(true);
