@@ -30,7 +30,7 @@ export function countArrowRun(profile) {
  * Стрелки — только в начале заезда: по очереди все четыре действия (влево, вправо, прыжок, подныр).
  * Каждая гаснет, когда игрок её выполнил (или сама через INTRO_MAX с), после четвёртой — до конца заезда ничего.
  */
-export const INTRO_ACTS = ['left', 'right', 'jump', 'duck'];
+export const INTRO_ACTS = ['left', 'right', 'jump']; // Пустошь: подныра нет
 export const INTRO_MIN = 0.6, INTRO_MAX = 4;
 export function createIntro() { return { step: 0, t: 0 }; }
 /** Кадр: did — { left, right, jump, duck } что игрок делает сейчас; вернёт стрелку или null (обучение кончилось) */

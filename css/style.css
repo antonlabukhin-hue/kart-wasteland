@@ -6589,3 +6589,8 @@ body:not(.swipe-ctl) #mobile-controls.active ~ #nitro-btn { right: calc(env(safe
 
 /* полсердца (зверь) */
 #game-hud .hud-hearts i.half { background: linear-gradient(90deg, #ff3b4a 50%, #55505c 50%); -webkit-background-clip: text; background-clip: text; color: transparent !important; text-shadow: none; }
+
+/* Пустошь: один режим — бесконечная трасса; кампания и «Звериный час» из меню убраны */
+#main-menu-screen .menu-card[data-menu="campaign"], #main-menu-screen .menu-card[data-menu="endless"] { display: none !important; }
+/* Пустошь: вся картинка заезда — выцветшая и пыльная (дома, машины, небо — в одной гамме) */
+#game-container canvas { filter: saturate(0.72) sepia(0.18) contrast(1.06); }

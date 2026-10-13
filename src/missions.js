@@ -15,7 +15,7 @@ export const MISSION_POOL = [
     { id: 'boards', text: 'Снеси рекламные щиты', stat: 'billboards', targets: [2, 4, 7] },
     { id: 'wins', text: 'Финиш или 1 км в бесконечной', stat: 'wins', targets: [2, 3, 5] },
     { id: 'clean', text: 'Без аварий: финиш или 500 м', stat: 'cleanWins', targets: [1, 2, 3] },
-    { id: 'boss', text: 'Победи босса или уйди от ГАИ', stat: 'bossDefeated', targets: [1, 2, 3] },
+    { id: 'boss', text: 'Уйди от босса компании', stat: 'bossDefeated', targets: [1, 2, 3] },
     { id: 'gum', text: 'Собери сердечки', stat: 'gumPicked', targets: [3, 6, 10] },
     { id: 'nitro', text: 'Подбери нитро', stat: 'nitroPicked', targets: [3, 6, 10] },
     { id: 'risk', text: 'Набери очков риска', stat: 'riskPoints', targets: [800, 2000, 4000] },

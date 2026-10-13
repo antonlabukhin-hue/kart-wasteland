@@ -58,12 +58,12 @@ export const LINES = {
         ['over_3', 'Он даже не понял, что случилось!']
     ],
     police: [
-        ['police_1', 'ГАИ на хвосте! Жми!'],
-        ['police_2', 'Мигалки в зеркале! Ой-ой-ой!']
+        ['police_1', 'Босс компании на хвосте! Жми!'],
+        ['police_2', 'Чёрный джип в зеркале! Отрывайся!']
     ],
     caught: [
-        ['caught_1', 'Попался! Документики, пожалуйста!'],
-        ['caught_2', 'Всё, приехали. Командир доволен.']
+        ['caught_1', 'Попался! Босс доволен.'],
+        ['caught_2', 'Всё, приехали. Компания своё забрала.']
     ],
     chance: [
         ['chance_1', 'Второй шанс! Не каждому дают!'],
@@ -185,7 +185,7 @@ export function createAnnouncer(o) {
 /** Крупная плашка игры (showBigPlaque) → о чём сказать ведущему */
 export function plaqueKind(title) {
     const t = String(title || '');
-    const map = [['В УДАРЕ', 'fever'], ['НОВЫЙ РЕКОРД', 'record'], ['ОБОГНАЛ', 'overtake'], ['ВТОРОЙ ШАНС', 'chance'], ['ГАИ ПОЙМАЛА', 'caught'],
+    const map = [['В УДАРЕ', 'fever'], ['НОВЫЙ РЕКОРД', 'record'], ['ОБОГНАЛ', 'overtake'], ['ВТОРОЙ ШАНС', 'chance'], ['БОСС ПОЙМАЛ', 'caught'],
         ['ВИДЕОКАССЕТА', 'cassette'], ['РЕКЛАМА СНЕСЕНА', 'billboard'], ['ПЕЙЗАЖ', 'landscape']];
     for (let i = 0; i < map.length; i++) if (t.indexOf(map[i][0]) >= 0) return map[i][1];
     return null;

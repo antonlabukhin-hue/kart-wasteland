@@ -18,7 +18,7 @@ import { SIGNAL_TIME, cutInAllowed, wantsCut, blinkOn, LANE_CHANGE_RATE } from '
 import { zoneFree, calmAhead, MAJOR_GAP, HURDLE_GAP } from './director.js';
 import { nearMissStep } from './near-miss.js';
 import { laneAssist } from './lane-assist.js';
-import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js';
+import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js';
         import * as THREE from 'three';
         import { SoundEngine } from './audio.js';
         import { AnimalSpawner } from './animals.js';
@@ -1337,7 +1337,7 @@ function createProfile(name) { return Profile.createProfile(name); }
                     // под кнопкой — бесконечная трасса и рекорд (два узла — чтобы переводились словарём отдельно)
                     const best = Math.round((currentPlayer.infinite && currentPlayer.infinite.best) || 0);
                     ps.textContent = '';
-                    const a = document.createElement('span'); a.textContent = 'Бесконечная трасса';
+                    const a = document.createElement('span'); a.textContent = 'Пустошь';
                     ps.append(a);
                     if (best > 0) { const b = document.createElement('span'); b.textContent = 'рекорд ' + best + ' м'; ps.append(' · ', b); }
                 }
@@ -6343,12 +6343,12 @@ function startGaragePreview(carId) {
                 const car = new THREE.Group();
                 const color = carColors[Math.floor(Math.random() * carColors.length)];
                 const types = TRAFFIC_KINDS;
-                const kind = types[Math.floor(Math.random() * types.length)];
+                const kind = INF ? WRECK_KINDS[Math.floor(Math.random() * WRECK_KINDS.length)] : types[Math.floor(Math.random() * types.length)]; /* Пустошь: на трассе стоят обломки (src/wrecks.js) */
                 let paint = color; if (kind === 'moto' && (color === 0xff33cc || color === 0xcc00ff)) paint = 0x3366ff; /* мотоцикл не розовый */
                 const isNight = (typeof weatherMode !== 'undefined' && weatherMode === 'night') || window.weatherMode === 'night';
                 const isDark = isNight || (typeof weatherMode !== 'undefined' && weatherMode === 'rain') || window.weatherMode === 'rain';
                 // модель — src/traffic-cars.js: сзади два стоп-сигнала (у мотоцикла — один), номер, бампер; фары ночью ярче
-                const tb = buildTraffic(kind, paint, { dark: isDark });
+                const tb = INF ? makeWreck(kind, paint, Math.random) : buildTraffic(kind, paint, { dark: isDark });
                 car.add(tb.group);
                 const hitW = tb.hitW, hitL = tb.hitL, frontZ = -hitL * 0.48;
 
@@ -6366,7 +6366,7 @@ function startGaragePreview(carId) {
 
                 try { mergeCarParts(car, { all: true }); } catch (e) {} // 10–19 деталей → 5–6 (колёса не крутятся, перекраски нет)
                 try { shareMaterials(car); } catch (e) {} // общие материалы на все попутки (src/merge-static.js)
-                addBlobShadow(car, hitW, hitL, -0.08); // мягкая тень на асфальте (src/ground-shadow.js)
+                addBlobShadow(car, hitW, hitL, -0.08); if (tb.pose) wreckFx(car, tb.pose, Math.random); // мягкая тень на асфальте (src/ground-shadow.js); дым и огонь над обломком
                 const sig = [-1, 1].map(function(sd) { const sg = new THREE.Group(); [frontZ - 0.02, hitL * 0.52].forEach(function(zz) { const b = new THREE.Mesh(SIG_GEO, SIG_MAT); b.position.set(sd * hitW * 0.44, 0.48, zz); sg.add(b); }); const ar = new THREE.Sprite(SIG_ARROW[sd < 0 ? 0 : 1]); ar.scale.set(0.9, 0.9, 1); ar.position.set(sd * 0.35, (TALL_H[kind] || 1.0) + 0.55, 0); ar.renderOrder = 6; sg.add(ar); sg.visible = false; car.add(sg); return sg; }); // поворотники и стрелка над машиной: мигают перед перестроением (src/traffic-signal.js)
                 const hug = hugFor(lane), x = carX(lane, hug); // по центру полосы или вплотную к обочине (src/traffic-lanes.js)
                 car.position.set(x, 0.1, z);
@@ -6374,9 +6374,9 @@ function startGaragePreview(carId) {
                 
                 return {
                     mesh: car, x: x, z: z, lane: lane, hug: hug,
-                    speed: 0.012 + Math.random() * 0.03,
+                    speed: INF ? 0 : 0.012 + Math.random() * 0.03,
                     active: true,
-                    laneChangeTimer: 2 + Math.random() * 4,
+                    laneChangeTimer: INF ? 1e9 : 2 + Math.random() * 4,
                     targetLane: lane,
                     isChangingLane: false,
                     laneChangeProgress: 0,
@@ -6394,7 +6394,7 @@ function startGaragePreview(carId) {
                 const tm = window.__campaignTrafficMul || 1;
                 if (tm !== 1) maxCars = Math.max(4, Math.min(28, Math.round(maxCars * tm)));
             } catch (e) {}
-            if (INF) { maxCars = Math.max(6, maxCars); infCarsBase = maxCars; } // бесконечная трасса: попуток как в обычном заезде, дальше — больше
+            if (INF) { maxCars = Math.max(12, maxCars); infCarsBase = maxCars; } /* Пустошь: обломков на дороге больше, чем было попуток */ // бесконечная трасса: попуток как в обычном заезде, дальше — больше
             for (let i = 0; i < maxCars; i++) {
                 const z = INF ? START_Z - 70 - Math.random() * 300 : -TRACK_LENGTH / 2 + 20 + Math.random() * (TRACK_LENGTH - 60);
                 const lane = spawnLane(cars, z, Math.floor(Math.random() * 3)); // строго по полосам, одна в ряду всегда свободна (src/traffic-lanes.js)
@@ -6893,7 +6893,7 @@ function startGaragePreview(carId) {
             }
             let nearMissCount = 0;
             const slipSt = INF ? createSlip() : null; /* слипстрим и нитро по кнопке (src/slipstream.js) */ const draftFx = slipSt ? createDraftFx(scene) : null; const nitroBtn = slipSt ? createNitroButton({ keyHint: isMobile ? '' : 'E', onFire: function() { fireNitro(); } }) : null;
-            const oncLane = INF ? createOncomingLane({ scene: scene, laneX: [-2, 0, 2], works: roadSegments }) : null; let _oncK = -1, _oncIn = false, _oncAcc = 0; /* «Встречка ×2» (src/oncoming-lane.js) */
+            const oncLane = null && createOncomingLane; /* Пустошь: встречки нет */ let _oncK = -1, _oncIn = false, _oncAcc = 0; /* «Встречка ×2» (src/oncoming-lane.js) */
             function oncomingFrame(deltaTime) { // шаг кадра — параметром: функция объявлена вне кадра
                 const k = oncIndexAt(infWorld ? infWorld.dist : 0, 260);
                 if (k >= 0 && k > _oncK) {
@@ -7155,7 +7155,7 @@ function startGaragePreview(carId) {
             const _lap0 = function() { for (const _st of populateLap(mapId, INF ? 'easy' : difficulty)) { /* обычный заезд — сразу целиком */ } }; if (INF && infRunOpts && infRunOpts.seed) withRandom(seededRnd((infRunOpts.seed ^ 0x5bd1e995) >>> 0), _lap0); else _lap0(); /* бесконечная: участки первого круга — тоже по сиду */ if (!INF && _campIdx >= 0) placePlan(chapterPatterns(_trackSpan, Math.random, { t: CHAPTER_T[difficulty] || 0.1, spikesOk: difficulty !== 'easy', free: function(a, b) { const lo = START_Z - b, hi = START_Z - a; return infBusy.every(function(z) { return lo > z[1] + 4 || hi < z[0] - 4; }); } }).map(function(it) { return it.kind === 'crate' ? { kind: 'nitro', d: it.d, lane: it.lane } : it; }), { scene: scene, START_Z: START_Z, lists: { obstacles: obstacles, collectibles: collectibles }, make: { eChip: createEChipItem, obstacle: createObstacle, collectible: createCollectible }, busy: infBusy, slideOf: function() { return slideType; } }); // главы: узоры с конусами и цепочками «Е» до босса (src/patterns.js); ящик — нитро
             // бесконечная трасса — src/modes/infinite-run.js: план кругов и узоры, уборка позади, ГАИ, цели на дороге, события пейзажей, «В ударе»
             const inf = INF ? createInfiniteRun({
-                seed: infRunOpts && infRunOpts.seed, rule: infRunOpts && infRunOpts.rule, fair: !!(infRunOpts && infRunOpts.fair), rival: infRunOpts && infRunOpts.rival, chaseTime: FAIL && FAIL.chaseTime, onEscape: function() { if (FAIL && FAIL.refill && gameState === 'racing' && strikes > 0) { strikes = 0; updateHUD(); try { showTimePenaltyPopup(0, '🚔 Ушёл от ГАИ — ♥ снова полные'); } catch (e) {} } }, scene: scene, START_Z: START_Z, TRACK_WIDTH: TRACK_WIDTH, span: _trackSpan, busy: infBusy, arch: infArch, player: currentPlayer, carPreset: carPreset, online: onlineBoard(),
+                seed: infRunOpts && infRunOpts.seed, rule: infRunOpts && infRunOpts.rule, fair: !!(infRunOpts && infRunOpts.fair), rival: infRunOpts && infRunOpts.rival, chaseTime: FAIL && FAIL.chaseTime, onEscape: function() { if (FAIL && FAIL.refill && gameState === 'racing' && strikes > 0) { strikes = 0; updateHUD(); try { showTimePenaltyPopup(0, '🏁 Ушёл от босса — ♥ снова полные'); } catch (e) {} } }, scene: scene, START_Z: START_Z, TRACK_WIDTH: TRACK_WIDTH, span: _trackSpan, busy: infBusy, arch: infArch, player: currentPlayer, carPreset: carPreset, online: onlineBoard(),
                 lists: { obstacles: obstacles, collectibles: collectibles, ramps: ramps, cars: cars, gapCones: gapCones, smashBoards: smashBoards, gaps: gaps, debrisZones: debrisZones, roadSegments: roadSegments, setEvents: setEvents },
                 make: { ride: createRideItem, eChip: createEChipItem, vhs: createVhsItem, power: createPowerItem, obstacle: createObstacle, collectible: createCollectible, car: createOpponentCar },
                 get lights() { return { ambient: ambient, hemi: hemi, sun: sunLight }; },
@@ -8050,7 +8050,7 @@ function startGaragePreview(carId) {
                 const _pr = police && (FAIL.chaseAll || String(obs.cause || '').indexOf('car:') === 0) ? police.crash() : null; /* «сердца»: ГАИ — только за столкновение с машиной; «ГАИ на хвосте» (src/fail-rules.js) — за любую аварию */
                 if (_pr === 'caught' && FAIL.chaseAll && strikes < MAX_STRIKES) police.crash(); /* «Рафик» в погоне выдержал удар — погоня заново */
                 if (_pr === 'caught' && (FAIL.chaseAll ? strikes >= MAX_STRIKES : strikes < MAX_STRIKES)) { // ГАИ поймала: ролик облёта (src/police-chase.js), потом — как обычно «Второй шанс»
-                    strikes = MAX_STRIKES; speed = 0; gameState = 'chance'; cars.forEach(function(c) { if (Math.abs(c.z - zPos) < 16) { c.z = freeZ(zPos - 90, c.lane, { gaps: gaps, ramps: ramps, works: roadSegments }); c.mesh.position.z = c.z; } }); try { showBigPlaque('🚨 ГАИ ПОЙМАЛА!', 'Вторая авария во время погони', 'crate-bad'); } catch (e) {}
+                    strikes = MAX_STRIKES; speed = 0; gameState = 'chance'; cars.forEach(function(c) { if (Math.abs(c.z - zPos) < 16) { c.z = freeZ(zPos - 90, c.lane, { gaps: gaps, ramps: ramps, works: roadSegments }); c.mesh.position.z = c.z; } }); try { showBigPlaque('🚨 БОСС ПОЙМАЛ!', 'Вторая авария во время погони', 'crate-bad'); } catch (e) {}
                     police.arrest({ camera: camera, renderer: renderer, x: xPos, z: zPos, onDone: function() { gameState = 'racing'; endGame('crash'); } }); return;
                 }
                 const lostMult = riskCrash(risk); if (lostMult > 1) try { showTimePenaltyPopup(0, '🔥 ×' + lostMult + ' сгорел'); } catch (e) {}
@@ -8998,7 +8998,7 @@ function startGaragePreview(carId) {
                         car.x = carX(car.lane, car.hug);
                         car.mesh.position.set(car.x, 0.1, car.z);
                         car.speed = (0.01 + Math.random() * 0.025 * (1 + progress * 0.3)) * infTrafficK;
-                        car.laneChangeTimer = 2 + Math.random() * 3;
+                        car.laneChangeTimer = INF ? 1e9 : 2 + Math.random() * 3; // Пустошь: обломок не перестраивается
                         car.isChangingLane = false;
                         car.laneChangeProgress = 0;
                         car.hitCooldown = 0;

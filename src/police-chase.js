@@ -44,9 +44,9 @@ export function policeStep(p, px, base, t, dt) {
 function doorLabel() {
     const c = document.createElement('canvas'); c.width = 128; c.height = 48;
     const x = c.getContext('2d');
-    x.fillStyle = '#f4f4f2'; x.fillRect(0, 0, 128, 48);
-    x.fillStyle = '#1f4fbf'; x.font = 'bold 34px Arial'; x.textAlign = 'center'; x.textBaseline = 'middle';
-    x.fillText('ГАИ', 64, 26);
+    x.fillStyle = '#15161a'; x.fillRect(0, 0, 128, 48); // Пустошь: гонится не ГАИ, а босс компании — чёрная машина с красной надписью
+    x.fillStyle = '#e02a1a'; x.font = 'bold 30px Arial'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText('КОРП', 64, 26);
     const t = new THREE.CanvasTexture(c); t.userData.keep = true;
     return t;
 }
@@ -67,7 +67,7 @@ export function policeCar() {
     const M = function(c, o) { const k = c + JSON.stringify(o || {}); return cache[k] || (cache[k] = new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.45, metalness: 0.2 }, o || {}))); };
     const BM = function(c) { return cache['b' + c] || (cache['b' + c] = new THREE.MeshBasicMaterial({ color: c })); };
     const box = function(m, w, h, l, x, y, z, rx) { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, l), m); b.position.set(x, y, z); if (rx) b.rotation.x = rx; g.add(b); return b; };
-    const white = M(0xf4f4f2), blueM = M(0x1f4fbf), glass = M(0x1a2a38, { roughness: 0.15, metalness: 0.5 }), dark = M(0x18181c, { roughness: 0.8 }), chrome = M(0xdfe3e8, { metalness: 0.25, roughness: 0.3 }) // светлый «хром»: металлу без карты отражений нечего отражать — он темнеет;
+    const white = M(0x15161a, { roughness: 0.3, metalness: 0.55 }), blueM = M(0xb01818), glass = M(0x1a2a38, { roughness: 0.15, metalness: 0.5 }), dark = M(0x18181c, { roughness: 0.8 }), chrome = M(0xdfe3e8, { metalness: 0.25, roughness: 0.3 }) // светлый «хром»: металлу без карты отражений нечего отражать — он темнеет;
     // кузов: низ, капот, багажник, салон
     box(white, 1.2, 0.36, 2.24, 0, 0.4, 0);
     box(white, 1.16, 0.08, 0.66, 0, 0.6, -0.76);                          // капот
@@ -110,8 +110,8 @@ export function policeCar() {
     box(dark, 0.86, 0.05, 0.22, 0, 0.995, 0.1);
     box(M(0xd8d8d8), 0.22, 0.09, 0.16, 0, 1.06, 0.1);                     // громкоговоритель
     const dome = function(c, x) { const d = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.13, 12), BM(c)); d.position.set(x, 1.085, 0.1); g.add(d); return d; };
-    const red = dome(0xff2020, -0.3), blue = dome(0x2060ff, 0.3);
-    const redOff = dome(0x5a1010, -0.3), blueOff = dome(0x10204a, 0.3);   // погасший купол — тёмный, не исчезает
+    const red = dome(0xff2020, -0.3), blue = dome(0xff7a10, 0.3); // красный и оранжевый — не милицейские
+    const redOff = dome(0x5a1010, -0.3), blueOff = dome(0x4a2a08, 0.3);   // погасший купол — тёмный, не исчезает
     red.userData.noMerge = blue.userData.noMerge = redOff.userData.noMerge = blueOff.userData.noMerge = true;
     red.scale.setScalar(1.02); blue.scale.setScalar(1.02);
     // фара-искатель у левой стойки и антенна
@@ -137,7 +137,7 @@ export function policeCar() {
     };
     g.userData.lights = [red, blue];
     try { mergeCarParts(g); } catch (e) { /* склейка — только ради скорости */ } // кузов — несколько мешей; купола мигалок и отсветы — отдельно
-    g.userData.glow = [spot(0xff2020, -1.1), spot(0x2060ff, 1.1)];
+    g.userData.glow = [spot(0xff2020, -1.1), spot(0xff7a10, 1.1)];
     g.scale.setScalar(0.85); // на 15% меньше обычной машины
     return g;
 }
@@ -176,7 +176,7 @@ export function createPolice(scene, onChase, onEscape, time) { // onChase — п
         if (on && !hud) {
             hud = document.createElement('div');
             hud.className = 'police-hud';
-            hud.innerHTML = '<b>🚨 ПОГОНЯ ГАИ</b><small>ещё авария — поймают</small><i><u></u></i>';
+            hud.innerHTML = '<b>🚨 БОСС НА ХВОСТЕ</b><small>ещё авария — поймает</small><i><u></u></i>';
             document.body.appendChild(hud);
         }
         if (!on && hud) { hud.remove(); hud = null; }

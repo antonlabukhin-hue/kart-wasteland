@@ -32,10 +32,12 @@ import { patternCounts } from '../patterns.js';
 import { tickPowers, activePowers } from '../powerups.js';
 import { renderPowerHud } from '../ui/second-chance.js';
 import { HEADSTART_M } from '../ui/boosts.js';
-import { createInfWorld, disposeTree } from '../inf-world.js';
+import { createInfWorld, disposeTree, freezeStatic } from '../inf-world.js';
 import * as Decor from '../decor.js';
 import { pickMeme, createSideMeme, decorateMemeCar, MEME_EVERY, MEMES } from '../memes.js';
 import { buildShowroomCar } from '../cars.js';
+import { wreckCount } from '../wrecks.js';
+import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
 
 const LX = [-2, 0, 2];
 const LAP_MAPS = ['arsenev', 'promzona', 'svalka'];
@@ -75,6 +77,15 @@ export function createInfiniteRun(ctx) {
     let lapK = 0, frame = 0, stage = 0, fresh = [], gen = null, genRnd = null;
     // мем-моменты 90-х (src/memes.js): попутка с коровой или шкафом, бабка с тележкой, рыбак, гаишник — раз в 475–775 м
     let nextMeme = 375 + Math.random() * 250, lastMeme = null;
+    let wasteTo = 0; // Пустошь: придорожные отголоски апокалипсиса (src/wasteland-decor.js) расставлены до этой дальности
+    function spawnWaste(it) {
+        if (!it.side && L.gaps.some(function(g) { const gd = START_Z - g.zNear; return it.d > gd - 6 && it.d < gd + 30; })) return; // трещина не висит над разломом
+        const g = buildWaste(it, Math.random);
+        g.position.set(wasteX(it, ctx.TRACK_WIDTH), 0, START_Z - it.d);
+        scene.add(g);
+        if (isStaticWaste(it.kind)) freezeStatic(g);
+        track([g]);
+    }
     const memeWalkers = [];
     function spawnMeme(d, forcedId) {
         const m = (forcedId && MEMES.find(function(x) { return x.id === forcedId; })) || pickMeme(lastMeme, Math.random, !!ctx.fair); lastMeme = m.id;
@@ -201,8 +212,8 @@ export function createInfiniteRun(ctx) {
             }
             // сложность по километрам
             const rp = rampAt(d, warm);
-            ctx.setRamp({ speedK: rp.speed * (rule.speedMul || 1), laneK: Math.max(0, Math.min(1, (d + warm - 700) / 2500)), trafficK: rp.trafficSpeed,
-                maxAnimals: Math.round(rp.maxAnimals * (rule.animalMul || 1)), animalSpeed: rp.animalSpeed, traffic: Math.round(rp.traffic * (rule.trafficMul || 1)) + (rule.trafficAdd || 0) });
+            ctx.setRamp({ speedK: rp.speed * (rule.speedMul || 1), laneK: 0, trafficK: 0, // Пустошь: обломки стоят и не перестраиваются (src/wrecks.js)
+                maxAnimals: Math.round(rp.maxAnimals * (rule.animalMul || 1)), animalSpeed: rp.animalSpeed, traffic: wreckCount(rp.traffic) + (rule.trafficAdd || 0) });
             // следующий круг расстановки — за 450 ед. до его начала (дальше тумана); по шагу за кадр — без рывка
             const k = Math.floor((d + 450) / ctx.span);
             if (gen) {
@@ -220,6 +231,8 @@ export function createInfiniteRun(ctx) {
                 genRnd = ctx.seed ? seededRnd((ctx.seed ^ Math.imul(k + 7, 0x85EBCA6B)) >>> 0) : null; // постановочные участки — тоже по сиду
                 gen = ctx.startLap(k, LAP_MAPS[k % 3], k < 2 && !warm ? 'easy' : 'medium'); // первые круги — лёгкая расстановка
             }
+            // Пустошь: обочины и асфальт — на 190 м вперёд, по 40 м за раз
+            if (d + 190 > wasteTo) { planWaste(wasteTo, wasteTo + 40, Math.random).forEach(spawnWaste); wasteTo += 40; }
             // мемы: следующий — за 170 м впереди (до тумана), не над разломом
             if (d + 170 > nextMeme) {
                 if (!L.gaps.some(function(g) { const gd = START_Z - g.zNear; return nextMeme > gd - 25 && nextMeme < gd + 20; })) spawnMeme(nextMeme);
