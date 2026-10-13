@@ -93,10 +93,10 @@ export function rampAt(dist, warm) {
     dist = (dist || 0) + (warm || 0); // warm — «горячий старт» (warmStart)
     const t = Math.max(0, Math.min(1, (dist || 0) / RAMP_LEN));
     const e = t * t * (3 - 2 * t); // медленно в начале, быстрее в середине, мягко к потолку
-    const a = Math.max(0, Math.min(1, ((dist || 0) - 1350) / (RAMP_LEN - 1350))), ea = a * a * (3 - 2 * a); // звери и попутки — после 1350 м
+    const a = Math.max(0, Math.min(1, ((dist || 0) - 200) / (RAMP_LEN - 200))), ea = a * a * (3 - 2 * a); // Пустошь: звери растут почти сразу (было — после 1350 м)
     const late = Math.max(0, Math.min(1, ((dist || 0) - RAMP_LEN) / LATE_LEN));
     return { t: t, late: late, speed: SPEED_RANGE[0] + (SPEED_RANGE[1] - SPEED_RANGE[0]) * e, density: 0.3 + e,
-        animals: 0.55 + 2.05 * ea, maxAnimals: Math.round(6 + 10 * ea), animalSpeed: 1 + 0.6 * ea,
+        animals: 2.6 + 3 * ea, maxAnimals: Math.round(10 + 10 * ea), animalSpeed: 1 + 0.6 * ea, // Пустошь: звери — главная угроза, их вдвое больше
         traffic: Math.round(4 * ea), trafficSpeed: 1 + 0.3 * ea };
 }
 
