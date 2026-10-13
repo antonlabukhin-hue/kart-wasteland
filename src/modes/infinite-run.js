@@ -36,6 +36,8 @@ import { createInfWorld, disposeTree } from '../inf-world.js';
 import * as Decor from '../decor.js';
 import { pickMeme, createSideMeme, decorateMemeCar, MEME_EVERY, MEMES } from '../memes.js';
 import { buildShowroomCar } from '../cars.js';
+import { wreckCount } from '../wrecks.js';
+import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
 
 const LX = [-2, 0, 2];
 const LAP_MAPS = ['arsenev', 'promzona', 'svalka'];
@@ -201,8 +203,8 @@ export function createInfiniteRun(ctx) {
             }
             // сложность по километрам
             const rp = rampAt(d, warm);
-            ctx.setRamp({ speedK: rp.speed * (rule.speedMul || 1), laneK: Math.max(0, Math.min(1, (d + warm - 700) / 2500)), trafficK: rp.trafficSpeed,
-                maxAnimals: Math.round(rp.maxAnimals * (rule.animalMul || 1)), animalSpeed: rp.animalSpeed, traffic: Math.round(rp.traffic * (rule.trafficMul || 1)) + (rule.trafficAdd || 0) });
+            ctx.setRamp({ speedK: rp.speed * (rule.speedMul || 1), laneK: 0, trafficK: 0, // Пустошь: обломки стоят и не перестраиваются (src/wrecks.js)
+                maxAnimals: Math.round(rp.maxAnimals * (rule.animalMul || 1)), animalSpeed: rp.animalSpeed, traffic: wreckCount(rp.traffic) + (rule.trafficAdd || 0) });
             // следующий круг расстановки — за 450 ед. до его начала (дальше тумана); по шагу за кадр — без рывка
             const k = Math.floor((d + 450) / ctx.span);
             if (gen) {

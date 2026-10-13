@@ -18,7 +18,7 @@ import { SIGNAL_TIME, cutInAllowed, wantsCut, blinkOn, LANE_CHANGE_RATE } from '
 import { zoneFree, calmAhead, MAJOR_GAP, HURDLE_GAP } from './director.js';
 import { nearMissStep } from './near-miss.js';
 import { laneAssist } from './lane-assist.js';
-import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js';
+import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js';
         import * as THREE from 'three';
         import { SoundEngine } from './audio.js';
         import { AnimalSpawner } from './animals.js';
@@ -6343,12 +6343,12 @@ function startGaragePreview(carId) {
                 const car = new THREE.Group();
                 const color = carColors[Math.floor(Math.random() * carColors.length)];
                 const types = TRAFFIC_KINDS;
-                const kind = types[Math.floor(Math.random() * types.length)];
+                const kind = INF ? WRECK_KINDS[Math.floor(Math.random() * WRECK_KINDS.length)] : types[Math.floor(Math.random() * types.length)]; /* Пустошь: на трассе стоят обломки (src/wrecks.js) */
                 let paint = color; if (kind === 'moto' && (color === 0xff33cc || color === 0xcc00ff)) paint = 0x3366ff; /* мотоцикл не розовый */
                 const isNight = (typeof weatherMode !== 'undefined' && weatherMode === 'night') || window.weatherMode === 'night';
                 const isDark = isNight || (typeof weatherMode !== 'undefined' && weatherMode === 'rain') || window.weatherMode === 'rain';
                 // модель — src/traffic-cars.js: сзади два стоп-сигнала (у мотоцикла — один), номер, бампер; фары ночью ярче
-                const tb = buildTraffic(kind, paint, { dark: isDark });
+                const tb = INF ? makeWreck(kind, paint, Math.random) : buildTraffic(kind, paint, { dark: isDark });
                 car.add(tb.group);
                 const hitW = tb.hitW, hitL = tb.hitL, frontZ = -hitL * 0.48;
 
@@ -6366,7 +6366,7 @@ function startGaragePreview(carId) {
 
                 try { mergeCarParts(car, { all: true }); } catch (e) {} // 10–19 деталей → 5–6 (колёса не крутятся, перекраски нет)
                 try { shareMaterials(car); } catch (e) {} // общие материалы на все попутки (src/merge-static.js)
-                addBlobShadow(car, hitW, hitL, -0.08); // мягкая тень на асфальте (src/ground-shadow.js)
+                addBlobShadow(car, hitW, hitL, -0.08); if (tb.pose) wreckFx(car, tb.pose, Math.random); // мягкая тень на асфальте (src/ground-shadow.js); дым и огонь над обломком
                 const sig = [-1, 1].map(function(sd) { const sg = new THREE.Group(); [frontZ - 0.02, hitL * 0.52].forEach(function(zz) { const b = new THREE.Mesh(SIG_GEO, SIG_MAT); b.position.set(sd * hitW * 0.44, 0.48, zz); sg.add(b); }); const ar = new THREE.Sprite(SIG_ARROW[sd < 0 ? 0 : 1]); ar.scale.set(0.9, 0.9, 1); ar.position.set(sd * 0.35, (TALL_H[kind] || 1.0) + 0.55, 0); ar.renderOrder = 6; sg.add(ar); sg.visible = false; car.add(sg); return sg; }); // поворотники и стрелка над машиной: мигают перед перестроением (src/traffic-signal.js)
                 const hug = hugFor(lane), x = carX(lane, hug); // по центру полосы или вплотную к обочине (src/traffic-lanes.js)
                 car.position.set(x, 0.1, z);
@@ -6374,9 +6374,9 @@ function startGaragePreview(carId) {
                 
                 return {
                     mesh: car, x: x, z: z, lane: lane, hug: hug,
-                    speed: 0.012 + Math.random() * 0.03,
+                    speed: INF ? 0 : 0.012 + Math.random() * 0.03,
                     active: true,
-                    laneChangeTimer: 2 + Math.random() * 4,
+                    laneChangeTimer: INF ? 1e9 : 2 + Math.random() * 4,
                     targetLane: lane,
                     isChangingLane: false,
                     laneChangeProgress: 0,
@@ -6394,7 +6394,7 @@ function startGaragePreview(carId) {
                 const tm = window.__campaignTrafficMul || 1;
                 if (tm !== 1) maxCars = Math.max(4, Math.min(28, Math.round(maxCars * tm)));
             } catch (e) {}
-            if (INF) { maxCars = Math.max(6, maxCars); infCarsBase = maxCars; } // бесконечная трасса: попуток как в обычном заезде, дальше — больше
+            if (INF) { maxCars = Math.max(12, maxCars); infCarsBase = maxCars; } /* Пустошь: обломков на дороге больше, чем было попуток */ // бесконечная трасса: попуток как в обычном заезде, дальше — больше
             for (let i = 0; i < maxCars; i++) {
                 const z = INF ? START_Z - 70 - Math.random() * 300 : -TRACK_LENGTH / 2 + 20 + Math.random() * (TRACK_LENGTH - 60);
                 const lane = spawnLane(cars, z, Math.floor(Math.random() * 3)); // строго по полосам, одна в ряду всегда свободна (src/traffic-lanes.js)
@@ -8998,7 +8998,7 @@ function startGaragePreview(carId) {
                         car.x = carX(car.lane, car.hug);
                         car.mesh.position.set(car.x, 0.1, car.z);
                         car.speed = (0.01 + Math.random() * 0.025 * (1 + progress * 0.3)) * infTrafficK;
-                        car.laneChangeTimer = 2 + Math.random() * 3;
+                        car.laneChangeTimer = INF ? 1e9 : 2 + Math.random() * 3; // Пустошь: обломок не перестраивается
                         car.isChangingLane = false;
                         car.laneChangeProgress = 0;
                         car.hitCooldown = 0;
