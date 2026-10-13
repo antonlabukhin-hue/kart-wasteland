@@ -3,7 +3,7 @@
  * Один раз на выпуск (метка tag в localStorage). «Смотреть» — витрина сразу на первой новинке.
  * Зависимости — явно: { tag, names, onOpen }.
  */
-export const NEW_SEEN_KEY = 'road_racing_new_cars_seen';
+export const NEW_SEEN_KEY = 'kw_road_racing_new_cars_seen';
 
 export function shouldShowNew(tag, storage) {
     let v = null;

@@ -4,7 +4,7 @@
  * В таблице — лучший заезд каждого игрока (по дальности). Хранилище — localStorage (или переданное).
  * Логика — чистая (с тестами); онлайн-таблица позже заменит только load/save.
  */
-export const BOARD_KEY = 'road_racing_board_v1';
+export const BOARD_KEY = 'kw_road_racing_board_v1';
 export const BOARD_SIZE = 10;
 
 // соперники из лора 90-х: дальность в метрах (часть — на неделе тоже «катаются»)

@@ -12,7 +12,7 @@ tools: Bash, PowerShell, Read, Grep, Glob
 - **Конкретные тесты:** `npx playwright test -c playwright.edge.config.js <файл> -g "<название>"`.
 
 ## Перед запуском
-- Порты 4199/4299 фиксированы: проверь, что на них не висят vite preview от прошлого прогона (`netstat -ano | findstr :4199`), и останови их. Два e2e-прогона одновременно не запускать.
+- Порты 4399/4499 фиксированы: проверь, что на них не висят vite preview от прошлого прогона (`netstat -ano | findstr :4399`), и останови их. Два e2e-прогона одновременно не запускать.
 - Chromium для Playwright не скачивается — только конфиги с Edge.
 - При `ENOSPC` удали `%TEMP%\playwright_*profile-*` и перезапусти.
 

@@ -7,9 +7,9 @@ description: Прогнать настоящий заезд автопилото
 
 ## Подготовка
 1. `npm run build:test` → `dist-test/` (есть `window.__raceDebug`, `window.__artKit`).
-2. Превью: launch-конфиг `test-build` (порт 4174) через `preview_start`.
+2. Превью: launch-конфиг `test-build` (порт 4184) через `preview_start`.
 3. **Не через панель браузера:** когда панель скрыта, `requestAnimationFrame` стоит и заезд замирает на отсчёте. Надёжно — скрипт Playwright в Edge.
-4. Не запускать параллельно с e2e (порты 4199/4299 не мешают, но CPU/GPU — да, метрики поплывут).
+4. Не запускать параллельно с e2e (порты 4399/4499 не мешают, но CPU/GPU — да, метрики поплывут).
 
 ## Скрипт
 Положить в `dist-test/` (тогда резолвится `@playwright/test`), запускать `node dist-test/auto.mjs`:
@@ -18,7 +18,7 @@ description: Прогнать настоящий заезд автопилото
 import { chromium } from '@playwright/test';
 const b = await chromium.launch({ channel: 'msedge' });
 const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
-await p.goto('http://localhost:4174/');
+await p.goto('http://localhost:4184/');
 // вход: имя ≥ 3 символов, затем меню → нужный режим/трасса → старт
 await p.evaluate(() => {
   const prev = window.__raceDebug;               // хук ставится в initGame: ждать НОВЫЙ объект, не сбрасывать его

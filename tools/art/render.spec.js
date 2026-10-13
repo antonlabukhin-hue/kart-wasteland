@@ -105,8 +105,8 @@ const SHOTS = {
 
 async function boot(page) {
     await page.addInitScript(() => {
-        localStorage.setItem('road_racing_briefing_v2', '1');
-        localStorage.setItem('road_racing_settings_v1', JSON.stringify({ quality: 'low', music: 0, engine: 0, sfx: 0 }));
+        localStorage.setItem('kw_road_racing_briefing_v2', '1');
+        localStorage.setItem('kw_road_racing_settings_v1', JSON.stringify({ quality: 'low', music: 0, engine: 0, sfx: 0 }));
     });
     await page.goto('./');
     await expect.poll(() => page.evaluate(() => !!(window.__artKit && window.createAnimalMesh)), { timeout: 30_000 }).toBe(true);

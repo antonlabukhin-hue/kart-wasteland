@@ -3,8 +3,8 @@ import { watchProblems, login, startFreeRace, startCampaign, progress, waitRacin
 
 // Тестовая сборка: ?start=… начинает заезд с этой доли трассы. Дальше тест только жмёт газ, как игрок
 const profile = page => page.evaluate(() => {
-    const id = localStorage.getItem('road_racing_session_player');
-    return JSON.parse(localStorage.getItem('road_racing_profiles_v1') || '[]').find(p => p.id === id);
+    const id = localStorage.getItem('kw_road_racing_session_player');
+    return JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1') || '[]').find(p => p.id === id);
 });
 
 test('босс появляется после 42% трассы', async ({ page }) => {
@@ -104,7 +104,7 @@ test('кампания: подарок за главу ведёт в гараж 
     await expect(page.locator('.gift-modal')).toHaveCount(0);
     await page.locator('#garage-panel-parts .color-swatch[data-paint="yellow"]').click();
     await expect(page.locator('#garage-panel-parts .color-swatch[data-paint="yellow"]')).not.toHaveClass(/gift-glow/);
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0].carLoadout.newGifts)).toEqual([]);
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0].carLoadout.newGifts)).toEqual([]);
     // наклейка — в «Трофеях», по нажатию — история
     await page.locator('.garage-tab[data-gtab="trophies"]').click();
     await page.locator('.tro-tab[data-tro="stickers"]').click(); // наклейки — своя вкладка «Трофеев»

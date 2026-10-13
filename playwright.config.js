@@ -21,21 +21,21 @@ export default defineConfig({
         },
     },
     projects: [
-        { name: 'site', testDir: 'tests/e2e', testIgnore: 'scenarios/**', use: { baseURL: 'http://localhost:4199/' } },
+        { name: 'site', testDir: 'tests/e2e', testIgnore: 'scenarios/**', use: { baseURL: 'http://localhost:4399/' } },
         // победный облёт камеры на сервере GitHub идёт ~20 с, плюс вход и меню — нужен запас
-        { name: 'scenarios', testDir: 'tests/e2e/scenarios', timeout: 180_000, use: { baseURL: 'http://localhost:4299/' } },
+        { name: 'scenarios', testDir: 'tests/e2e/scenarios', timeout: 180_000, use: { baseURL: 'http://localhost:4499/' } },
     ],
     // каждый прогон заново собирает игру, чтобы не проверить старый dist/
     webServer: [
         {
-            command: 'npx vite build --logLevel error && npx vite preview --port 4199 --strictPort',
-            url: 'http://localhost:4199/',
+            command: 'npx vite build --logLevel error && npx vite preview --port 4399 --strictPort',
+            url: 'http://localhost:4399/',
             reuseExistingServer: false,
             timeout: 120_000,
         },
         {
-            command: 'npx vite build --mode test --outDir dist-test --logLevel error && npx vite preview --outDir dist-test --port 4299 --strictPort',
-            url: 'http://localhost:4299/',
+            command: 'npx vite build --mode test --outDir dist-test --logLevel error && npx vite preview --outDir dist-test --port 4499 --strictPort',
+            url: 'http://localhost:4499/',
             reuseExistingServer: false,
             timeout: 120_000,
         },

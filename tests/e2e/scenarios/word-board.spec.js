@@ -22,7 +22,7 @@ test('слово дня и таблица рекордов', async ({ page }) =>
         const g = window.__raceDebug;
         const c = g.collectibles.filter(c => c.type === 'letter' && c.active && c.z < g.z - 3).sort((a, b) => b.z - a.z)[0];
         for (let i = 0; i < 20 && c.active; i++) { g.setStrikes(0); g.cars.forEach(car => { car.z = c.z - 300; car.mesh.position.z = car.z; }); g.setX(c.x); g.setZ(c.z + 0.2); await new Promise(r => setTimeout(r, 50)); }
-        return JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0].wordDay.got;
+        return JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0].wordDay.got;
     });
     expect(got).toBe(1);
     await expect.poll(() => page.evaluate(() => window.__sawLetter)).toBe(true);

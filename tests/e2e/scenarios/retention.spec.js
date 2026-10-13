@@ -65,11 +65,11 @@ test('серия дней: сундук дня', async ({ page }) => {
     await expect(page.locator('#mm-chips')).toHaveText('70');
     // вернулся на следующий день — серия 2 и сундук предлагается сам
     await page.evaluate(() => {
-        const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1'));
+        const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
         const d = new Date(); d.setDate(d.getDate() - 1);
         const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
         l.forEach(p => { p.streak = { count: 1, last: k, claimed: k }; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
     });
     await page.reload();
     await page.locator('#splash-screen').click();
@@ -102,9 +102,9 @@ test('«Привет» с новостями, машины в подарок: в
     // седьмой день подряд (сундук сегодня уже забран — не мешает)
     await page.evaluate(() => {
         const d = new Date(), p2 = n => (n < 10 ? '0' : '') + n, today = d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
-        const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1'));
+        const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
         l.forEach(p => { p.streak = { count: 7, last: today, claimed: today }; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
     });
     await page.reload();
     await page.locator('#splash-screen').click();
@@ -113,7 +113,7 @@ test('«Привет» с новостями, машины в подарок: в
     await expect(page.locator('.giftcar-modal')).toContainText('Трайк');
     await page.locator('.giftcar-modal .nc-go').click();
     await expect(page.locator('#shop-action')).toContainText('ВЫБРАТЬ');
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0].unlockedCars)).toContain('trike');
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0].unlockedCars)).toContain('trike');
     expect(problems).toEqual([]);
 });
 
@@ -123,9 +123,9 @@ test('секретная краска и тест-драйв за вехи: пл
     await login(page);
     await page.evaluate(() => {
         const d = new Date(), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-        const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1'));
+        const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
         l.forEach(p => { p.campaign = Object.assign(p.campaign || {}, { completed: [0, 1] }); p.activity = { [k]: 9 }; p.streak = { count: 1, last: k, claimed: k }; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
     });
     await page.reload();
     await page.locator('#splash-screen').click();
@@ -143,7 +143,7 @@ test('секретная краска и тест-драйв за вехи: пл
     await page.locator('#mm-td').click();
     await page.locator('.td-ticket').first().click();
     await waitRacing(page);
-    const p = await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0]);
+    const p = await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0]);
     expect(p.testDrives.tickets).toEqual([]);
     expect(p.secretPaints.got.neon).toBeTruthy();
     await page.evaluate(() => window.__raceDebug.end('crash'));
@@ -161,9 +161,9 @@ test('подарок за возвращение, именной номер, м�
         await page.evaluate(([days, count]) => {
             const d = new Date(); d.setDate(d.getDate() - days);
             const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-            const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1'));
+            const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
             l.forEach(p => { p.streak = { count: count, last: k, claimed: k }; });
-            localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+            localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
         }, [days, count]);
         await page.reload();
         await page.locator('#splash-screen').click();
@@ -173,10 +173,10 @@ test('подарок за возвращение, именной номер, м�
     await seed(5, 3);
     const gift = page.locator('.hello-modal .hn-gift');
     await expect(gift).toContainText('С возвращением', { timeout: 15_000 });
-    const chips = await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0].season.chips || 0);
+    const chips = await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0].season.chips || 0);
     await gift.locator('.hn-claim').click();
     await expect(gift.locator('.hn-got')).toContainText('+400 Е');
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0].season.chips)).toBe(chips + 400);
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0].season.chips)).toBe(chips + 400);
     await page.locator('.hello-modal .hn-go').click();
     // 14-й день подряд
     await seed(1, 13);

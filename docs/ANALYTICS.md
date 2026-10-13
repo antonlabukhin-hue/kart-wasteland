@@ -1,6 +1,6 @@
 # Аналитика
 
-`src/analytics.js` — журнал событий на устройстве игрока (`localStorage`, ключ `road_racing_analytics_v1`,
+`src/analytics.js` — журнал событий на устройстве игрока (`localStorage`, ключ `kw_road_racing_analytics_v1`,
 последние 600 событий). В сеть ничего не уходит, пока не подключён отправщик `setSender(fn)`.
 
 ## Как посмотреть

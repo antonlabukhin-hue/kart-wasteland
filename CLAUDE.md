@@ -1,6 +1,12 @@
-# Дорожный прорыв (simple-kart-racer)
+# Дорожный прорыв: Пустошь (kart-wasteland)
 
-Браузерная гонка на Three.js + Vite. Сайт — GitHub Pages (`antonlabukhin-hue/kart-racer`), плюс сборки для Яндекс Игр, Electron (`desktop/`) и мобильных (`mobile/`).
+**Это экспериментальная копия.** Основная игра — `antonlabukhin-hue/kart-racer` (папка `Desktop/simple-kart-racer`). Здесь новый сценарий: разбитые машины вместо попуток, бешеные звери — главная угроза, босс компании вместо ГАИ, объезд по полю раз в 3000 м.
+- Из основной игры можно подтягивать правки: `git fetch upstream` + `git merge upstream/main` (конфликты — по смыслу, эта версия главнее).
+- Ключи localStorage — с префиксом `kw_`, кэш SW — `kart-wasteland-*`: на одном домене github.io версии не делят сохранения.
+- Общая база Supabase отключена (`src/online-board.js` → `offline.invalid`), чтобы не смешивать рекорды и метрики с основной игрой. Своя база — позже.
+- Порты сдвинуты (превью 4184/4186, dev 5183, e2e 4399/4499) — можно работать в обеих папках одновременно.
+
+Браузерная гонка на Three.js + Vite. Сайт — GitHub Pages (`antonlabukhin-hue/kart-wasteland`), плюс сборки для Яндекс Игр, Electron (`desktop/`) и мобильных (`mobile/`).
 Общение и коммиты — на русском.
 
 ## Карта кода
@@ -22,9 +28,9 @@
 - `npm run test:unit` — vitest, быстро.
 - `npm run test:e2e:edge` — e2e в установленном Edge (Chromium для Playwright не скачивается). ~5 мин.
 - `CI=1 npm run test:e2e:slow` — Edge без GPU, как CI; ~60 мин, запускать частями (см. скилл `release`).
-- `npm run build:test` → `dist-test/` с `window.__raceDebug` и `window.__artKit`; превью — launch-конфиг `test-build` (порт 4174).
+- `npm run build:test` → `dist-test/` с `window.__raceDebug` и `window.__artKit`; превью — launch-конфиг `test-build` (порт 4184).
 - `npm run art` (`ART_ONLY=...`) — рендеры картинок в `public/images`.
-- e2e использует фиксированные порты 4199/4299 — не запускать два e2e-прогона параллельно.
+- e2e использует фиксированные порты 4399/4499 — не запускать два e2e-прогона параллельно.
 
 ## Процесс
 - Работа в ветке `claude/<тема>`, один коммит на пункт (`feat(...)`/`fix(...)`, по-русски).

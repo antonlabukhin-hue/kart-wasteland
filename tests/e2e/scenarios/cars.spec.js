@@ -8,9 +8,9 @@ for (const id of CAR_SHOP_ORDER) {
         const problems = watchProblems(page);
         await login(page);
         await page.evaluate(id => {
-            const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1') || '[]');
+            const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1') || '[]');
             l.forEach(p => { p.unlockedCars = Array.from(new Set([].concat(p.unlockedCars || [], [id]))); p.preferredCar = id; p.infCarPicked = true; });
-            localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+            localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
         }, id);
         await page.reload();
         await page.locator('#splash-screen').click();

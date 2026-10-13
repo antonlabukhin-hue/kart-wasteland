@@ -3,7 +3,7 @@
  * потом картинка проявляется с дрожью и разъездом цветов. ~3 с, касание — пропустить.
  * Раз за сессию (sessionStorage); в автотестах — только с ?vhs=1. Без файлов: шум рисуется на маленьком холсте.
  */
-export const VHS_KEY = 'road_racing_vhs_seen';
+export const VHS_KEY = 'kw_road_racing_vhs_seen';
 
 export function shouldPlayVhs(o) {
     const q = o.search || '';

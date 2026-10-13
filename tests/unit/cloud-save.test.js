@@ -19,15 +19,15 @@ describe('облачное сохранение', () => {
         expect(s.m[CODE_KEY]).toBe(c);
     });
     it('снимок — ключи прогресса; восстановление пишет их обратно', () => {
-        const a = mem({ road_racing_profiles_v1: '[1]', road_racing_board_v1: '[2]', other: 'x' });
+        const a = mem({ kw_road_racing_profiles_v1: '[1]', kw_road_racing_board_v1: '[2]', other: 'x' });
         const snap = snapshot(a);
-        expect(Object.keys(snap.keys).sort()).toEqual(['road_racing_board_v1', 'road_racing_profiles_v1']);
+        expect(Object.keys(snap.keys).sort()).toEqual(['kw_road_racing_board_v1', 'kw_road_racing_profiles_v1']);
         const b = mem();
         expect(applySnapshot(snap, b)).toBe(2);
-        expect(b.m.road_racing_profiles_v1).toBe('[1]');
+        expect(b.m.kw_road_racing_profiles_v1).toBe('[1]');
         expect(b.m.other).toBeUndefined();
         expect(applySnapshot(null, b)).toBe(0);
-        expect(SYNC_KEYS).toContain('road_racing_profiles_v1');
+        expect(SYNC_KEYS).toContain('kw_road_racing_profiles_v1');
     });
     it('сеть: запись и чтение через функции базы; нет сети — null', async () => {
         const calls = [];

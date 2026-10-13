@@ -37,7 +37,7 @@ export function unseenNews(profile) {
 
 let shownNow = false; // окно уже показывали в этот заход в игру
 /** Автотесты отключают окно этим ключом (его проверяет свой тест) */
-export const HELLO_SKIP_KEY = 'road_racing_hello_skip';
+export const HELLO_SKIP_KEY = 'kw_road_racing_hello_skip';
 
 /** Показать ли окно: есть новое или сегодня ещё не здоровались */
 export function helloDue(profile, today, storage) {

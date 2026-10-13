@@ -25,8 +25,8 @@ export function markVisit(profile, today, createdDay) {
     return v;
 }
 
-/** localStorage road_racing_open_all = '1' — всё открыто сразу, игрок считается бывалым (e2e-тесты и поддержка) */
-export const OPEN_ALL_KEY = 'road_racing_open_all';
+/** localStorage kw_road_racing_open_all = '1' — всё открыто сразу, игрок считается бывалым (e2e-тесты и поддержка) */
+export const OPEN_ALL_KEY = 'kw_road_racing_open_all';
 export function openAll() {
     try { return typeof localStorage !== 'undefined' && localStorage.getItem(OPEN_ALL_KEY) === '1'; } catch (e) { return false; }
 }

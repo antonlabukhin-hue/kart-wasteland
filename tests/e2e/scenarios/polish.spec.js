@@ -25,9 +25,9 @@ test('гараж: после покупки улучшения фишки в ш�
     const problems = watchProblems(page);
     await login(page);
     await page.evaluate(() => {
-        const list = JSON.parse(localStorage.getItem('road_racing_profiles_v1') || '[]');
+        const list = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1') || '[]');
         list.forEach(p => { p.season = Object.assign({}, p.season, { chips: 5000 }); p.econVer = 2; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(list));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(list));
     });
     await page.reload();
     await page.locator('#splash-screen').click();

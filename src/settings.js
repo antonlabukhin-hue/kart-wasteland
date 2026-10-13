@@ -2,7 +2,7 @@
  * Настройки игрока (одни на устройство, не на профиль): громкость, графика, камера, тряска.
  * Хранятся в localStorage; любые кривые значения из хранилища приводятся к допустимым.
  */
-export const SETTINGS_KEY = 'road_racing_settings_v1';
+export const SETTINGS_KEY = 'kw_road_racing_settings_v1';
 
 export const DEFAULT_SETTINGS = {
     music: 0.35,      // громкость музыки 0..1 — тише: «Е», аварии и прыжки слышно всегда

@@ -3,7 +3,7 @@
  * Страница — сначала сеть (свежая версия), без сети — из кэша. Скрипты, стили, картинки, музыка —
  * из кэша сразу, а в фоне обновляются (у скриптов и стилей Vite имена с хэшем — новая версия = новый файл).
  */
-const CACHE = 'road-breakthrough-v1';
+const CACHE = 'kart-wasteland-v1'; // своё имя: «Дорожный прорыв» живёт на том же домене github.io
 
 self.addEventListener('install', function(e) {
     e.waitUntil(caches.open(CACHE).then(function(c) { return c.addAll(['./', './index.html', './manifest.webmanifest', './icons/icon-192.png']); }).catch(function() {}));
@@ -12,7 +12,7 @@ self.addEventListener('install', function(e) {
 
 self.addEventListener('activate', function(e) {
     e.waitUntil(caches.keys().then(function(keys) {
-        return Promise.all(keys.filter(function(k) { return k !== CACHE; }).map(function(k) { return caches.delete(k); }));
+        return Promise.all(keys.filter(function(k) { return k.indexOf('kart-wasteland') === 0 && k !== CACHE; }).map(function(k) { return caches.delete(k); }));
     }).then(function() { return self.clients.claim(); }));
 });
 

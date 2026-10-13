@@ -1,12 +1,14 @@
-# 🏎️ Дорожный прорыв (kart-racer)
+# 🏎️ Дорожный прорыв: Пустошь (kart-wasteland)
 
-[![Тесты и публикация](https://github.com/antonlabukhin-hue/kart-racer/actions/workflows/deploy.yml/badge.svg)](https://github.com/antonlabukhin-hue/kart-racer/actions/workflows/deploy.yml)
+> Экспериментальная версия [«Дорожного прорыва»](https://github.com/antonlabukhin-hue/kart-racer): вместо попуток — разбитые машины, самолёты и военная техника на трассе, главная угроза — бешеные звери, гонится босс компании, раз в 3000 м — объезд по полю. Основная игра живёт и обновляется отдельно.
+
+[![Тесты и публикация](https://github.com/antonlabukhin-hue/kart-wasteland/actions/workflows/deploy.yml/badge.svg)](https://github.com/antonlabukhin-hue/kart-wasteland/actions/workflows/deploy.yml)
 ![Three.js](https://img.shields.io/badge/three.js-0.185-black)
 ![Лицензия кода](https://img.shields.io/badge/код-ISC-blue)
 
 Аркадные 3D-гонки на [Three.js](https://threejs.org/): постапокалиптичные трассы Приморья, советские машины, звери на дороге и боссы в кампании.
 
-**Играть онлайн:** [antonlabukhin-hue.github.io/kart-racer](https://antonlabukhin-hue.github.io/kart-racer/)
+**Играть онлайн:** [antonlabukhin-hue.github.io/kart-wasteland](https://antonlabukhin-hue.github.io/kart-wasteland/)
 
 ---
 
@@ -121,4 +123,4 @@ npm test             # всё: модульные + браузерные (сам
 ## Ссылки
 
 - **Репозиторий:** [github.com/antonlabukhin-hue/kart-racer](https://github.com/antonlabukhin-hue/kart-racer)
-- **Демо:** [antonlabukhin-hue.github.io/kart-racer](https://antonlabukhin-hue.github.io/kart-racer/)
+- **Демо:** [antonlabukhin-hue.github.io/kart-wasteland](https://antonlabukhin-hue.github.io/kart-wasteland/)

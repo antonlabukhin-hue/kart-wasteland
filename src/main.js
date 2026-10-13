@@ -390,8 +390,8 @@ import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traff
         // ============================================================
         // РАБОТА С localStorage
         // ============================================================
-        const STORAGE_KEY = 'road_racing_best_times';
-        const MAP_UNLOCK_KEY = 'road_racing_maps_unlocked';
+        const STORAGE_KEY = 'kw_road_racing_best_times';
+        const MAP_UNLOCK_KEY = 'kw_road_racing_maps_unlocked';
 
 
         // =======================
@@ -409,7 +409,7 @@ import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traff
          * Возвращает прогресс кампании для currentPlayer.
          *
          * ВНИМАНИЕ: функция МУТИРУЕТ currentPlayer.campaign — синхронизирует его
-         * с бэкапом в localStorage ('road_racing_campaign_<id>'). Логика слияния:
+         * с бэкапом в localStorage ('kw_road_racing_campaign_<id>'). Логика слияния:
          *   unlocked = max(inMemory, backup)
          *   completed = union(inMemory, backup)
          * Это осознанный side-effect: защита от потерянных глав при обрыве сессии.
@@ -1409,7 +1409,7 @@ function createProfile(name) { return Profile.createProfile(name); }
                 giftPopWait = null;
                 const gift = takeGiftPending(currentPlayer);
                 if (gift) { saveCurrentPlayer(); try { if (window.soundEngine) window.soundEngine.playSfx('fanfare', 0.9); } catch (e) {} showGiftCarPop(gift, { name: nameOf(gift.car), onOpen: openCar, onClose: function() { menuGiftCars(); } }); return; }
-                if (helloReady(currentPlayer, today)) { try { localStorage.setItem('road_racing_gift_cars_intro_v1', '1'); } catch (e) {} showHello({ profile: currentPlayer, today: today, hour: new Date().getHours(), forYou: forYouRows().concat(moreForYou(currentPlayer, CAR_PRESETS, isGiftCar, carName)), gifts: helloGifts(currentPlayer, function() { saveCurrentPlayer(); refreshMenuUI(); }), onAct: helloAct, onClose: function() { try { refreshMenuUI(); } catch (e) {} } }); /* закрыли — теперь сундук дня */ saveCurrentPlayer(); } // «Привет, Имя!» — новости и «сегодня для тебя» (src/ui/hello-news.js)
+                if (helloReady(currentPlayer, today)) { try { localStorage.setItem('kw_road_racing_gift_cars_intro_v1', '1'); } catch (e) {} showHello({ profile: currentPlayer, today: today, hour: new Date().getHours(), forYou: forYouRows().concat(moreForYou(currentPlayer, CAR_PRESETS, isGiftCar, carName)), gifts: helloGifts(currentPlayer, function() { saveCurrentPlayer(); refreshMenuUI(); }), onAct: helloAct, onClose: function() { try { refreshMenuUI(); } catch (e) {} } }); /* закрыли — теперь сундук дня */ saveCurrentPlayer(); } // «Привет, Имя!» — новости и «сегодня для тебя» (src/ui/hello-news.js)
             }, function() { giftPopWait = null; });
         }
 
@@ -2665,7 +2665,7 @@ function startGaragePreview(carId) {
 
         function showFirstRaceOnboarding() {
             try {
-                if (localStorage.getItem('road_racing_onboarded_v1') === '1') return;
+                if (localStorage.getItem('kw_road_racing_onboarded_v1') === '1') return;
             } catch (e) {}
             const el = document.getElementById('onboarding-tip');
             if (!el) return;
@@ -2687,7 +2687,7 @@ function startGaragePreview(carId) {
                 stop();
                 try {
                     el.classList.remove('show');
-                    localStorage.setItem('road_racing_onboarded_v1', '1');
+                    localStorage.setItem('kw_road_racing_onboarded_v1', '1');
                 } catch (e3) {}
             };
             window.__onboardStop = stop;
@@ -2700,7 +2700,7 @@ function startGaragePreview(carId) {
         window.showFirstRaceOnboarding = showFirstRaceOnboarding;
 
         // «Даю установку:» — при первом заезде отсчёт стоит, пока игрок не прочитает правила и не нажмёт «Погнали»
-        const BRIEFING_KEY = 'road_racing_briefing_v2';
+        const BRIEFING_KEY = 'kw_road_racing_briefing_v2';
         function showRaceBriefing() {
             if (!loadSettings().tutorial) return false; // обучение выключено (по умолчанию) — сразу отсчёт
             try { if (localStorage.getItem(BRIEFING_KEY) === '1') return false; } catch (e) {}
@@ -2752,7 +2752,7 @@ function startGaragePreview(carId) {
             openSettingsScreenUI({
                 onQuality: applyQualityChoice,
                 onLang: function(v) { applyLang(resolveLang(v, navigator.languages, platform.lang())); },
-                tutorialKeys: [BRIEFING_KEY, MEET_KEY, 'road_racing_hint_board'],
+                tutorialKeys: [BRIEFING_KEY, MEET_KEY, 'kw_road_racing_hint_board'],
                 cloud: onlineBoard(),
                 sound: function() { return window.soundEngine; }
             });
@@ -6828,7 +6828,7 @@ function startGaragePreview(carId) {
                     left: btns ? '◀ ВЛЕВО' : isMobile ? 'СВАЙП ВЛЕВО' : 'A / ←', right: btns ? '▶ ВПРАВО' : isMobile ? 'СВАЙП ВПРАВО' : 'D / →' };
                 arrowEl.lastChild.textContent = T[act] || '';
             }
-            const HURDLE_HINT = 'road_racing_hurdle_hint_v1';
+            const HURDLE_HINT = 'kw_road_racing_hurdle_hint_v1';
             function hurdleHint(kind) { // первые три встречи каждого вида — подсказка, как пройти
                 let seen = {}; try { seen = JSON.parse(localStorage.getItem(HURDLE_HINT) || '{}'); } catch (e) {}
                 if ((seen[kind] || 0) >= 3) return; // kind — 'jump' | 'duck'
@@ -8674,7 +8674,7 @@ function startGaragePreview(carId) {
                 }
                 if (TUTOR && gameState === 'racing' && !boardHintDone && (meetSeen.has('billboard') || coachSteps.length) && smashBoards.some(function(b) { const d = zPos - b.z; return !b.smashed && d > 12 && d < 45; })) {
                     boardHintDone = true;
-                    if (hintOnce('road_racing_hint_board', 3)) showInfoPop('💥', 'Рекламу можно сносить!', 'Тарань щит — не авария: +' + SMASH_CHIPS + ' Е и очки стиля');
+                    if (hintOnce('kw_road_racing_hint_board', 3)) showInfoPop('💥', 'Рекламу можно сносить!', 'Тарань щит — не авария: +' + SMASH_CHIPS + ' Е и очки стиля');
                 }
                 for (let evi = 0; evi < 2 + setEvents.length; evi++) {
                     const ev = evi === 0 ? mapEvent : evi === 1 ? pipeDrop : setEvents[evi - 2];
@@ -11264,7 +11264,7 @@ function showLoreScreen(quality, difficulty) {
                 const sp0 = document.getElementById('splash-screen');
                 if (sp0 && getComputedStyle(sp0).display !== 'none') {
                     let car0 = 'cheburashka';
-                    try { const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1') || '[]'); if (l[0] && l[0].preferredCar) car0 = l[0].preferredCar; } catch (e) {}
+                    try { const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1') || '[]'); if (l[0] && l[0].preferredCar) car0 = l[0].preferredCar; } catch (e) {}
                     const reduce0 = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                     startMenuBg({ carId: car0, intro: true, still: reduce0, lowPower: !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) });
                 }

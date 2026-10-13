@@ -28,7 +28,7 @@ RB_SMOKE=1 npx electron .
 ### Что нужно для Steam
 - [ ] Steamworks: аккаунт партнёра, App ID, depot; загрузка папки `desktop/release/*-unpacked` через SteamPipe.
 - [ ] `steamworks.js` (npm) в `main.cjs`: достижения Steam ← `ACHIEVEMENTS` из `src/content.js`, облачные сохранения
-      профиля (сейчас `localStorage` — `road_racing_profiles_*`, `road_racing_campaign_*`, `road_racing_ghost_v1_*`).
+      профиля (сейчас `localStorage` — `kw_road_racing_profiles_*`, `kw_road_racing_campaign_*`, `kw_road_racing_ghost_v1_*`).
 - [ ] Полная поддержка геймпада (Steam Deck): гонка, пауза и меню уже работают (`src/gamepad.js`);
       осталось проверить на устройстве и добавить подписи кнопок геймпада в брифинге.
 - [ ] Иконка приложения (`build.win.icon` / `build.mac.icon` в `desktop/package.json`), капсулы магазина, трейлер.

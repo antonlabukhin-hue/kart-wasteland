@@ -7,7 +7,7 @@ const MAX_SAMPLES = 2400; // 4 минуты — с запасом на 90-сек
 const r2 = function(v) { return Math.round(v * 100) / 100; };
 
 export function ghostKey(profileId, trackKey, difficulty) {
-    return 'road_racing_ghost_v1_' + (profileId || 'p') + '_' + trackKey + '_' + difficulty;
+    return 'kw_road_racing_ghost_v1_' + (profileId || 'p') + '_' + trackKey + '_' + difficulty;
 }
 
 export function createGhostRecorder() {

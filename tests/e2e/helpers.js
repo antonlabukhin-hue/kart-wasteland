@@ -37,19 +37,19 @@ export async function countShouts(page) {
 // tutorial: true — включить «Обучение в заезде» в настройках (по умолчанию оно выключено);
 // fresh: true — настоящий новичок: новости с 3-го захода, «Слово дня» и др. со 2-го дня (src/visits.js); иначе всё открыто сразу
 export async function login(page, name = 'Тестер', url = './', { briefing = false, tutorial = false, fresh = false } = {}) {
-    if (!briefing) await page.addInitScript(() => localStorage.setItem('road_racing_briefing_v2', '1'));
-    if (!fresh) await page.addInitScript(() => localStorage.setItem('road_racing_open_all', '1'));
-    if (tutorial) await page.addInitScript(() => { const k = 'road_racing_settings_v1'; const st = JSON.parse(localStorage.getItem(k) || '{}'); st.tutorial = true; localStorage.setItem(k, JSON.stringify(st)); });
+    if (!briefing) await page.addInitScript(() => localStorage.setItem('kw_road_racing_briefing_v2', '1'));
+    if (!fresh) await page.addInitScript(() => localStorage.setItem('kw_road_racing_open_all', '1'));
+    if (tutorial) await page.addInitScript(() => { const k = 'kw_road_racing_settings_v1'; const st = JSON.parse(localStorage.getItem(k) || '{}'); st.tutorial = true; localStorage.setItem(k, JSON.stringify(st)); });
     // показ наград в конце заезда (крутящаяся «Е», кассета, салют рекорда) проверяет свой тест — остальным сразу итоги
-    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_reveal')) localStorage.setItem('road_racing_skip_reveal', '1'); });
+    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_reveal')) localStorage.setItem('kw_road_racing_skip_reveal', '1'); });
     // плашку «Появились новые машины» проверяет свой тест — остальным она не мешает
-    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_newcars') && !localStorage.getItem('road_racing_new_cars_seen')) localStorage.setItem('road_racing_new_cars_seen', 'all'); });
+    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_newcars') && !localStorage.getItem('kw_road_racing_new_cars_seen')) localStorage.setItem('kw_road_racing_new_cars_seen', 'all'); });
     // «первое знакомство» (пауза перед новым на дороге) проверяет свой тест — остальным всё уже знакомо
-    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_meet') && !localStorage.getItem('road_racing_met_v1')) localStorage.setItem('road_racing_met_v1', 'all'); });
+    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_meet') && !localStorage.getItem('kw_road_racing_met_v1')) localStorage.setItem('kw_road_racing_met_v1', 'all'); });
     // плашку «Машины в подарок» проверяет свой тест — остальным она не мешает
-    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_giftintro')) localStorage.setItem('road_racing_gift_cars_intro_v1', '1'); });
+    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_giftintro')) localStorage.setItem('kw_road_racing_gift_cars_intro_v1', '1'); });
     // «Привет, Имя!» с новостями (src/ui/hello-news.js) проверяет свой тест — остальным не мешает
-    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_hello')) localStorage.setItem('road_racing_hello_skip', '1'); else localStorage.removeItem('road_racing_hello_skip'); });
+    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_hello')) localStorage.setItem('kw_road_racing_hello_skip', '1'); else localStorage.removeItem('kw_road_racing_hello_skip'); });
     await page.goto(url);
     await expect(page.locator('#profile-login-btn')).toBeEnabled();
     await page.locator('#splash-screen').click();
@@ -80,9 +80,9 @@ export async function startFreeRace(page, difficulty = 'easy') {
 // «Звериный час» открывается после главы 1: отметить её пройденной в сохранении и перезайти
 export async function unlockBeastHour(page, name = 'Тестер') {
     await page.evaluate(() => {
-        const list = JSON.parse(localStorage.getItem('road_racing_profiles_v1') || '[]');
+        const list = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1') || '[]');
         list.forEach(p => { p.campaign = Object.assign({}, p.campaign, { unlocked: 2, completed: ['c01'] }); });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(list));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(list));
     });
     await page.reload();
     await page.locator('#splash-screen').click();

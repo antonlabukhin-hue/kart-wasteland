@@ -3,7 +3,7 @@
  * Ничего не уходит в сеть, пока не подключён отправщик (setSender). Сводка — summarize():
  * где игроки проигрывают, какие главы бросают, сколько длится заезд. См. docs/ANALYTICS.md.
  */
-export const ANALYTICS_KEY = 'road_racing_analytics_v1';
+export const ANALYTICS_KEY = 'kw_road_racing_analytics_v1';
 export const MAX_EVENTS = 600;
 
 let _sender = null;

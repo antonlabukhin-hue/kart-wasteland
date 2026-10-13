@@ -30,7 +30,7 @@ test('рекламный щит в полосе: снёс — не авария,
     /* газ жмётся сам (W — прыжок) */
     await expect.poll(() => page.evaluate(() => window.__raceDebug.stats.billboards || 0), { timeout: 30_000 }).toBeGreaterThanOrEqual(1);
     // подсказка «рекламу можно сносить» — часть обучения, по умолчанию его нет; после удара — плашка с бонусом
-    expect(await page.evaluate(() => Number(localStorage.getItem('road_racing_hint_board') || 0))).toBe(0);
+    expect(await page.evaluate(() => Number(localStorage.getItem('kw_road_racing_hint_board') || 0))).toBe(0);
     await expect.poll(() => page.evaluate(() => window.__sawSmash), { timeout: 5_000 }).toBe(true);
     /* газ жмётся сам (W — прыжок) */
     expect(await page.evaluate(() => window.__raceDebug.strikes)).toBe(0);
@@ -41,9 +41,9 @@ test('промзона: труба рушится с эстакады попер
     const problems = watchProblems(page);
     await login(page, 'Тестер', './?start=0.1');
     await page.evaluate(() => {
-        const list = JSON.parse(localStorage.getItem('road_racing_profiles_v1') || '[]');
+        const list = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1') || '[]');
         list.forEach(p => { p.unlockedMaps = ['arsenev', 'promzona', 'svalka']; p.hasSeenShop = true; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(list));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(list));
     });
     await page.reload();
     await page.locator('#splash-screen').click();
@@ -72,9 +72,9 @@ for (const map of ['arsenev', 'promzona', 'svalka']) {
         const problems = watchProblems(page);
         await login(page, 'Тестер', './?start=0.05');
         await page.evaluate(() => {
-            const list = JSON.parse(localStorage.getItem('road_racing_profiles_v1') || '[]');
+            const list = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1') || '[]');
             list.forEach(p => { p.unlockedMaps = ['arsenev', 'promzona', 'svalka']; p.hasSeenShop = true; });
-            localStorage.setItem('road_racing_profiles_v1', JSON.stringify(list));
+            localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(list));
         });
         await page.reload();
         await page.locator('#splash-screen').click();

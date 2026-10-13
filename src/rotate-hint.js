@@ -3,7 +3,7 @@
  * Показывается на телефоне сразу после «GO!» первых HINT_RACES заездов (через ~2 с, чтобы не сливаться с отсчётом),
  * текст — под текущее положение телефона. Повернул хоть раз посреди заезда — значит, знает: больше не показываем.
  */
-export const HINT_KEY = 'road_racing_rotate_hint';
+export const HINT_KEY = 'kw_road_racing_rotate_hint';
 export const HINT_RACES = 3;
 
 export function rotateHintText(portrait) {

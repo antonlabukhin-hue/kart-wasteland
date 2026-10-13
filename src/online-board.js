@@ -6,7 +6,9 @@
 import { weekKey } from './leaderboard.js';
 
 export const ONLINE = {
-    url: 'https://gxwfntxsvtytphjuatlt.supabase.co/rest/v1/runs',
+    // Пустошь пока без общей базы: рекорды, облачные сохранения и метрики «Дорожного прорыва» не трогаем.
+    // Адрес в зоне .invalid никуда не ведёт — всё работает как без сети. Своя база — позже.
+    url: 'https://offline.invalid/rest/v1/runs',
     key: 'sb_publishable_8gAmYHi5uwWEH0qZbNwybA_uaIkLgzH'
 };
 const TIMEOUT = 6000;

@@ -5,7 +5,7 @@
  */
 import { ONLINE, cleanName } from './online-board.js';
 
-export const DAILY_KEY = 'road_racing_daily_board_v1';
+export const DAILY_KEY = 'kw_road_racing_daily_board_v1';
 const URL = ONLINE.url.replace(/\/runs$/, '/daily_runs');
 const TIMEOUT = 6000;
 const H = function(extra) { return Object.assign({ apikey: ONLINE.key, Authorization: 'Bearer ' + ONLINE.key }, extra || {}); };

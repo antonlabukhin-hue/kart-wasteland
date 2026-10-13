@@ -4,7 +4,7 @@
  * Каждую секунду заезда пишет «след» в localStorage: если вкладку выкинуло (iPhone закрывает её при нехватке памяти),
  * при следующем запуске в углу видно, на каком метре и с какими числами заезд оборвался.
  */
-const KEY = 'road_racing_diag_trail';
+const KEY = 'kw_road_racing_diag_trail';
 let src = null;
 /** Источник чисел заезда: fn() → { dist, renderer } (вызывается из main.js, когда заезд идёт) */
 export function setDiagSource(fn) { src = fn; }

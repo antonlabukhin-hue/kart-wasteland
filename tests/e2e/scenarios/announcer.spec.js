@@ -13,7 +13,7 @@ test('ведущий: реплика на старте и на рекорде, �
     await page.evaluate(() => window.__raceDebug.end('crash'));
     await expect(page.locator('#finish-screen')).toBeVisible({ timeout: 10_000 });
     // выключили — молчит
-    await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('road_racing_settings_v1') || '{}'); s.host = 'off'; localStorage.setItem('road_racing_settings_v1', JSON.stringify(s)); });
+    await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('kw_road_racing_settings_v1') || '{}'); s.host = 'off'; localStorage.setItem('kw_road_racing_settings_v1', JSON.stringify(s)); });
     await page.locator('#finish-restart-btn').click();
     await waitRacing(page);
     await page.waitForTimeout(3000);

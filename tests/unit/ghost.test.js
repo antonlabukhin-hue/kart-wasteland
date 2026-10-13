@@ -31,7 +31,7 @@ describe('призрак лучшего заезда', () => {
         expect(isBetterGhost(g, 59)).toBe(true);
         expect(isBetterGhost(g, 61)).toBe(false);
         expect(isValidGhost({ v: 1, step: 0.1, time: 1, x: [0, 1], z: [0], y: [0, 0] })).toBe(false);
-        expect(ghostKey('id1', 'arsenev', 'hard')).toBe('road_racing_ghost_v1_id1_arsenev_hard');
+        expect(ghostKey('id1', 'arsenev', 'hard')).toBe('kw_road_racing_ghost_v1_id1_arsenev_hard');
     });
 });
 

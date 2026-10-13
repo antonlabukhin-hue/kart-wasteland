@@ -40,12 +40,12 @@ test('площадка: второй шанс и ×2 «Е» за рекламу,
     await expect(page.locator('#finish-screen')).toContainText('ЗАЕЗД ОКОНЧЕН', { timeout: 10_000 });
 
     // ×2 «Е» за рекламу на итогах
-    const before = await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0].season.chips);
+    const before = await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0].season.chips);
     const dbl = page.locator('#finish-actions .ad-double');
     await expect(dbl).toContainText('×2');
     await dbl.click();
     await expect(dbl).toContainText('удвоено', { timeout: 5_000 });
-    const after = await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0].season.chips);
+    const after = await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0].season.chips);
     const gain = Number((await dbl.textContent()).match(/\+(\d+)/)[1]);
     expect(gain).toBeGreaterThanOrEqual(got);
     expect(after - before).toBe(gain);
@@ -64,7 +64,7 @@ test('аккаунт Яндекса: прогресс уходит в аккау
     const ctx1 = await browser.newContext({ baseURL }), p1 = await ctx1.newPage();
     const problems = watchProblems(p1);
     await login(p1, 'Аккаунт', './?ads=mock');
-    await expect.poll(() => p1.evaluate(() => { const d = JSON.parse(localStorage.getItem('mock_ya_save') || 'null'); return !!(d && d.keys && /Аккаунт/.test(d.keys.road_racing_profiles_v1 || '')); }), { timeout: 15_000 }).toBe(true);
+    await expect.poll(() => p1.evaluate(() => { const d = JSON.parse(localStorage.getItem('mock_ya_save') || 'null'); return !!(d && d.keys && /Аккаунт/.test(d.keys.kw_road_racing_profiles_v1 || '')); }), { timeout: 15_000 }).toBe(true);
     const saved = await p1.evaluate(() => localStorage.getItem('mock_ya_save'));
     expect(problems).toEqual([]);
     await ctx1.close();
@@ -72,7 +72,7 @@ test('аккаунт Яндекса: прогресс уходит в аккау
     const ctx2 = await browser.newContext({ baseURL }), p2 = await ctx2.newPage();
     await p2.addInitScript((s) => { if (!sessionStorage.getItem('seeded')) { sessionStorage.setItem('seeded', '1'); localStorage.setItem('mock_ya_save', s); } }, saved);
     await p2.goto('./?ads=mock');
-    await expect.poll(() => p2.evaluate(() => /Аккаунт/.test(localStorage.getItem('road_racing_profiles_v1') || '')), { timeout: 15_000 }).toBe(true);
+    await expect.poll(() => p2.evaluate(() => /Аккаунт/.test(localStorage.getItem('kw_road_racing_profiles_v1') || '')), { timeout: 15_000 }).toBe(true);
     await p2.locator('#splash-screen').click();
     await expect(p2.locator('#profile-list')).toContainText('Аккаунт', { timeout: 15_000 });
     await ctx2.close();

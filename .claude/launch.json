@@ -10,10 +10,10 @@
         "--outDir",
         "dist-test",
         "--port",
-        "4174",
+        "4184",
         "--strictPort"
       ],
-      "port": 4174
+      "port": 4184
     },
     {
       "name": "site-build",
@@ -24,10 +24,10 @@
         "--outDir",
         "dist",
         "--port",
-        "4176",
+        "4186",
         "--strictPort"
       ],
-      "port": 4176
+      "port": 4186
     },
     {
       "name": "dev",
@@ -35,10 +35,10 @@
       "runtimeArgs": [
         "vite",
         "--port",
-        "5173",
+        "5183",
         "--strictPort"
       ],
-      "port": 5173
+      "port": 5183
     }
   ]
 }

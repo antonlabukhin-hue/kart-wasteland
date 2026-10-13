@@ -12,14 +12,14 @@ description: Проверить визуальные изменения игры
 
 ## Как снимать
 1. `npm run build:test` → `dist-test/` (есть `window.__raceDebug`, `window.__artKit`).
-2. Запустить превью: launch-конфиг `test-build` (порт 4174).
+2. Запустить превью: launch-конфиг `test-build` (порт 4184).
 3. Скрипт положить **в `dist-test/`** (тогда резолвится `@playwright/test`), запускать `node dist-test/shot.mjs`:
    ```js
    import { chromium } from '@playwright/test';
    const b = await chromium.launch({ channel: 'msedge' });
    const pc = await b.newPage({ viewport: { width: 1366, height: 768 } });
    const phone = await b.newPage({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
-   // ... goto http://localhost:4174/, вход (имя ≥ 3 символов), переходы по экранам, page.screenshot(...)
+   // ... goto http://localhost:4184/, вход (имя ≥ 3 символов), переходы по экранам, page.screenshot(...)
    await b.close();
    ```
    Скриншоты — в scratchpad, не в репозиторий.

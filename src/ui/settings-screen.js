@@ -121,7 +121,7 @@ export function openSettingsScreen(deps) {
                 if (!data) { status('Сохранение не найдено (или нет сети)'); return; }
                 if (!confirm('Заменить прогресс на этом устройстве сохранением из облака?')) { status(''); return; }
                 applySnapshot(data);
-                try { localStorage.setItem('road_racing_cloud_code', code); } catch (e) {}
+                try { localStorage.setItem('kw_road_racing_cloud_code', code); } catch (e) {}
                 location.reload();
             });
         };

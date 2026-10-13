@@ -7,9 +7,9 @@ test('звериная тропа: с трамплина машина перел
     const problems = watchProblems(page);
     await login(page, 'Тестер', './?start=0.1');
     await page.evaluate(() => {
-        const list = JSON.parse(localStorage.getItem('road_racing_profiles_v1') || '[]');
+        const list = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1') || '[]');
         list.forEach(p => { p.campaign = Object.assign({}, p.campaign, { unlocked: 5, completed: ['c01', 'c02', 'c03', 'c04'] }); p.hasSeenShop = true; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(list));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(list));
     });
     await page.reload();
     await page.locator('#splash-screen').click();

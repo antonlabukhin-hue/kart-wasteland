@@ -78,9 +78,9 @@ test('бесконечная трасса: усиление подбираетс
     const problems = watchProblems(page);
     await login(page);
     await page.evaluate(() => {
-        const list = JSON.parse(localStorage.getItem('road_racing_profiles_v1') || '[]');
+        const list = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1') || '[]');
         list.forEach(p => { p.season = Object.assign({}, p.season, { chips: 1000 }); });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(list));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(list));
     });
     await page.reload();
     await page.locator('#splash-screen').click();
@@ -126,7 +126,7 @@ test('бесконечная трасса: усиление подбираетс
 test('бесконечная трасса: рекорд — салют, потом золотая «Е», потом итоги', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
-    await page.evaluate(() => { sessionStorage.setItem('keep_reveal', '1'); localStorage.removeItem('road_racing_skip_reveal'); });
+    await page.evaluate(() => { sessionStorage.setItem('keep_reveal', '1'); localStorage.removeItem('kw_road_racing_skip_reveal'); });
     await page.reload();
     await page.locator('#splash-screen').click();
     await page.locator('#profile-list').getByText('Тестер').click();
@@ -212,14 +212,14 @@ test('первое знакомство: пауза с плашкой перед
     await expect(page.locator('.meet-overlay')).toHaveCount(0);
     await expect.poll(() => page.evaluate(() => window.__raceDebug.z), { timeout: 5_000 }).toBeLessThan(z1);
     // знакомое запомнено
-    const seen = await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_met_v1') || '[]'));
+    const seen = await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_met_v1') || '[]'));
     expect(seen.length).toBeGreaterThanOrEqual(1);
     // «Больше не подсказывать» — все знакомства отмечены
     await expect(card).toBeVisible({ timeout: 45_000 }); // на CI без видеокарты до следующего нового — дольше
     expect(await card.locator('.meet-title').textContent()).not.toBe(title);
     await card.locator('.meet-off').click();
     await expect(page.locator('.meet-overlay')).toHaveCount(0);
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_met_v1')).length)).toBe(15);
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_met_v1')).length)).toBe(15);
     /* газ жмётся сам (W — прыжок) */
     expect(problems).toEqual([]);
 });
@@ -277,9 +277,9 @@ test('бусты: «Разгон» и «Запаска» покупаются в
     const problems = watchProblems(page);
     await login(page);
     await page.evaluate(() => {
-        const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1'));
+        const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
         l.forEach(p => { p.season.chips = 1000; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
     });
     await page.reload();
     await page.locator('#splash-screen').click();
@@ -292,7 +292,7 @@ test('бусты: «Разгон» и «Запаска» покупаются в
     await page.evaluate(() => { window.__sawHead = false; new MutationObserver(() => { const p = document.querySelector('.big-plaque'); if (p && p.textContent.includes('РАЗГОН')) window.__sawHead = true; }).observe(document.body, { childList: true, subtree: true }); });
     await page.locator('#shop-action').click();
     await waitRacing(page);
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0].season.chips)).toBe(550);
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0].season.chips)).toBe(550);
     /* газ жмётся сам (W — прыжок) */
     await expect.poll(() => page.evaluate(() => window.__sawHead), { timeout: 10_000 }).toBe(true);
     // попутка в машину во время «Разгона» — аварии нет
@@ -311,9 +311,9 @@ test('значки 90-х: коллекция видна в «Трофеях»', 
     const problems = watchProblems(page);
     await login(page);
     await page.evaluate(() => {
-        const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1'));
+        const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
         l.forEach(p => { p.badges = { got: { tech: 1, pager: 2 }, done: false }; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
     });
     await page.reload();
     await page.locator('#splash-screen').click();
@@ -330,9 +330,9 @@ test('горячий старт: опытному игроку — плашка 
     const problems = watchProblems(page);
     await login(page);
     await page.evaluate(() => {
-        const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1'));
+        const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
         l.forEach(p => { p.infinite = { best: 5000, bestScore: 0, runs: 3 }; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
     });
     await page.reload();
     await page.locator('#splash-screen').click();
@@ -430,9 +430,9 @@ test('цели на дороге: растяжка рекорда и щиты с
     const problems = watchProblems(page);
     await login(page);
     await page.evaluate(() => {
-        const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1'));
+        const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
         l.forEach(p => { p.infinite = { best: 900, bestScore: 0, runs: 0 }; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
     });
     await page.reload();
     await page.locator('#splash-screen').click();
@@ -503,9 +503,9 @@ test('итоги бесконечной трассы: «до рекорда не
     const problems = watchProblems(page);
     await login(page);
     await page.evaluate(() => {
-        const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1'));
+        const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
         l.forEach(p => { p.infinite = { best: 400, bestScore: 0, runs: 1 }; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
     });
     await page.reload();
     await page.locator('#splash-screen').click();
@@ -524,7 +524,7 @@ test('итоги бесконечной трассы: «до рекорда не
 test('машина дня: тест-драйв и покупка со скидкой на итогах', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
-    await page.evaluate(() => { const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1')); l.forEach(p => { p.season.chips = 100000; }); localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l)); });
+    await page.evaluate(() => { const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1')); l.forEach(p => { p.season.chips = 100000; }); localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l)); });
     await page.reload();
     await page.locator('#splash-screen').click();
     await page.locator('#profile-list').getByText('Тестер').click();
@@ -543,7 +543,7 @@ test('машина дня: тест-драйв и покупка со скидк
     await expect(page.locator('#finish-screen .fin-testdrive')).toContainText('Тест-драйв', { timeout: 10_000 });
     await page.locator('#finish-buy-car').click();
     await expect(page.locator('#finish-buy-car')).toContainText('твоя');
-    const p = await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0]);
+    const p = await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0]);
     expect(p.unlockedCars).toContain(carId);
     expect(p.carDay.tried).toBe(true);
     expect(problems).toEqual([]);
@@ -557,7 +557,7 @@ test('заезд дня: одна попытка, результат и мест
     await expect(page.locator('.daily-modal .dl-rule')).toBeVisible();
     await page.locator('.daily-modal .dl-go').click();
     await waitRacing(page);
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1'))[0].dailyRun.started)).toBe(true); // попытка — в dailyRun (daily занято «заданием дня»)
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'))[0].dailyRun.started)).toBe(true); // попытка — в dailyRun (daily занято «заданием дня»)
     await page.evaluate(() => { const g = window.__raceDebug; g.setZ(g.startZ - 250); });
     await page.waitForTimeout(300);
     await page.evaluate(() => window.__raceDebug.end('crash'));

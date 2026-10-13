@@ -9,14 +9,14 @@ import { rankOf, totalFromSeason, RANKS } from './ranks.js';
 import { riskToXp } from './risk-combo.js';
 import { countArrowRun } from './move-tutor.js';
 
-export const PROFILES_KEY = 'road_racing_profiles_v1';
-export const SESSION_KEY = 'road_racing_session_player';
+export const PROFILES_KEY = 'kw_road_racing_profiles_v1';
+export const SESSION_KEY = 'kw_road_racing_session_player';
 export const MAX_SEASON_LEVEL = 30;
 export const HISTORY_LIMIT = 25;
 export const MAP_ORDER = ['arsenev', 'promzona', 'svalka'];
 
 export function campaignBackupKey(p) {
-    return 'road_racing_campaign_' + (p && (p.id || p.name) || 'p');
+    return 'kw_road_racing_campaign_' + (p && (p.id || p.name) || 'p');
 }
 
 export function defaultSeason() {

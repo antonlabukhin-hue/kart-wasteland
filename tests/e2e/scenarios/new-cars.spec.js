@@ -50,13 +50,13 @@ test('новичок: без окон новостей до 3-го захода,
     await expect(page.locator('.hello-modal')).toHaveCount(0);
     // третий заход, и уже второй день игры: новости и карточки меню
     await page.evaluate(() => {
-        const l = JSON.parse(localStorage.getItem('road_racing_profiles_v1'));
+        const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
         l.forEach(p => { if (p.name === 'Новичок') p.visits = { n: p.visits.n, days: 1, last: '2020-01-01' }; });
-        localStorage.setItem('road_racing_profiles_v1', JSON.stringify(l));
+        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
     });
     await again();
     await expect(page.locator('.newcars-modal, .hello-modal').first()).toBeVisible({ timeout: 5_000 });
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('road_racing_profiles_v1')).find(p => p.name === 'Новичок').visits)).toMatchObject({ n: 3, days: 2 });
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1')).find(p => p.name === 'Новичок').visits)).toMatchObject({ n: 3, days: 2 });
     await expect(page.locator('#main-menu-screen .mm-extras')).toBeAttached();
     expect(await page.locator('#main-menu-screen').evaluate(el => el.classList.contains('mm-fresh'))).toBe(false);
     expect(problems).toEqual([]);

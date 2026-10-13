@@ -73,7 +73,7 @@ Vite собирает `index.html`, `css/`, `src/*` и three из `node_modules`
 
 ## P0 (сделано)
 
-- Онбординг первого заезда (`road_racing_onboarded_v1`, `#onboarding-tip`)
+- Онбординг первого заезда (`kw_road_racing_onboarded_v1`, `#onboarding-tip`)
 - Telegraph босса: ring + scale pulse + `_windupNeed` ≥ 0.65 с
 - `window.teardownRaceUI` — единая очистка HUD/финиш/пауза
 - `docs/QA.md` — smoke-чеклист

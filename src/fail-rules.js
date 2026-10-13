@@ -9,7 +9,7 @@
  * Логика — чистая (с тестами).
  */
 
-export const AB_KEY = 'road_racing_ab_fail';
+export const AB_KEY = 'kw_road_racing_ab_fail';
 export const VARIANTS = ['hearts', 'chase'];
 export const CHASE_AB = 8;      // с погони в варианте 'chase' (в 'hearts' — CHASE_TIME из src/police-chase.js)
 export const CHASE_HEARTS = 2;  // сердец в варианте 'chase'

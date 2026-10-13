@@ -8,8 +8,8 @@
 import { ONLINE } from './online-board.js';
 import { createRunTracker } from './run-metrics.js';
 
-export const PID_KEY = 'road_racing_pid';
-export const DAY0_KEY = 'road_racing_day0';
+export const PID_KEY = 'kw_road_racing_pid';
+export const DAY0_KEY = 'kw_road_racing_day0';
 const RPC = ONLINE.url.replace(/\/runs$/, '/rpc/session_put');
 const RPC_CHAPTER = ONLINE.url.replace(/\/runs$/, '/rpc/chapter_put');
 const RPC_RUN = ONLINE.url.replace(/\/runs$/, '/rpc/run_put');

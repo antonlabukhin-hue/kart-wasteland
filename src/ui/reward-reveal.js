@@ -89,7 +89,7 @@ function countUp(node, to, suffix) {
     requestAnimationFrame(step);
 }
 
-export const SKIP_KEY = 'road_racing_skip_reveal'; // только для автотестов: сразу к итогам
+export const SKIP_KEY = 'kw_road_racing_skip_reveal'; // только для автотестов: сразу к итогам
 export function showRewardReveal(o) {
     try { if (localStorage.getItem(SKIP_KEY) === '1') { if (o.onDone) o.onDone(); return null; } } catch (e) {}
     const root = el('div', 'reward-reveal');

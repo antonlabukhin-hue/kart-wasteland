@@ -8,7 +8,7 @@
  */
 import { snapshot, applySnapshot } from './cloud-save.js';
 
-export const LOCAL_AT_KEY = 'road_racing_local_at';
+export const LOCAL_AT_KEY = 'kw_road_racing_local_at';
 export const MAX_BYTES = 190000; // у Яндекса предел ~200 КБ на данные игрока
 
 /** Что делать при запуске: 'pull' — взять из аккаунта, 'push' — отправить своё, 'none' — совпадает */

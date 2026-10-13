@@ -12,7 +12,7 @@ test('призрак: после победы на следующем заезд
     await expect(page.locator('#finish-screen')).toContainText('Призрак обновлён', { timeout: 120_000 });
     await expect(page.locator('#finish-screen')).toContainText('Первый рекорд трассы');
     /* газ жмётся сам (W — прыжок) */
-    const saved = await page.evaluate(() => Object.keys(localStorage).filter(k => k.startsWith('road_racing_ghost_v1_')).length);
+    const saved = await page.evaluate(() => Object.keys(localStorage).filter(k => k.startsWith('kw_road_racing_ghost_v1_')).length);
     expect(saved).toBe(1);
 
     await page.locator('#finish-restart-btn').click();

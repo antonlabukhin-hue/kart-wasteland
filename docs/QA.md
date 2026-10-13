@@ -29,7 +29,7 @@
 ## Сброс онбординга (для теста)
 
 ```js
-localStorage.removeItem('road_racing_onboarded_v1');
+localStorage.removeItem('kw_road_racing_onboarded_v1');
 ```
 
 ## Команды

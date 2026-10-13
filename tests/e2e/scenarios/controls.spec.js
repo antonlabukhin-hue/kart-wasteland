@@ -34,7 +34,7 @@ test('по умолчанию — кнопки руля, газа и тормо�
 
 test('свайпы: газ сам, свайп влево/вправо — в соседнюю полосу, кнопок руля нет', async ({ page }) => {
     const problems = watchProblems(page);
-    await page.addInitScript(() => localStorage.setItem('road_racing_settings_v1', JSON.stringify({ controls: 'swipe' })));
+    await page.addInitScript(() => localStorage.setItem('kw_road_racing_settings_v1', JSON.stringify({ controls: 'swipe' })));
     await login(page);
     await page.locator('#main-menu-play').click();
     await page.setViewportSize({ width: 844, height: 390 }); // повернули телефон

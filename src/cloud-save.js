@@ -6,8 +6,8 @@
  */
 import { ONLINE } from './online-board.js';
 
-export const CODE_KEY = 'road_racing_cloud_code';
-export const SYNC_KEYS = ['road_racing_profiles_v1', 'road_racing_board_v1', 'road_racing_met_v1'];
+export const CODE_KEY = 'kw_road_racing_cloud_code';
+export const SYNC_KEYS = ['kw_road_racing_profiles_v1', 'kw_road_racing_board_v1', 'kw_road_racing_met_v1'];
 const ALPHA = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // без 0/O и 1/I — не перепутать при вводе
 const RPC = ONLINE.url.replace(/\/runs$/, '/rpc/');
 
@@ -84,7 +84,7 @@ export function createAutoSync(opts) {
 export function cloudCodeHint(ok, notify, storage) {
     const st = storage || localStorage;
     if (!ok || !notify) return false;
-    try { if (st.getItem('road_racing_cloud_hint')) return false; st.setItem('road_racing_cloud_hint', '1'); } catch (e) { return false; }
+    try { if (st.getItem('kw_road_racing_cloud_hint')) return false; st.setItem('kw_road_racing_cloud_hint', '1'); } catch (e) { return false; }
     notify.success('☁ Прогресс в облаке. Твой код: ' + getCode(st), 'Запиши его: в другом браузере или на новом телефоне — Настройки → «Загрузить» по коду');
     return true;
 }
