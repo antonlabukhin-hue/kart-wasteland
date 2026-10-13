@@ -94,13 +94,8 @@ export const GATE_FROM = 700;
 export const GATE_EVERY = [900, 1400];
 export const GATE_SIGN = 70;
 export const GATE_AFTER = 40;
-export function planGates(d0, d1, rnd) {
-    const r = rnd || Math.random, out = [];
-    const first = Math.max(d0, GATE_FROM) + r() * 200;
-    for (let d = first; d < d1; d += GATE_EVERY[0] + r() * (GATE_EVERY[1] - GATE_EVERY[0])) {
-        out.push({ d: Math.round(d), kind: DUCK_KINDS[Math.floor(r() * DUCK_KINDS.length) % DUCK_KINDS.length], lanes: [0, 1, 2], gate: true });
-    }
-    return out;
+export function planGates() { // Пустошь: подныра нет — ворот не ставим
+    return [];
 }
 
 /* ---------- меши (перёд машины — к −z; препятствие поперёк полос) ---------- */

@@ -6893,7 +6893,7 @@ function startGaragePreview(carId) {
             }
             let nearMissCount = 0;
             const slipSt = INF ? createSlip() : null; /* слипстрим и нитро по кнопке (src/slipstream.js) */ const draftFx = slipSt ? createDraftFx(scene) : null; const nitroBtn = slipSt ? createNitroButton({ keyHint: isMobile ? '' : 'E', onFire: function() { fireNitro(); } }) : null;
-            const oncLane = INF ? createOncomingLane({ scene: scene, laneX: [-2, 0, 2], works: roadSegments }) : null; let _oncK = -1, _oncIn = false, _oncAcc = 0; /* «Встречка ×2» (src/oncoming-lane.js) */
+            const oncLane = null && createOncomingLane; /* Пустошь: встречки нет */ let _oncK = -1, _oncIn = false, _oncAcc = 0; /* «Встречка ×2» (src/oncoming-lane.js) */
             function oncomingFrame(deltaTime) { // шаг кадра — параметром: функция объявлена вне кадра
                 const k = oncIndexAt(infWorld ? infWorld.dist : 0, 260);
                 if (k >= 0 && k > _oncK) {
