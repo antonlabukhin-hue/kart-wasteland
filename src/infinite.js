@@ -6,24 +6,24 @@ import { pickPattern, expandPattern, patternSpan, patternGap } from './patterns.
  */
 
 /** Пейзажи идут по кругу; у каждого — стиль декора (src/decor.js), небо/туман/земля, скользкое пятно, звери */
-export const THEMES = [
-    { id: 'day', name: 'Арсеньев, день', style: 'arsenev', accent: 0xffc83c, sky: 0xe8c898, zenith: 0x5b8ad0, fog: 0xe0c090, fogNear: 55, fogFar: 200, ground: 0xa08866, light: 1, slide: 'oil',
-        animals: ['DOG', 'CAT', 'DEER', 'BOAR', 'FOX', 'HUMAN', 'CHICKEN'] },
-    { id: 'village', name: 'Деревня', style: 'village', accent: 0x8ad84a, sky: 0xd4e2ea, zenith: 0x4f8fe0, fog: 0xcad8d4, fogNear: 55, fogFar: 200, ground: 0x7e9a52, light: 1.05, slide: 'oil',
-        animals: ['CHICKEN', 'DOG', 'CAT', 'BOAR', 'FOX', 'DEER'] },
-    { id: 'promzona', name: 'Промзона', style: 'industrial', accent: 0xff4a3a, sky: 0x9a8a78, zenith: 0x5c6378, fog: 0x8a7a68, fogNear: 40, fogFar: 170, ground: 0x7a7468, light: 0.9, slide: 'acid',
-        animals: ['CROC', 'RHINO', 'DINO', 'PEACOCK', 'DOG'] },
-    { id: 'snow', name: 'Снежная тайга', style: 'forest', accent: 0x8ad8ff, snow: true, sky: 0xc8d4e0, zenith: 0x7fa3d6, fog: 0xd0dae4, fogNear: 50, fogFar: 195, ground: 0xe8f0f8, light: 1.05, slide: 'ice',
-        animals: ['BEAR', 'FOX', 'DEER', 'BOAR'] },
-    { id: 'city', name: 'Микрорайон', style: 'city', accent: 0x4ab0ff, sky: 0xdcc8a8, zenith: 0x6690d0, fog: 0xd4c0a0, fogNear: 50, fogFar: 190, ground: 0x8a8a78, light: 0.95, slide: 'oil',
-        animals: ['DOG', 'CAT', 'HUMAN', 'CHICKEN'] },
-    { id: 'night', name: 'Ночная трасса', style: 'arsenev', accent: 0xff4ad8, night: true, sky: 0x0a1020, zenith: 0x03050e, fog: 0x12182a, fogNear: 22, fogFar: 120, ground: 0x3a4458, light: 0.45, slide: 'oil',
+export const THEMES = [ // Пустошь: небо в пыли и дыму, звери — бешеные (src/zombie-look.js), людей и кур на дороге нет
+    { id: 'day', name: 'Мёртвый Арсеньев', style: 'arsenev', accent: 0xffa03c, sky: 0xd2a77c, zenith: 0x7a6a62, fog: 0xc4986c, fogNear: 45, fogFar: 185, ground: 0x8e7656, light: 0.92, slide: 'oil',
+        animals: ['DOG', 'BOAR', 'FOX', 'DEER', 'CAT', 'BEAR'] },
+    { id: 'village', name: 'Брошенная деревня', style: 'village', accent: 0xc8d84a, sky: 0xbcb49a, zenith: 0x6a6f6a, fog: 0xaea48a, fogNear: 45, fogFar: 185, ground: 0x6e6e46, light: 0.95, slide: 'oil',
+        animals: ['DOG', 'BOAR', 'FOX', 'DEER', 'CAT'] },
+    { id: 'promzona', name: 'Промзона', style: 'industrial', accent: 0xff4a3a, sky: 0x8a7a68, zenith: 0x4c4a52, fog: 0x7a6a58, fogNear: 38, fogFar: 165, ground: 0x6a645a, light: 0.85, slide: 'acid',
+        animals: ['CROC', 'RHINO', 'DINO', 'DOG', 'BOAR'] },
+    { id: 'snow', name: 'Пепельная тайга', style: 'forest', accent: 0xc8c0b8, snow: true, sky: 0xaaa69e, zenith: 0x6a6a70, fog: 0xa09c94, fogNear: 40, fogFar: 175, ground: 0x9a968e, light: 0.85, slide: 'ice',
+        animals: ['BEAR', 'FOX', 'DEER', 'BOAR', 'DOG'] },
+    { id: 'city', name: 'Пустой микрорайон', style: 'city', accent: 0xff8a3a, sky: 0xc6a684, zenith: 0x6a6070, fog: 0xb8966e, fogNear: 42, fogFar: 180, ground: 0x7a7466, light: 0.9, slide: 'oil',
+        animals: ['DOG', 'CAT', 'BOAR', 'FOX'] },
+    { id: 'night', name: 'Ночь пожаров', style: 'arsenev', accent: 0xff5a2a, night: true, sky: 0x1e0e0a, zenith: 0x070304, fog: 0x2a1410, fogNear: 22, fogFar: 120, ground: 0x3a2c28, light: 0.45, slide: 'oil',
         animals: ['BEAR', 'BOAR', 'DOG', 'CAT', 'FOX', 'DEER'] },
-    { id: 'svalka', name: 'Свалка «Надежда»', style: 'junk', accent: 0xffa03a, sky: 0xb0a080, zenith: 0x7488aa, fog: 0xa89878, fogNear: 45, fogFar: 180, ground: 0x8a7650, light: 0.95, slide: 'tar',
+    { id: 'svalka', name: 'Свалка «Надежда»', style: 'junk', accent: 0xffa03a, sky: 0xa89470, zenith: 0x6a6a74, fog: 0x9c8a68, fogNear: 42, fogFar: 175, ground: 0x7e6a48, light: 0.9, slide: 'tar',
         animals: ['LION', 'MONKEY', 'ZEBRA', 'HIPPO', 'GIRAFFE'] },
-    { id: 'rain', name: 'Дождь на трассе', style: 'arsenev', accent: 0x5ad8c8, rain: true, sky: 0x6a7a88, zenith: 0x3b4552, fog: 0x6a7a88, fogNear: 25, fogFar: 110, ground: 0x66727c, light: 0.75, slide: 'oil',
-        animals: ['DOG', 'DEER', 'FOX', 'CAT', 'HUMAN', 'BOAR'] },
-    { id: 'jungle', name: 'Джунгли-зоопарк', style: 'forest', accent: 0x5aff7a, sky: 0x4a6a40, zenith: 0x2f5a4a, fog: 0x3d5a38, fogNear: 30, fogFar: 140, ground: 0x5a7a40, light: 0.9, slide: 'tar',
+    { id: 'rain', name: 'Кислотный дождь', style: 'arsenev', accent: 0x9aff5a, rain: true, sky: 0x5e6a56, zenith: 0x343c32, fog: 0x5e6a56, fogNear: 25, fogFar: 110, ground: 0x56604e, light: 0.72, slide: 'acid',
+        animals: ['DOG', 'DEER', 'FOX', 'CAT', 'BOAR'] },
+    { id: 'jungle', name: 'Сбежавший зоопарк', style: 'forest', accent: 0x5aff7a, sky: 0x5a6a44, zenith: 0x34503e, fog: 0x4a5a3a, fogNear: 30, fogFar: 140, ground: 0x5a6a3e, light: 0.85, slide: 'tar',
         animals: ['CROC', 'ELEPHANT', 'RHINO', 'LION', 'MONKEY'] }
 ];
 /** Безумный транспорт (src/rides.js) — не чаще одного превращения на RIDE_SPAN ед. */
