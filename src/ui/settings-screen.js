@@ -50,8 +50,8 @@ export function openSettingsScreen(deps) {
         '<small class="sc-note" id="st-controls-note">' + controlsNote(st.controls) + '</small>' +
         '<small class="sc-note">📱 Заезд идёт и вертикально, и боком — поверни телефон, как удобнее, игра продолжится</small>' +
         '<div class="st-group">Правило бесконечной трассы</div>' +
-        choice('fail', [['hearts', '♥ Три сердца'], ['chase', '🚔 ГАИ на хвосте']]) +
-        '<small class="sc-note">«ГАИ на хвосте» — проба: два сердца, авария сажает ГАИ на хвост, ушёл от погони — сердца снова полные</small>' +
+        choice('fail', [['hearts', '♥ Три сердца'], ['chase', '🚨 Босс на хвосте']]) +
+        '<small class="sc-note">«Босс на хвосте» — проба: два сердца, авария сажает босса на хвост, ушёл от погони — сердца снова полные</small>' +
         '<div class="st-group">Удобство</div>' +
         toggle('shake', 'Тряска камеры при ударах') +
         toggle('vibrate', 'Вибрация телефона при аварии') +
