@@ -16,7 +16,9 @@ test('Пустошь: один режим, обломки стоят, звери
 
     // едем: аварии не копятся (проверяем мир, а не вождение), погоня не мешает
     await page.evaluate(() => { window.__keep = setInterval(() => { const g = window.__raceDebug; g.setStrikes(0); try { g.police && g.police.stop(); } catch (e) {} }, 100); });
-    await expect.poll(() => page.evaluate(() => window.__raceDebug.inf.dist), { timeout: 30_000 }).toBeGreaterThan(120);
+    // на сервере GitHub ~5 кадров/с — ждём не метры, а сам мир: придорожное и трещины расставлены
+    await expect.poll(() => page.evaluate(() => window.__raceDebug.scene.children.filter(o => /^waste:(crack|scorch)/.test(o.name)).length), { timeout: 90_000 }).toBeGreaterThan(3);
+    await expect.poll(() => page.evaluate(() => window.__raceDebug.scene.children.filter(o => /^waste:/.test(o.name)).length), { timeout: 90_000 }).toBeGreaterThan(10);
 
     const s = await page.evaluate(() => {
         const g = window.__raceDebug;
