@@ -1337,7 +1337,7 @@ function createProfile(name) { return Profile.createProfile(name); }
                     // под кнопкой — бесконечная трасса и рекорд (два узла — чтобы переводились словарём отдельно)
                     const best = Math.round((currentPlayer.infinite && currentPlayer.infinite.best) || 0);
                     ps.textContent = '';
-                    const a = document.createElement('span'); a.textContent = 'Бесконечная трасса';
+                    const a = document.createElement('span'); a.textContent = 'Пустошь';
                     ps.append(a);
                     if (best > 0) { const b = document.createElement('span'); b.textContent = 'рекорд ' + best + ' м'; ps.append(' · ', b); }
                 }
