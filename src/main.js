@@ -8083,7 +8083,7 @@ function startGaragePreview(carId) {
                 updateHUD();
 
                 if (strikes >= MAX_STRIKES) {
-                    if (INF && playerCar) { gameState = 'chance'; speed = 0; crashCine({ scene: scene, camera: camera, renderer: renderer, car: playerCar, onDone: function() { gameState = 'racing'; endGame('crash'); } }); } else endGame('crash'); /* Пустошь: облёт места аварии (src/crash-cine.js), потом — итоги */
+                    if (INF && playerCar) { gameState = 'chance'; speed = 0; crashCine({ scene: scene, camera: camera, renderer: renderer, car: playerCar, variant: import.meta.env.MODE === 'test' ? window.__crashVariant : null, onDone: function() { gameState = 'racing'; endGame('crash'); } }); } else endGame('crash'); /* Пустошь: облёт места аварии (src/crash-cine.js), потом — итоги */
                 }
             }
 

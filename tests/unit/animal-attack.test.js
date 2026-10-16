@@ -85,16 +85,20 @@ describe('Пустошь: зверь на капоте — стряхнуть р
     });
 });
 
-import { crashPose } from '../../src/crash-cine.js';
-describe('Пустошь: кадр последней аварии', () => {
-    it('машину подбрасывает и переворачивает на бок, к концу — лежит на земле', () => {
-        expect(crashPose(0)).toEqual({ y: 0, roll: 0, yaw: 0 });
-        expect(crashPose(0.17).y).toBeGreaterThan(0.5);
-        const end = crashPose(1);
-        expect(end.y).toBeCloseTo(0, 6);
-        expect(end.roll).toBeGreaterThan(1.5);
+import { crashPose, VARIANTS } from '../../src/crash-cine.js';
+describe('Пустошь: ролики последней аварии', () => {
+    it('четыре разных ролика; в каждом машину подбрасывает или крутит, к концу — на земле', () => {
+        expect(VARIANTS.length).toBe(4);
+        VARIANTS.forEach((v) => {
+            expect(crashPose(v, 0).y).toBeCloseTo(0, 6);
+            expect(crashPose(v, 1).y).toBeCloseTo(0, 6);
+            const mid = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7].map((k) => crashPose(v, k));
+            expect(mid.some((p) => p.y > 0.5 || Math.abs(p.yaw) > 2), v).toBe(true);
+        });
+        expect(Math.abs(crashPose('barrel', 1).pitch)).toBeGreaterThan(Math.PI * 4);
+        expect(crashPose('launch', 0.4).y).toBeGreaterThan(3);
     });
-});
+});;
 
 import { createLatch } from '../../src/hood-latch.js';
 describe('Пустошь: шкала «стряхни» не переезжает в следующий заезд', () => {

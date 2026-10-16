@@ -6642,3 +6642,6 @@ body:not(.race-mode).hood-latch #game-container::after { display: none !importan
     :root body.race-mode #risk-hud#risk-hud { bottom: calc(env(safe-area-inset-bottom, 0px) + 4px) !important; transform: translateX(-50%) scale(.85) !important; transform-origin: bottom center !important; }
     #armor-bar, #power-slot { bottom: calc(env(safe-area-inset-bottom, 0px) + 52px) !important; }
 }
+
+/* ролик аварии — без кнопок и плашек поверх */
+body.crash-cine :is(#nitro-btn, .police-hud, .rt, #latch-bar, #power-slot, #armor-bar) { display: none !important; }
