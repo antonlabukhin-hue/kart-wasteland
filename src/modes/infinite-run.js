@@ -36,10 +36,10 @@ import { createInfWorld, disposeTree, freezeStatic } from '../inf-world.js';
 import * as Decor from '../decor.js';
 import { pickMeme, createSideMeme, decorateMemeCar, MEME_EVERY, MEMES } from '../memes.js';
 import { buildShowroomCar } from '../cars.js';
-import { wreckCount } from '../wrecks.js';
+import { wreckCount, latchClear, spreadZ, WRECK_GAP } from '../wrecks.js';
 import { prepAttack, stepAttack } from '../animal-attack.js';
 import { warnSfx } from '../beast-sfx.js';
-import { createLatch } from '../hood-latch.js';
+import { createLatch, HOLD } from '../hood-latch.js';
 import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
 
 const LX = [-2, 0, 2];
@@ -69,7 +69,10 @@ export function createInfiniteRun(ctx) {
         strikes: function() { return ctx.strikes; }, zAhead: function(dd) { return ctx.z - dd; },
         plaque: function(a, b, c) { ctx.plaque(a, b, c); },
         addObstacle: function(type, x, z, label) { const c = make.obstacle(z, type); c.x = x; c.mesh.position.x = x; c.label = label; L.obstacles.push(c); return c; },
-        addCar: function(z, lane) { const c = make.car(z, lane); L.cars.push(c); return c; },
+        addCar: function(z, lane) { // машина события (колонна, пробка): обычные обломки рядом — дальше по дороге, чтобы не громоздились
+            L.cars.forEach(function(o) { if (!o.event && o.mesh && Math.abs(o.z - z) < WRECK_GAP) { o.z = spreadZ(L.cars, z - 70 - Math.random() * 80, WRECK_GAP, o); o.mesh.position.z = o.z; } });
+            const c = make.car(z, lane); c.event = true; L.cars.push(c); return c;
+        },
         removeCar: function(c) { const i = L.cars.indexOf(c); if (i >= 0) L.cars.splice(i, 1); scene.remove(c.mesh); },
         addAnimal: function(type, z, left) { const sp = ctx.animals; sp._planFromLeft = left; sp.animals.push(sp.createAnimal(z, type)); },
         addE: function(x, z, n) { for (let i = 0; i < n; i++) L.collectibles.push(make.eChip(x, 0.6, z - i * 2.2)); },
@@ -83,6 +86,22 @@ export function createInfiniteRun(ctx) {
     // Пустошь: звери нападают (src/animal-attack.js), прыгнувший вцепляется в капот (src/hood-latch.js)
     let attackWired = false;
     const latch = createLatch({ plaque: function(t, s, c) { ctx.plaque(t, s, c); }, popup: function(t) { ctx.popup(t); }, onShook: function() { riskEvent(ctx.risk, 'dodge'); } });
+    /**
+     * Зверь вцепился в капот: на всё время захвата и ещё полторы секунды впереди — пусто (src/wrecks.js latchClear).
+     * Обломки уезжают дальше по дороге, звери впереди — тоже; стряхиваешь рулём, не думая об объезде.
+     */
+    function calmAhead(grabbed) {
+        const sp = ctx.animals, D = latchClear(HOLD, (sp && sp._v) || 25), z = ctx.z;
+        L.cars.forEach(function(c) {
+            if (!c || c.active === false || !c.mesh || c.convoy || z - c.z < -3 || z - c.z > D) return;
+            c.z = spreadZ(L.cars, z - D - 10 - Math.random() * 60, WRECK_GAP, c); c.mesh.position.z = c.z;
+        });
+        if (sp) sp.animals.forEach(function(a) {
+            if (a === grabbed || a.hit || z - a.z < -3 || z - a.z > D) return;
+            if (a.triggered) { a.hit = true; if (a.mesh) a.mesh.visible = false; } // уже бежит — исчезает (без удара)
+            else { a.z -= D; if (a.mesh) a.mesh.position.z = a.z; }
+        });
+    }
     function animalsTick(dt) {
         const sp = ctx.animals;
         if (!sp) return;
@@ -98,6 +117,7 @@ export function createInfiniteRun(ctx) {
             if (calm) sp.densityFn = function(z) { const v = calm(z); return v > 0 ? v : run.animalDensity() * 0.5; };
         }
         latch.tick(dt, ctx.x);
+        if (latch.active) sp.spawnTimer = 0; // зверь на капоте — новых не выпускаем, пока не стряхнёшь
         const now = performance.now() / 1000;
         for (let i = 0; i < sp.animals.length; i++) {
             const a = sp.animals[i];
@@ -207,7 +227,7 @@ export function createInfiniteRun(ctx) {
         /** Мем впереди на ahead м (тесты и скриншоты): id из src/memes.js MEMES */
         spawnMeme: function(id, ahead) { return spawnMeme((world ? world.dist : 0) + ahead, id); },
         /** Зверь-прыгун долетел до машины: вцепляется в капот — true (полсердца — потом, если не стряхнул: onFail) */
-        grab: function(a, onFail) { return a.role === 'lunge' && latch.grab(a, ctx.car, onFail); },
+        grab: function(a, onFail) { if (a.role !== 'lunge' || !latch.grab(a, ctx.car, onFail)) return false; calmAhead(a); return true; },
         /** Каждый кадр заезда */
         tick: function(dt) {
             const t = world.tick(ctx.z), d = world.dist, stats = ctx.stats, risk = ctx.risk, powers = ctx.powers, z = ctx.z;

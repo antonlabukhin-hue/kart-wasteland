@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { burnHex, wreckPose, wreckHit, wreckCount, WRECK_KINDS, BTR_HIT } from '../../src/wrecks.js';
+import { burnHex, wreckPose, wreckHit, wreckCount, WRECK_KINDS, BTR_HIT, WRECK_BASE, WRECK_GAP, spreadZ, latchClear } from '../../src/wrecks.js';
 import { sickRgb } from '../../src/zombie-look.js';
 
 const ch = (h) => [(h >> 16) & 255, (h >> 8) & 255, h & 255];
@@ -45,8 +45,8 @@ describe('Пустошь: обломки на трассе', () => {
     });
 
     it('обломков с ростом сложности больше; виды — без мотоциклов, есть БТР', () => {
-        expect(wreckCount(0)).toBe(2);
-        expect(wreckCount(4)).toBe(10);
+        expect(WRECK_BASE + wreckCount(0)).toBe(7);
+        expect(WRECK_BASE + wreckCount(4)).toBe(11);
         expect(WRECK_KINDS).toContain('btr');
         expect(WRECK_KINDS).not.toContain('moto');
     });
@@ -60,5 +60,28 @@ describe('Пустошь: бешеные звери', () => {
         const white = sickRgb(255, 255, 255);
         expect(white[0]).toBeLessThan(255);
         expect(sickRgb(0, 0, 0).every((v) => v >= 0)).toBe(true);
+    });
+    it('обломки — по одному в ряду: новый не ближе WRECK_GAP ни к одному в любой полосе', () => {
+        const cars = [{ z: -100, lane: 0 }, { z: -110, lane: 2 }, { z: -150, lane: 1 }];
+        const z = spreadZ(cars, -105);
+        cars.forEach((c) => expect(Math.abs(c.z - z)).toBeGreaterThanOrEqual(WRECK_GAP));
+        expect(z).toBeLessThan(-105);
+        expect(spreadZ(cars, -300)).toBe(-300);
+        expect(spreadZ(cars, -100, null, cars[0])).not.toBe(-100); // соседняя всё равно мешает
+    });
+    it('пока зверь на капоте — впереди чисто на всё время захвата и ещё полторы секунды', () => {
+        expect(latchClear(2.6, 30)).toBeCloseTo(123);
+        expect(latchClear(2.6, 0)).toBe(70);
+    });
+});
+
+import { placeWreck } from '../../src/wrecks.js';
+describe('Пустошь: место для обломка', () => {
+    it('и не над разломом, и не вплотную к другим', () => {
+        const cars = [{ z: -100 }, { z: -130 }];
+        const free = (z) => (z <= -95 && z >= -125 ? -126 : z); // «разлом» на −95…−125: двигает за него
+        const z = placeWreck(cars, -110, null, free);
+        expect(z < -125 || z > -95).toBe(true);
+        cars.forEach((c) => expect(Math.abs(c.z - z)).toBeGreaterThanOrEqual(18));
     });
 });

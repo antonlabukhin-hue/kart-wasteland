@@ -18,7 +18,7 @@ import { SIGNAL_TIME, cutInAllowed, wantsCut, blinkOn, LANE_CHANGE_RATE } from '
 import { zoneFree, calmAhead, MAJOR_GAP, HURDLE_GAP } from './director.js';
 import { nearMissStep } from './near-miss.js';
 import { laneAssist } from './lane-assist.js';
-import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js'; import { makeAnimal } from './zombie-look.js'; import { crashCine } from './crash-cine.js';
+import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx, WRECK_BASE, WRECK_GAP, spreadZ, placeWreck } from './wrecks.js'; import { makeAnimal } from './zombie-look.js'; import { crashCine } from './crash-cine.js';
         import * as THREE from 'three';
         import { SoundEngine } from './audio.js';
         import { AnimalSpawner } from './animals.js';
@@ -4892,7 +4892,7 @@ function startGaragePreview(carId) {
                         // вокруг машины — чисто: звери убегают, ямы и попутки отодвигаются
                         animalSpawner.animals.forEach(function(a) { if (Math.abs(a.z - zPos) < 30) a.hit = true; });
                         obstacles.forEach(function(o) { if (o.active && Math.abs(o.z - zPos) < 25) { o.active = false; o.mesh.visible = false; } });
-                        cars.forEach(function(c) { if (c.z < zPos + 6 && c.z > zPos - 35) { c.z = freeZ(zPos - 70 - Math.random() * 40, c.lane, { gaps: gaps, ramps: ramps, works: roadSegments }); c.mesh.position.z = c.z; } }); /* не над разломом */
+                        cars.forEach(function(c) { if (c.z < zPos + 6 && c.z > zPos - 35) { const fz = function(z) { return freeZ(z, c.lane, { gaps: gaps, ramps: ramps, works: roadSegments }); }; c.z = INF ? placeWreck(cars, zPos - 70 - Math.random() * 60, c, fz) : fz(zPos - 70 - Math.random() * 40); c.mesh.position.z = c.z; } }); /* не над разломом */
                         gameState = 'racing';
                         try { showBigPlaque('▶ ВТОРОЙ ШАНС', INF ? 'Ещё ' + (MAX_STRIKES - strikes) + ' ♥ — газу!' : 'Две жизни и броня — газу!', 'armor'); } catch (e) {}
                     },
@@ -6394,9 +6394,9 @@ function startGaragePreview(carId) {
                 const tm = window.__campaignTrafficMul || 1;
                 if (tm !== 1) maxCars = Math.max(4, Math.min(28, Math.round(maxCars * tm)));
             } catch (e) {}
-            if (INF) { maxCars = Math.max(12, maxCars); infCarsBase = maxCars; } /* Пустошь: обломков на дороге больше, чем было попуток */ // бесконечная трасса: попуток как в обычном заезде, дальше — больше
+            if (INF) { maxCars = WRECK_BASE; infCarsBase = maxCars; } /* Пустошь: обломков 7–11, по одному в ряду (src/wrecks.js) */ // бесконечная трасса: попуток как в обычном заезде, дальше — больше
             for (let i = 0; i < maxCars; i++) {
-                const z = INF ? START_Z - 70 - Math.random() * 300 : -TRACK_LENGTH / 2 + 20 + Math.random() * (TRACK_LENGTH - 60);
+                const z = INF ? spreadZ(cars, START_Z - 70 - Math.random() * 330) : -TRACK_LENGTH / 2 + 20 + Math.random() * (TRACK_LENGTH - 60);
                 const lane = spawnLane(cars, z, Math.floor(Math.random() * 3)); // строго по полосам, одна в ряду всегда свободна (src/traffic-lanes.js)
                 if (lane != null) cars.push(createOpponentCar(z, lane));
             }
@@ -6966,7 +6966,7 @@ function startGaragePreview(carId) {
                 }
                 // попутка, оказавшаяся там, где только что появился разлом (бесконечная трасса строится впереди на ходу), —
                 // дальше по дороге, иначе она стоит над провалом и на следующем кадре «взлетает»
-                cars.forEach(function(c) { if (c.active && c.mesh && c.z <= zHi + 4 && c.z >= zLo - 4) { c.z = freeZ(zLo - 6 - Math.random() * 10, c.lane, { gaps: gaps, ramps: ramps, works: roadSegments }); c.mesh.position.z = c.z; } });
+                cars.forEach(function(c) { if (c.active && c.mesh && c.z <= zHi + 4 && c.z >= zLo - 4) { const fz = function(z) { return freeZ(z, c.lane, { gaps: gaps, ramps: ramps, works: roadSegments }); }; c.z = INF ? placeWreck(cars, zLo - 6 - Math.random() * 30, c, fz) : fz(zLo - 6 - Math.random() * 10); c.mesh.position.z = c.z; } }); /* Пустошь: не в кучу за разломом */
             }
             // генератор: в бесконечной трассе круг строится по участку за кадр (yield), в обычной — целиком
             function* populateLap(mapId, difficulty) {
@@ -7165,7 +7165,7 @@ function startGaragePreview(carId) {
                 addNitro: function(sec) { nitroTimer = Math.max(nitroTimer, sec); },
                 setRamp: function(r) { // сложность по километрам; попуток больше — новые далеко впереди
                     infSpeedK = r.speedK; infLaneK = r.laneK; infTrafficK = r.trafficK; animalSpawner.maxAnimals = r.maxAnimals; animalSpawner.speedMul = r.animalSpeed;
-                    if (cars.length < infCarsBase + r.traffic) { const nz = zPos - 180 - Math.random() * 200, nl = spawnLane(cars, nz, Math.floor(Math.random() * 3)); if (nl != null) cars.push(createOpponentCar(nz, nl)); }
+                    if (cars.length < infCarsBase + r.traffic) { const nz = spreadZ(cars, zPos - 180 - Math.random() * 300), nl = spawnLane(cars, nz, Math.floor(Math.random() * 3)); if (nl != null) cars.push(createOpponentCar(nz, nl)); }
                 },
                 setTheme: function(th) { infTheme = th; animalSpawner.animalPool = th.animals; weatherMode = window.weatherMode = th.night ? 'night' : th.rain ? 'rain' : 'day'; if (snowfall) snowfall.points.visible = !!th.snow; },
                 startLap: function(k, map, diff) { _lapK = k; _lapZ0 = START_Z - k * _trackSpan; return populateLap(map, diff); },
@@ -8872,18 +8872,18 @@ function startGaragePreview(carId) {
                 }
 
                 // Попутные машины
-                const _avoidH = { gaps: gaps, ramps: ramps, works: roadSegments }; /* попутки объезжают трамплины и ремонт, разлом — перепрыгивают (src/traffic-avoid.js) */
+                const _avoidH = { gaps: gaps, ramps: ramps, works: roadSegments }, wreckZ = function(c, z) { return INF ? placeWreck(cars, z, c, function(q) { return freeZ(q, c.lane, _avoidH); }) : freeZ(z, c.lane, _avoidH); }; /* wreckZ — Пустошь: и не вплотную к другому обломку (src/wrecks.js); попутки объезжают трамплины и ремонт, разлом — перепрыгивают (src/traffic-avoid.js) */
                 {
                     const wb = wallBreaker(cars, zPos - 2, zPos - 320, wallWin(Math.abs(speed) * 60)); // на скорости «ряд» длиннее — лесенку из трёх машин тоже разбиваем (src/traffic-lanes.js)
                     if (wb) {
                         if (zPos - wb.z > 45) { // в тумане — переставить подальше вперёд
-                            const nz = freeZ(zPos - 200 - Math.random() * 100, wb.lane, _avoidH), nl = spawnLane(cars.filter(function(o) { return o !== wb; }), nz, wb.lane);
+                            const nz = wreckZ(wb, zPos - 200 - Math.random() * 100), nl = spawnLane(cars.filter(function(o) { return o !== wb; }), nz, wb.lane);
                             wb.z = nz; if (nl != null) { wb.lane = wb.targetLane = nl; wb.isChangingLane = false; wb.x = carX(nl, 0); wb.mesh.position.x = wb.x; } wb.mesh.position.z = wb.z;
                         } else wb._boost = 1.5; // на виду — передняя резко уходит вперёд, ряд расходится
                     }
                     gaps.forEach(function(g) { (g.lanes || []).forEach(function(li) { cars.forEach(function(c) {
                         if (c.active && (c.lane === li || (c.isChangingLane && c.targetLane === li)) && c.z < g.zNear + 9 && c.z > g.zFar - 2) { // не успела уйти с полосы трамплина
-                            c.z = freeZ(g.zFar - 20 - Math.random() * 20, c.lane, _avoidH); c.mesh.position.z = c.z;
+                            c.z = wreckZ(c, g.zFar - 20 - Math.random() * 20); c.mesh.position.z = c.z;
                         }
                     }); }); });
                 }
@@ -8894,7 +8894,7 @@ function startGaragePreview(carId) {
                         car.x += f.vx * deltaTime; car.z += f.vz * deltaTime; f.y = Math.max(0.1, f.y + f.vy * deltaTime);
                         car.mesh.position.set(car.x, f.y, car.z); car.mesh.rotation.x += f.rx * deltaTime; car.mesh.rotation.z += f.rz * deltaTime;
                         if (f.y <= 0.1 && f.vy < 0 && !f.landed) { f.landed = true; f.vy = 3.5; f.vx *= 0.5; try { if (particleSystem && particleSystem.explode) particleSystem.explode({ x: car.x, y: 0.4, z: car.z }, 0.8); } catch (e) {} }
-                        if (f.t > 1.6) { car._fly = null; car.mesh.rotation.set(0, 0, 0); car.mesh.position.y = 0.1; car.x = carX(car.lane, car.hug); car.z = freeZ(zPos - 120 - Math.random() * 60, car.lane, _avoidH); car.mesh.position.set(car.x, 0.1, car.z); car.hitCooldown = 0; }
+                        if (f.t > 1.6) { car._fly = null; car.mesh.rotation.set(0, 0, 0); car.mesh.position.y = 0.1; car.x = carX(car.lane, car.hug); car.z = wreckZ(car, zPos - 120 - Math.random() * 60); car.mesh.position.set(car.x, 0.1, car.z); car.hitCooldown = 0; }
                         return;
                     }
                     
@@ -8903,7 +8903,7 @@ function startGaragePreview(carId) {
                     if (car.mesh) {
                         car.mesh.matrixAutoUpdate = true;
                         car.mesh.position.z = car.z;
-                        const tp = trafficPlan(car.z, car.isChangingLane ? car.targetLane : car.lane, _avoidH); car.mesh.position.y = 0.1 + tp.y; car.airY = tp.y; if (car._avoidLock > 0) car._avoidLock -= deltaTime; if (tp.lane != null && !car.isChangingLane && car.lane !== tp.lane && canEnterLane(cars, car, tp.lane)) { car.targetLane = tp.lane; car.isChangingLane = true; car.laneChangeProgress = 0; car._avoidLock = 3; } else if (tp.lane != null && car.isChangingLane && car.lane !== car.targetLane) { const l0 = car.lane, h0 = car._hug0 != null ? car._hug0 : car.hug; car.lane = car.targetLane; car.targetLane = l0; car._hug0 = car.hug; car.hug = h0; car.laneChangeProgress = 1 - car.laneChangeProgress; car._avoidLock = 3; } /* уже перестраивается в полосу трамплина — плавно назад */
+                        const tp = trafficPlan(car.z, car.isChangingLane ? car.targetLane : car.lane, _avoidH); car.mesh.position.y = 0.1 + tp.y; car.airY = tp.y; if (car._avoidLock > 0) car._avoidLock -= deltaTime; if (INF && tp.lane != null && zPos - car.z > 60) { car.z = wreckZ(car, car.z - 25); car.mesh.position.z = car.z; } else if (!INF && tp.lane != null && !car.isChangingLane && car.lane !== tp.lane && canEnterLane(cars, car, tp.lane)) { car.targetLane = tp.lane; car.isChangingLane = true; car.laneChangeProgress = 0; car._avoidLock = 3; } else if (tp.lane != null && car.isChangingLane && car.lane !== car.targetLane) { const l0 = car.lane, h0 = car._hug0 != null ? car._hug0 : car.hug; car.lane = car.targetLane; car.targetLane = l0; car._hug0 = car.hug; car.hug = h0; car.laneChangeProgress = 1 - car.laneChangeProgress; car._avoidLock = 3; } /* уже перестраивается в полосу трамплина — плавно назад */
                     }
                     
                     if (car._sigT > 0) { // поворотник: 0.8 с мигает, потом перестраивается — если всё ещё можно и не подрезает игрока (src/traffic-signal.js)
@@ -8980,7 +8980,7 @@ function startGaragePreview(carId) {
                         try { showTimePenaltyPopup(0, 'Перелёт!'); } catch (e) {}
                     } else if (car.hitCooldown <= 0 && Math.abs(dx) < hw && (Math.abs(dz) < hl || sweptZ(car.z, hl)) && ((ABILITY === 'avenger' && (stats.rams || 0) < AVENGER_RAMS) || risk.fever > 0 || rideOn(ride))) {
                         // «Ночной мститель» и «В ударе» — таран: попутку отбрасывает вперёд, аварии нет («В ударе» — ещё и «Е»)
-                        car.hitCooldown = 1.2; if (!rideOn(ride)) { car.z = freeZ(zPos - 60 - Math.random() * 40, car.lane, _avoidH); car.mesh.position.z = car.z; } /* на безумном транспорте попутка не переносится — она улетает (rideRam) */ speed *= risk.fever > 0 ? 1 : 0.9; shakeTime = 0.15; if (risk.fever > 0) stats.eChips = (stats.eChips || 0) + FEVER_RAM_E; const rideE = rideOn(ride) ? RIDES[ride.id].ramE : 0; if (rideE) stats.eChips = (stats.eChips || 0) + rideE; if (rideOn(ride)) rideRam(car);
+                        car.hitCooldown = 1.2; if (!rideOn(ride)) { car.z = wreckZ(car, INF ? zPos - 150 - Math.random() * 100 : zPos - 60 - Math.random() * 40); car.mesh.position.z = car.z; } /* на безумном транспорте попутка не переносится — она улетает (rideRam) */ speed *= risk.fever > 0 ? 1 : 0.9; shakeTime = 0.15; if (risk.fever > 0) stats.eChips = (stats.eChips || 0) + FEVER_RAM_E; const rideE = rideOn(ride) ? RIDES[ride.id].ramE : 0; if (rideE) stats.eChips = (stats.eChips || 0) + rideE; if (rideOn(ride)) rideRam(car);
                         _nmBlock = 2; try { if (window.soundEngine) window.soundEngine.playSfx('crash', 0.8); } catch (e) {} if (risk.fever > 0) photoBook.request('Снёс в «УДАРЕ»!', 5); if (!(risk.fever > 0) && !rideOn(ride)) stats.rams = (stats.rams || 0) + 1; // «Ночной мститель»: таранов — AVENGER_RAMS за заезд, дальше — как все
                         try { showTimePenaltyPopup(0, rideOn(ride) ? (RIDES[ride.id].icon + ' Снёс!' + (rideE ? ' +' + rideE + ' Е' : '')) : risk.fever > 0 ? '💥 Снёс! +' + FEVER_RAM_E + ' Е' : stats.rams >= AVENGER_RAMS ? '🦇 Последний таран!' : '🦇 Таран ' + stats.rams + '/' + AVENGER_RAMS); } catch (e) {}
                     } else if (car.hitCooldown <= 0 && Math.abs(dx) < hw && (Math.abs(dz) < hl || sweptZ(car.z, hl))) {
@@ -8990,9 +8990,9 @@ function startGaragePreview(carId) {
                     }
                     
                     if (INF ? (car.z > zPos + 45 || car.z < zPos - 420) : car.z < -TRACK_LENGTH / 2 - 10) {
-                        car.z = INF ? zPos - 170 - Math.random() * 220 : TRACK_LENGTH / 2 + 10 + Math.random() * 20;
+                        car.z = INF ? zPos - 170 - Math.random() * 330 : TRACK_LENGTH / 2 + 10 + Math.random() * 20;
                         car.lane = Math.floor(Math.random() * 3);
-                        car.z = freeZ(car.z, car.lane, _avoidH); // не над разломом и не на трамплин
+                        car.z = wreckZ(car, car.z); // не над разломом и не на трамплин; Пустошь — и не вплотную к другому обломку
                         { const sl = spawnLane(cars.filter(function(o) { return o !== car; }), car.z, car.lane); if (sl != null) car.lane = sl; else car.z -= 40; } // не в «стенку»
                         car.targetLane = car.lane; car.hug = hugFor(car.lane);
                         car.x = carX(car.lane, car.hug);

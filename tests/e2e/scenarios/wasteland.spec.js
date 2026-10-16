@@ -29,6 +29,7 @@ test('Пустошь: один режим, обломки стоят, звери
             g.scene.children.forEach(o => { if (/^waste:/.test(o.name)) { waste++; if (/crack|scorch/.test(o.name)) cracks++; } });
             res({
                 n: g.cars.length,
+                tight: g.cars.filter(c => !c.event).some((c, i, a) => a.some(o => o !== c && !o.event && Math.abs(o.z - c.z) < 18 && g.z - c.z > 0 && g.z - c.z < 200 && g.z - o.z > 0 && g.z - o.z < 200)), // по одному обломку в ряду
                 notWrecks: g.cars.filter(c => !(kinds.includes(c.kind) && c.speed === 0 && c.laneChangeTimer >= 1e8)).map(c => c.kind + ':' + c.speed + ':' + c.laneChangeTimer),
                 moved: g.cars.filter((c, i) => c.z !== z0[i] && Math.abs(c.z - z0[i]) < 50).length, // переставленные вперёд — не в счёт
                 smoke: g.cars.filter(c => { const f = c.mesh.getObjectByName('wreckFx'); return f && f.children.length; }).length,
@@ -37,7 +38,8 @@ test('Пустошь: один режим, обломки стоят, звери
             });
         }, 1500));
     });
-    expect(s.n).toBeGreaterThanOrEqual(12);
+    expect(s.n).toBeGreaterThanOrEqual(7); // обломков 7–11, не стена (src/wrecks.js WRECK_BASE)
+    expect(s.tight).toBe(false);
     expect(s.notWrecks).toEqual([]);
     expect(s.moved).toBe(0);
     expect(s.smoke).toBeGreaterThan(0);
