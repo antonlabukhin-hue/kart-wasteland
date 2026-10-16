@@ -85,6 +85,17 @@ function rubble(g, x, z, r) {
         m.castShadow = true; g.add(m);
     }
 }
+const embersM = {};
+let emberTex = null;
+function emberMat(c) {
+    if (!emberTex) {
+        const cv = document.createElement('canvas'); cv.width = cv.height = 64; const x = cv.getContext('2d');
+        const g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,255,220,1)'); g.addColorStop(0.25, 'rgba(255,255,255,0.8)'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+        x.strokeStyle = 'rgba(255,255,255,0.9)'; x.lineWidth = 3; x.beginPath(); x.moveTo(32, 4); x.lineTo(26, 22); x.lineTo(36, 34); x.lineTo(28, 50); x.lineTo(34, 62); x.stroke(); // трещина
+        emberTex = new THREE.CanvasTexture(cv); emberTex.userData.keep = true;
+    }
+    return embersM[c] || (embersM[c] = new THREE.SpriteMaterial({ map: emberTex, color: c, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+}
 const plain = {};
 function mat(h) { return plain[h] || (plain[h] = new THREE.MeshStandardMaterial({ color: h, roughness: 1, flatShading: true })); }
 
@@ -115,5 +126,11 @@ export function ruinStretch(g, r, o) {
     const nh = opts.houseFires == null ? 2 : opts.houseFires, nt = opts.treeFires == null ? 2 : opts.treeFires;
     for (let i = 0; i < nh && houses.length; i++) { const p = houses.splice(Math.floor(r() * houses.length), 1)[0]; lit(p, 1.3, r() < 0.7); rubble(g, p.x * 0.92, p.z, r); }
     for (let i = 0; i < nt && trees.length; i++) { const p = trees.splice(Math.floor(r() * trees.length), 1)[0]; p.y += 1.4; lit(p, 0.9, true); }
-    return { fires: fires };
+    // тлеющие трещины и окна в стенах: светящиеся пятна цвета зоны (src/zone-accents.js emberColor)
+    let embers = 0;
+    if (opts.ember != null) for (let i = 0; i < (opts.embers == null ? 8 : opts.embers) && houses.length; i++) {
+        const p = houses.splice(Math.floor(r() * houses.length), 1)[0];
+        const s = new THREE.Sprite(emberMat(opts.ember)); s.scale.setScalar(0.5 + r() * 0.9); s.position.copy(p); g.add(s); embers++;
+    }
+    return { fires: fires, embers: embers };
 }

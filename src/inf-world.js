@@ -16,6 +16,7 @@ import { buildScenery } from './scenery.js';
 import { setKitGlow, setKeepOut } from './scenery-kit.js';
 import { placeRoadside } from './roadside.js';
 import { ruinStretch } from './ruin.js';
+import { accentStretch, emberColor } from './zone-accents.js';
 import { hasBridge, createBridge, createBridgeTrain } from './railway.js';
 import { createSmoke } from './smoke.js';
 import { hasGulls, createGulls } from './gulls.js';
@@ -225,7 +226,8 @@ export function createInfWorld(o) {
         } catch (e) { console.warn('scenery', e); }
         setKeepOut(null);
         if (bridgeZ != null) { g.add(createBridge(bridgeZ, W)); addMover(i, createBridgeTrain(scene, bridgeZ, null, o.onEvent)); }
-        try { ruinStretch(g, r, o.lite ? { houseFires: 1, treeFires: 1 } : null); } catch (e) { console.warn('ruin', e); } // Пустошь: копоть, выбитые стёкла, мёртвая листва, пожары (src/ruin.js)
+        try { ruinStretch(g, r, o.lite ? { houseFires: 1, treeFires: 1, ember: emberColor(th.id), embers: 4 } : { ember: emberColor(th.id) }); } catch (e) { console.warn('ruin', e); }
+        try { const fl = accentStretch(g, th.id, z0, STRETCH, W, r, heightAt, o.lite); if (fl) addMover(i, fl); } catch (e) { console.warn('accents', e); } // яркие акценты зоны (src/zone-accents.js) // Пустошь: копоть, выбитые стёкла, мёртвая листва, пожары (src/ruin.js)
         freezeStatic(g);
         return g;
     }
