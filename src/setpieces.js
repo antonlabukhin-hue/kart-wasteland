@@ -14,10 +14,11 @@ import * as THREE from 'three';
 
 /** Цвет «дна» разлома по карте/теме */
 export function gapStyle(mapId, isSnow) {
-    if (isSnow) return { floor: 0x0d2233, glow: 0x66c8ff, name: 'полынья' };
-    if (mapId === 'promzona') return { floor: 0x0a1a08, glow: 0x44ff33, name: 'кислотная траншея' };
+    // Пустошь: в разломах не вода — раскалённое нутро земли, тлеющий пепел, кислота и огонь (голубая вода выбивалась из пейзажа)
+    if (isSnow) return { floor: 0x161210, glow: 0x8a2a14, name: 'тлеющий пепел' };
+    if (mapId === 'promzona') return { floor: 0x0a1a08, glow: 0x5ad02a, name: 'кислотная траншея' };
     if (mapId === 'svalka') return { floor: 0x1a0c06, glow: 0xff6622, name: 'горящая яма' };
-    return { floor: 0x061018, glow: 0x33a8d8, name: 'размыв' };
+    return { floor: 0x200806, glow: 0xb8381a, name: 'раскалённый разлом' };
 }
 
 /**
