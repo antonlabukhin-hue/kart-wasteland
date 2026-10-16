@@ -6,7 +6,7 @@
  * пока горит, цепочка не гаснет, потом множитель — снова ×1 (следующий «В ударе» — заново с нуля).
  */
 export const FEVER_TIME = 3; // было 7, потом 5: неуязвимость дольше снимала напряжение кульминации
-export const RISK_POINTS = { nearMiss: 50, nearClose: 80, nearPerfect: 120, jump: 80, landing: 60, billboard: 40, pattern: 60 }; // pattern — узор пройден, ничего не задел (src/patterns.js)
+export const RISK_POINTS = { dodge: 100, nearMiss: 50, nearClose: 80, nearPerfect: 120, jump: 80, landing: 60, billboard: 40, pattern: 60 }; // pattern — узор пройден, ничего не задел (src/patterns.js)
 export const MAX_MULT = 5;
 export const CHAIN_WINDOW = 5; // с
 
@@ -20,7 +20,7 @@ export function createRisk(feverOk) {
  * «идеально», сложная связка, прыжок над зверем. Обычное «на волоске», прыжок через трубу, посадка — очки, но не ступень:
  * «В ударе» набирался слишком просто. Окно цепочки там — FEVER_WINDOW. В кампании — как раньше, ступень за любое.
  */
-export const STEP_KINDS = ['nearClose', 'nearPerfect', 'pattern', 'jump'];
+export const STEP_KINDS = ['nearClose', 'nearPerfect', 'pattern', 'jump', 'dodge']; // dodge — Пустошь: увернулся от прыжка или тарана зверя (src/animal-attack.js)
 export const FEVER_WINDOW = 4;
 export function riskEvent(r, kind) {
     const base = RISK_POINTS[kind] || 40;

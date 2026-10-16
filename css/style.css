@@ -6594,3 +6594,18 @@ body:not(.swipe-ctl) #mobile-controls.active ~ #nitro-btn { right: calc(env(safe
 #main-menu-screen .menu-card[data-menu="campaign"], #main-menu-screen .menu-card[data-menu="endless"] { display: none !important; }
 /* Пустошь: вся картинка заезда — выцветшая и пыльная (дома, машины, небо — в одной гамме) */
 #game-container canvas { filter: saturate(0.72) sepia(0.18) contrast(1.06); }
+
+/* Пустошь: зверь вцепился в капот — рывки руля и время */
+#latch-bar { position: fixed; left: 50%; top: 27%; transform: translateX(-50%); z-index: 60; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; width: 220px; pointer-events: none; }
+#latch-bar i { width: 44px; height: 14px; border-radius: 5px; background: rgba(255,255,255,.2); border: 2px solid #fff; }
+#latch-bar i.on { background: #ffd84a; }
+#latch-bar u { display: block; width: 100%; height: 6px; margin-top: 2px; border-radius: 3px; background: rgba(0,0,0,.45); overflow: hidden; }
+#latch-bar u b { display: block; height: 100%; background: #ff3b2f; }
+body.hood-latch #game-container::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(ellipse at center, transparent 50%, rgba(150,0,0,.45) 100%); }
+
+/* Пустошь: облёт места последней аварии (src/crash-cine.js) — полосы «кино» и надпись */
+body.crash-cine #game-container::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 11%; background: #000; z-index: 3; box-shadow: 0 calc(89vh) 0 0 #000; pointer-events: none; }
+#crash-cine-cap { position: fixed; left: 50%; bottom: 15%; transform: translateX(-50%); z-index: 70; text-align: center; color: #fff; pointer-events: none; animation: cineIn .6s ease-out both; text-shadow: 0 3px 0 #000, 0 0 24px rgba(255,80,0,.6); }
+#crash-cine-cap b { display: block; font: 900 clamp(34px, 7vw, 64px)/1 system-ui, sans-serif; letter-spacing: .08em; color: #ff6a2a; }
+#crash-cine-cap small { display: block; margin-top: 6px; font: 700 clamp(13px, 2.4vw, 18px)/1.2 system-ui, sans-serif; color: #f2d8b8; }
+@keyframes cineIn { from { opacity: 0; transform: translate(-50%, 14px); } to { opacity: 1; transform: translate(-50%, 0); } }

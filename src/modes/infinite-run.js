@@ -37,6 +37,8 @@ import * as Decor from '../decor.js';
 import { pickMeme, createSideMeme, decorateMemeCar, MEME_EVERY, MEMES } from '../memes.js';
 import { buildShowroomCar } from '../cars.js';
 import { wreckCount } from '../wrecks.js';
+import { prepAttack, stepAttack } from '../animal-attack.js';
+import { createLatch } from '../hood-latch.js';
 import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
 
 const LX = [-2, 0, 2];
@@ -77,6 +79,29 @@ export function createInfiniteRun(ctx) {
     let lapK = 0, frame = 0, stage = 0, fresh = [], gen = null, genRnd = null;
     // мем-моменты 90-х (src/memes.js): попутка с коровой или шкафом, бабка с тележкой, рыбак, гаишник — раз в 475–775 м
     let nextMeme = 375 + Math.random() * 250, lastMeme = null;
+    // Пустошь: звери нападают (src/animal-attack.js), прыгнувший вцепляется в капот (src/hood-latch.js)
+    let attackWired = false;
+    const latch = createLatch({ plaque: function(t, s, c) { ctx.plaque(t, s, c); }, popup: function(t) { ctx.popup(t); }, onShook: function() { riskEvent(ctx.risk, 'dodge'); } });
+    function animalsTick(dt) {
+        const sp = ctx.animals;
+        if (!sp) return;
+        if (!attackWired) {
+            attackWired = true;
+            sp.mandatoryPool = (sp.mandatoryPool || []).filter(function(k) { return k !== 'HUMAN' && k !== 'CHICKEN' && k !== 'PEACOCK'; }); // стартовый набор зверей — без людей, кур и павлинов
+            sp.prep = function(a) { prepAttack(a, Math.random, sp.triggerLookahead); };
+            sp.behave = function(a, d, pz) { return stepAttack(a, d, pz, ctx.x); };
+            // у разлома, ворот, события звери не пропадают совсем (как было), а выбегают вдвое реже — их должно быть много
+            const calm = sp.densityFn;
+            if (calm) sp.densityFn = function(z) { const v = calm(z); return v > 0 ? v : run.animalDensity() * 0.5; };
+        }
+        latch.tick(dt, ctx.x);
+        for (let i = 0; i < sp.animals.length; i++) {
+            const a = sp.animals[i];
+            if (a.dodged !== 'new') continue;
+            a.dodged = 'done';
+            if (ctx.state === 'racing') { const rv = riskEvent(ctx.risk, 'dodge'); try { ctx.popup((a.role === 'charge' ? '🐗 Ушёл от тарана!' : '🐺 Увернулся!') + ' ×' + rv.mult); } catch (e) {} }
+        }
+    }
     let wasteTo = 0; // Пустошь: придорожные отголоски апокалипсиса (src/wasteland-decor.js) расставлены до этой дальности
     function spawnWaste(it) {
         if (!it.side && L.gaps.some(function(g) { const gd = START_Z - g.zNear; return it.d > gd - 6 && it.d < gd + 30; })) return; // трещина не висит над разломом
@@ -168,9 +193,12 @@ export function createInfiniteRun(ctx) {
         hitPattern: function(id) { patHit.add(id); },
         /** Мем впереди на ahead м (тесты и скриншоты): id из src/memes.js MEMES */
         spawnMeme: function(id, ahead) { return spawnMeme((world ? world.dist : 0) + ahead, id); },
+        /** Зверь-прыгун долетел до машины: вцепляется в капот — true (полсердца — потом, если не стряхнул: onFail) */
+        grab: function(a, onFail) { return a.role === 'lunge' && latch.grab(a, ctx.car, onFail); },
         /** Каждый кадр заезда */
         tick: function(dt) {
             const t = world.tick(ctx.z), d = world.dist, stats = ctx.stats, risk = ctx.risk, powers = ctx.powers, z = ctx.z;
+            animalsTick(dt);
             themeEv.tick(d, z, dt);
             if (roadGoals) roadGoals.tick(d);
             tickPowers(powers, dt);

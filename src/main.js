@@ -7161,7 +7161,7 @@ function startGaragePreview(carId) {
                 get lights() { return { ambient: ambient, hemi: hemi, sun: sunLight }; },
                 get z() { return zPos; }, get x() { return xPos; }, get speed() { return speed; }, get strikes() { return strikes; }, get state() { return gameState; },
                 get stats() { return stats; }, get risk() { return risk; }, get powers() { return powers; }, get headstartTo() { return headstartTo; }, get maxSpeed() { return MAX_SPEED; },
-                get nitro() { return nitroTimer; }, get animals() { return animalSpawner; }, get chunks() { return chunkCull; },
+                get nitro() { return nitroTimer; }, get animals() { return animalSpawner; }, get car() { return playerCar; }, get chunks() { return chunkCull; },
                 addNitro: function(sec) { nitroTimer = Math.max(nitroTimer, sec); },
                 setRamp: function(r) { // сложность по километрам; попуток больше — новые далеко впереди
                     infSpeedK = r.speedK; infLaneK = r.laneK; infTrafficK = r.trafficK; animalSpawner.maxAnimals = r.maxAnimals; animalSpawner.speedMul = r.animalSpeed;
@@ -10299,7 +10299,7 @@ function startGaragePreview(carId) {
                                 try { if (typeof showTimePenaltyPopup === 'function') showTimePenaltyPopup(0, 'Перелёт!'); } catch (e) {}
                             } else {
                                 obs.hit = true;
-                                hitOrGraze(obs, dx, hitR);
+                                if (!(inf && inf.grab(obs, function() { hitOrGraze(obs, 0, 1); }))) hitOrGraze(obs, dx, hitR); /* Пустошь: прыгун вцепляется в капот — полсердца, только если не стряхнул */
                             }
                         }
                     }

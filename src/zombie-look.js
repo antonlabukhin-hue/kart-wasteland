@@ -49,14 +49,35 @@ function sickMat(m) {
     return c;
 }
 
+let glowMat = null;
+/** Свечение глаз: мягкое красное пятно (аддитивно) — горящие глаза видно издалека, днём и ночью */
+function eyeGlow() {
+    if (!glowMat) {
+        const c = document.createElement('canvas'); c.width = c.height = 32;
+        const x = c.getContext('2d'), g = x.createRadialGradient(16, 16, 0, 16, 16, 16);
+        g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.35, 'rgba(255,80,40,0.8)'); g.addColorStop(1, 'rgba(255,0,0,0)');
+        x.fillStyle = g; x.fillRect(0, 0, 32, 32);
+        const t = new THREE.CanvasTexture(c); t.userData.keep = true;
+        glowMat = new THREE.SpriteMaterial({ map: t, color: 0xff3020, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+    }
+    return new THREE.Sprite(glowMat);
+}
+
 /** Перекрасить модель зверя в «бешеную» (повторный вызов ничего не делает) */
 export function zombify(mesh) {
     if (!mesh || mesh.userData.zombie) return mesh;
     mesh.userData.zombie = true;
+    const eyes = [];
     mesh.traverse(function(o) {
         if (!o.isMesh || !o.material) return;
-        if (o.userData && o.userData.isEye) { o.material = EYE; o.userData.dayMat = EYE; o.userData.nightMat = EYE; return; }
+        if (o.userData && o.userData.isEye) { o.material = EYE; o.userData.dayMat = EYE; o.userData.nightMat = EYE; eyes.push(o); return; }
         o.material = Array.isArray(o.material) ? o.material.map(sickMat) : sickMat(o.material);
     });
+    // горящие глаза: свечение — в системе координат зверя (модель ещё в начале координат)
+    if (typeof document !== 'undefined' && eyes.length) {
+        mesh.updateMatrixWorld(true);
+        const inv = new THREE.Matrix4().copy(mesh.matrixWorld).invert(), v = new THREE.Vector3();
+        eyes.forEach(function(e) { const s = eyeGlow(); e.getWorldPosition(v).applyMatrix4(inv); s.position.copy(v); s.scale.setScalar(0.32); s.userData.eyeGlow = true; mesh.add(s); });
+    }
     return mesh;
 }
