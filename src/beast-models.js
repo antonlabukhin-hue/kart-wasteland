@@ -21,20 +21,31 @@ const CONE = function() { return G('cone', function() { return new THREE.ConeGeo
 const BOX = function() { return G('box', function() { return new THREE.BoxGeometry(1, 1, 1); }); };
 
 function kit(g) {
-    const add = function(geo, color, p, s, r) { const m = new THREE.Mesh(geo, M(color)); m.position.set(p[0], p[1], p[2]); m.scale.set(s[0], s[1], s[2]); if (r) m.rotation.set(r[0] || 0, r[1] || 0, r[2] || 0); m.castShadow = true; g.add(m); return m; };
+    const add = function(geo, color, p, s, r, parent) { const m = new THREE.Mesh(geo, M(color)); m.position.set(p[0], p[1], p[2]); m.scale.set(s[0], s[1], s[2]); if (r) m.rotation.set(r[0] || 0, r[1] || 0, r[2] || 0); m.castShadow = true; (parent || g).add(m); return m; };
+    const hips = function(color, spots, idx, h, w, hoof, tilt) {
+        spots.forEach(function(q, i) {
+            const hip = new THREE.Group(); hip.position.set(q[0], h, q[1]); if (tilt) hip.rotation.x = tilt;
+            hip.userData.isLeg = true; hip.userData.legIndex = idx[i]; hip.userData.baseY = h;
+            g.add(hip);
+            add(CYL(), color, [0, -h / 2, 0], [w, h, w], null, hip);                       // нога: от бедра вниз
+            add(SPH(), color, [0, -w * 0.2, 0], [w * 1.5, w * 1.7, w * 1.5], null, hip);   // бедро — утоплено в тело
+            if (hoof) add(SPH(), hoof, [0, -h + w * 0.6, w * 0.3], [w * 1.2, w * 0.7, w * 1.5], null, hip); // лапа/копыто — качается с ногой
+        });
+    };
     return {
         ell: function(color, p, s, r) { return add(SPH(), color, p, s, r); },
         cyl: function(color, p, s, r) { return add(CYL(), color, p, s, r); },
         cone: function(color, p, s, r) { return add(CONE(), color, p, s, r); },
         box: function(color, p, s, r) { return add(BOX(), color, p, s, r); },
-        /** четыре ноги: x — полуширина, zf/zb — перед и зад, h — длина ноги, w — толщина; hoof — цвет копыта/лапы */
-        legs: function(color, x, zf, zb, h, w, hoof) {
-            [[-x, zf], [x, zf], [-x, zb], [x, zb]].forEach(function(q, i) {
-                const leg = add(CYL(), color, [q[0], h / 2, q[1]], [w, h, w]);
-                leg.userData.isLeg = true; leg.userData.legIndex = i; leg.userData.baseY = h / 2;
-                if (hoof) { const pw = add(SPH(), hoof, [q[0], w * 0.6, q[1] + w * 0.3], [w * 1.2, w * 0.7, w * 1.5]); pw.userData.isPaw = true; pw.userData.legIndex = i; pw.userData.baseY = w * 0.6; }
-            });
-        },
+        /**
+         * Четыре ноги: x — полуширина, zf/zb — перед и зад, h — длина ноги, w — толщина; hoof — цвет копыта/лапы.
+         * Нога — шарнир у бедра (группа на высоте h): бег (src/animals.js, src/animal-attack.js) качает группу,
+         * и нога поворачивается от тела, а не вокруг своей середины (верх выезжал из тела — ноги висели отдельно).
+         * Бедро — шар, утопленный в тело: стык закрыт при любом размахе.
+         */
+        legs: function(color, x, zf, zb, h, w, hoof) { hips(color, [[-x, zf], [x, zf], [-x, zb], [x, zb]], [0, 1, 2, 3], h, w, hoof); },
+        /** Две ноги (раптор): x — полуширина, z — где, индексы фаз 0 и 3 */
+        legs2: function(color, x, z, h, w, tilt) { hips(color, [[-x, z], [x, z]], [0, 3], h, w, null, tilt); },
         eyes: function(y, z, x, r) {
             // глаз — шарик своего размера, масштаб 1: спавнер зверей (src/animals.js) сбрасывает масштаб глаз на 1 (ночью — 1.6),
             // и шарик, уменьшенный масштабом, раздувался в огромный цветной шар, закрывавший зверя
@@ -183,7 +194,7 @@ const BUILD = {
         k.eyes(1.8, 0.5, 0.05, 0.02);
     },
     DINO: function(k) { // ящер-раптор: на двух ногах, хвост-противовес, маленькие лапки, пасть
-        [[-0.12, 0], [0.12, 3]].forEach(function(q) { const l = k.cyl(0x2a4a1e, [q[0], 0.25, 0], [0.07, 0.5, 0.07], [0.2, 0, 0]); l.userData.isLeg = true; l.userData.legIndex = q[1]; l.userData.baseY = 0.25; });
+        k.legs2(0x2a4a1e, 0.12, 0.02, 0.52, 0.07, 0.15);
         k.ell(0x3a6a2a, [0, 0.6, 0], [0.18, 0.2, 0.36], [-0.2, 0, 0]);
         k.cone(0x3a6a2a, [0, 0.66, -0.6], [0.12, 0.6, 0.12], [-Math.PI / 2 - 0.2, 0, 0]);
         k.ell(0x3a6a2a, [0, 0.9, 0.36], [0.11, 0.12, 0.2], [0.2, 0, 0]);
