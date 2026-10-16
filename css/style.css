@@ -6631,3 +6631,7 @@ body.crash-cine #game-container::before { content: ""; position: absolute; left:
     :root body.race-mode #hud-speedo#hud-speedo { transform: scale(.66) !important; }
     #latch-bar { top: calc(max(8px, env(safe-area-inset-top)) + 140px) !important; }
 }
+
+/* шкала «стряхни» — только пока зверь на капоте и идёт заезд */
+body:not(.hood-latch) #latch-bar, body:not(.race-mode) #latch-bar { display: none !important; }
+body:not(.race-mode).hood-latch #game-container::after { display: none !important; }

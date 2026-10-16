@@ -93,3 +93,15 @@ describe('Пустошь: кадр последней аварии', () => {
         expect(end.roll).toBeGreaterThan(1.5);
     });
 });
+
+import { createLatch } from '../../src/hood-latch.js';
+describe('Пустошь: шкала «стряхни» не переезжает в следующий заезд', () => {
+    it('новый заезд убирает оставшуюся шкалу и красные края', () => {
+        const removed = [], cls = new Set(['hood-latch']);
+        globalThis.document = { getElementById: (id) => (id === 'latch-bar' ? { remove: () => removed.push(id) } : null), body: { classList: { remove: (c) => cls.delete(c), add: (c) => cls.add(c), contains: (c) => cls.has(c) } } };
+        createLatch({});
+        expect(removed).toEqual(['latch-bar']);
+        expect(cls.has('hood-latch')).toBe(false);
+        delete globalThis.document;
+    });
+});
