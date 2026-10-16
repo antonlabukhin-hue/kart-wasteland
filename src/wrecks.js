@@ -9,7 +9,7 @@
  */
 import * as THREE from 'three';
 import { buildTraffic } from './traffic-cars.js';
-import { zombify } from './zombie-look.js';
+import { makeAnimal } from './zombie-look.js';
 
 /** Сколько обломков добавить к базовым (как попуток): extra — рост сложности rampAt().traffic (0 → 4) → 2 … 10 */
 export function wreckCount(extra) { return 2 + Math.round((extra || 0) * 2); }
@@ -153,7 +153,7 @@ const ROOF = ['BEAR', 'BOAR', 'DOG'];
 function roofAnimal(r) {
     const mk = typeof window !== 'undefined' && window.createAnimalMesh;
     if (!mk) return null;
-    try { const a = mk(ROOF[Math.floor(r() * ROOF.length)]); zombify(a); a.scale.multiplyScalar(0.62); a.traverse(function(o) { o.userData.keepSkin = true; }); return a; } catch (e) { return null; }
+    try { const sp = ROOF[Math.floor(r() * ROOF.length)], a = makeAnimal(sp); a.scale.multiplyScalar(0.62); a.traverse(function(o) { o.userData.keepSkin = true; }); return a; } catch (e) { return null; }
 }
 
 /**

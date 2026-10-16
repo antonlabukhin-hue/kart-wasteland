@@ -219,26 +219,26 @@ export const CAR_PRESETS = {
 
 export const ANIMAL_TYPES = {
     // --- Карта 1: Арсеньев (яркие, контрастные) ---
-    DOG: { id: 'dog', name: 'Собака', width: 0.68, height: 0.52, color: 0xD2691E, accentColor: 0xFFF8DC, speedCross: 4.0, speedZ: 0.02, penalty: 0.35, timePenalty: 4, radius: 0.78, design: 'dog', emoji: '🐕' },
-    CAT: { id: 'cat', name: 'Кот', width: 0.54, height: 0.42, color: 0xFF8C00, accentColor: 0xFFFAF0, speedCross: 5.0, speedZ: 0.015, penalty: 0.25, timePenalty: 3, radius: 0.66, design: 'cat', emoji: '🐈' },
-    DEER: { id: 'deer', name: 'Олень', width: 0.92, height: 0.88, color: 0xDEB887, accentColor: 0xFFFFFF, speedCross: 5.5, speedZ: 0.025, penalty: 0.45, timePenalty: 6, radius: 1.05, design: 'deer', emoji: '🦌' },
-    BOAR: { id: 'boar', name: 'Кабан', width: 0.88, height: 0.68, color: 0x6B4423, accentColor: 0x1A1A1A, speedCross: 3.5, speedZ: 0.02, penalty: 0.5, timePenalty: 5, radius: 0.98, design: 'boar', emoji: '🐗' },
-    FOX: { id: 'fox', name: 'Лиса', width: 0.60, height: 0.44, color: 0xFF4500, accentColor: 0xFFFFFF, speedCross: 4.5, speedZ: 0.018, penalty: 0.3, timePenalty: 3.5, radius: 0.72, design: 'fox', emoji: '🦊' },
-    BEAR: { id: 'bear', name: 'Медведь', width: 1.20, height: 1.08, color: 0x8B4513, accentColor: 0x3D2314, speedCross: 2.5, speedZ: 0.015, penalty: 0.6, timePenalty: 7, radius: 1.30, design: 'bear', emoji: '🐻' },
+    DOG: { id: 'dog', name: 'Волк-падальщик', width: 0.68, height: 0.52, color: 0xD2691E, accentColor: 0xFFF8DC, speedCross: 4.0, speedZ: 0.02, penalty: 0.35, timePenalty: 4, radius: 0.78, design: 'dog', emoji: '🐕' },
+    CAT: { id: 'cat', name: 'Чумной кот', width: 0.54, height: 0.42, color: 0xFF8C00, accentColor: 0xFFFAF0, speedCross: 5.0, speedZ: 0.015, penalty: 0.25, timePenalty: 3, radius: 0.66, design: 'cat', emoji: '🐈' },
+    DEER: { id: 'deer', name: 'Олень-призрак', width: 0.92, height: 0.88, color: 0xDEB887, accentColor: 0xFFFFFF, speedCross: 5.5, speedZ: 0.025, penalty: 0.45, timePenalty: 6, radius: 1.05, design: 'deer', emoji: '🦌' },
+    BOAR: { id: 'boar', name: 'Кабан-таран', width: 0.88, height: 0.68, color: 0x6B4423, accentColor: 0x1A1A1A, speedCross: 3.5, speedZ: 0.02, penalty: 0.5, timePenalty: 5, radius: 0.98, design: 'boar', emoji: '🐗' },
+    FOX: { id: 'fox', name: 'Огнелис', width: 0.60, height: 0.44, color: 0xFF4500, accentColor: 0xFFFFFF, speedCross: 4.5, speedZ: 0.018, penalty: 0.3, timePenalty: 3.5, radius: 0.72, design: 'fox', emoji: '🦊' },
+    BEAR: { id: 'bear', name: 'Медведь-мутант', width: 1.20, height: 1.08, color: 0x8B4513, accentColor: 0x3D2314, speedCross: 2.5, speedZ: 0.015, penalty: 0.6, timePenalty: 7, radius: 1.30, design: 'bear', emoji: '🐻' },
     CHICKEN: { id: 'chicken', name: 'Курица', width: 0.48, height: 0.50, color: 0xFFD700, accentColor: 0xFF0000, speedCross: 3.8, speedZ: 0.02, penalty: 0.2, timePenalty: 2.5, radius: 0.55, design: 'chicken', emoji: '🐔' },
     HUMAN: { id: 'human', name: 'Человек', width: 0.55, height: 0.58, color: 0xF5DEB3, accentColor: 0x1E90FF, speedCross: 4.0, speedZ: 0.025, penalty: 0.2, timePenalty: 3, radius: 0.68, design: 'human', emoji: '👤' },
     // --- Карта 2: Промзона ---
-    CROC: { id: 'croc', name: 'Крокодил', width: 1.15, height: 0.45, color: 0x228B22, accentColor: 0x006400, speedCross: 3.2, speedZ: 0.02, penalty: 0.5, timePenalty: 6, radius: 1.1, design: 'croc', emoji: '🐊' },
-    RHINO: { id: 'rhino', name: 'Носорог', width: 1.25, height: 0.85, color: 0xA9A9A9, accentColor: 0x696969, speedCross: 2.8, speedZ: 0.015, penalty: 0.55, timePenalty: 6, radius: 1.2, design: 'rhino', emoji: '🦏' },
-    ELEPHANT: { id: 'elephant', name: 'Слон', width: 1.35, height: 1.1, color: 0x808080, accentColor: 0xC0C0C0, speedCross: 2.2, speedZ: 0.012, penalty: 0.65, timePenalty: 7, radius: 1.35, design: 'elephant', emoji: '🐘' },
-    DINO: { id: 'dino', name: 'Динозавр', width: 1.2, height: 1.0, color: 0x32CD32, accentColor: 0xFFD700, speedCross: 3.5, speedZ: 0.02, penalty: 0.55, timePenalty: 6, radius: 1.2, design: 'dino', emoji: '🦖' },
+    CROC: { id: 'croc', name: 'Крокодил-кислотник', width: 1.15, height: 0.45, color: 0x228B22, accentColor: 0x006400, speedCross: 3.2, speedZ: 0.02, penalty: 0.5, timePenalty: 6, radius: 1.1, design: 'croc', emoji: '🐊' },
+    RHINO: { id: 'rhino', name: 'Носорог-бульдозер', width: 1.25, height: 0.85, color: 0xA9A9A9, accentColor: 0x696969, speedCross: 2.8, speedZ: 0.015, penalty: 0.55, timePenalty: 6, radius: 1.2, design: 'rhino', emoji: '🦏' },
+    ELEPHANT: { id: 'elephant', name: 'Мамонт пустоши', width: 1.35, height: 1.1, color: 0x808080, accentColor: 0xC0C0C0, speedCross: 2.2, speedZ: 0.012, penalty: 0.65, timePenalty: 7, radius: 1.35, design: 'elephant', emoji: '🐘' },
+    DINO: { id: 'dino', name: 'Ящер', width: 1.2, height: 1.0, color: 0x32CD32, accentColor: 0xFFD700, speedCross: 3.5, speedZ: 0.02, penalty: 0.55, timePenalty: 6, radius: 1.2, design: 'dino', emoji: '🦖' },
     PEACOCK: { id: 'peacock', name: 'Павлин', width: 0.7, height: 0.95, color: 0x00CED1, accentColor: 0xFF1493, speedCross: 4.2, speedZ: 0.02, penalty: 0.3, timePenalty: 3.5, radius: 0.8, design: 'peacock', emoji: '🦚' },
     // --- Карта 3: Свалка ---
-    LION: { id: 'lion', name: 'Лев', width: 1.05, height: 0.75, color: 0xDAA520, accentColor: 0x8B4513, speedCross: 4.0, speedZ: 0.02, penalty: 0.5, timePenalty: 5.5, radius: 1.05, design: 'lion', emoji: '🦁' },
-    MONKEY: { id: 'monkey', name: 'Обезьяна', width: 0.55, height: 0.65, color: 0xCD853F, accentColor: 0xFFE4C4, speedCross: 5.0, speedZ: 0.025, penalty: 0.3, timePenalty: 3.5, radius: 0.7, design: 'monkey', emoji: '🐒' },
-    GIRAFFE: { id: 'giraffe', name: 'Жираф', width: 0.7, height: 1.4, color: 0xF4A460, accentColor: 0x8B4513, speedCross: 3.5, speedZ: 0.02, penalty: 0.45, timePenalty: 5, radius: 0.95, design: 'giraffe', emoji: '🦒' },
-    ZEBRA: { id: 'zebra', name: 'Зебра', width: 0.95, height: 0.8, color: 0xF5F5F5, accentColor: 0x1A1A1A, speedCross: 4.5, speedZ: 0.022, penalty: 0.4, timePenalty: 4.5, radius: 1.0, design: 'zebra', emoji: '🦓' },
-    HIPPO: { id: 'hippo', name: 'Бегемот', width: 1.3, height: 0.85, color: 0x9370DB, accentColor: 0x4B0082, speedCross: 2.5, speedZ: 0.015, penalty: 0.6, timePenalty: 6.5, radius: 1.25, design: 'hippo', emoji: '🦛' }
+    LION: { id: 'lion', name: 'Лев-пожар', width: 1.05, height: 0.75, color: 0xDAA520, accentColor: 0x8B4513, speedCross: 4.0, speedZ: 0.02, penalty: 0.5, timePenalty: 5.5, radius: 1.05, design: 'lion', emoji: '🦁' },
+    MONKEY: { id: 'monkey', name: 'Обезьяна-мародёр', width: 0.55, height: 0.65, color: 0xCD853F, accentColor: 0xFFE4C4, speedCross: 5.0, speedZ: 0.025, penalty: 0.3, timePenalty: 3.5, radius: 0.7, design: 'monkey', emoji: '🐒' },
+    GIRAFFE: { id: 'giraffe', name: 'Жираф-мутант', width: 0.7, height: 1.4, color: 0xF4A460, accentColor: 0x8B4513, speedCross: 3.5, speedZ: 0.02, penalty: 0.45, timePenalty: 5, radius: 0.95, design: 'giraffe', emoji: '🦒' },
+    ZEBRA: { id: 'zebra', name: 'Зебра-призрак', width: 0.95, height: 0.8, color: 0xF5F5F5, accentColor: 0x1A1A1A, speedCross: 4.5, speedZ: 0.022, penalty: 0.4, timePenalty: 4.5, radius: 1.0, design: 'zebra', emoji: '🦓' },
+    HIPPO: { id: 'hippo', name: 'Бегемот-болотник', width: 1.3, height: 0.85, color: 0x9370DB, accentColor: 0x4B0082, speedCross: 2.5, speedZ: 0.015, penalty: 0.6, timePenalty: 6.5, radius: 1.25, design: 'hippo', emoji: '🦛' }
 };
 
 export const MAP_ANIMALS = {

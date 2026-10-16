@@ -18,7 +18,7 @@ import { SIGNAL_TIME, cutInAllowed, wantsCut, blinkOn, LANE_CHANGE_RATE } from '
 import { zoneFree, calmAhead, MAJOR_GAP, HURDLE_GAP } from './director.js';
 import { nearMissStep } from './near-miss.js';
 import { laneAssist } from './lane-assist.js';
-import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js'; import { crashCine } from './crash-cine.js';
+import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js'; import { makeAnimal } from './zombie-look.js'; import { crashCine } from './crash-cine.js';
         import * as THREE from 'three';
         import { SoundEngine } from './audio.js';
         import { AnimalSpawner } from './animals.js';
@@ -4055,7 +4055,7 @@ function startGaragePreview(carId) {
         }
         window.createAnimalMesh = createAnimalMesh;
         // только тестовая сборка: набор для рендера картинок игры (tools/art)
-        if (import.meta.env.MODE === 'test') window.__artKit = { garage: function(id) { startGaragePreview(id); }, shop: function(id) { startShopPreview(id); }, liftCar: liftCar, THREE: THREE, memes: Memes, renderDiorama: renderDiorama, lanes: ART_LANES, tracks: CAMPAIGN_TRACKS, buildCar: buildShowroomCar, mergeCar: mergeCarParts, landmark: createLandmark,
+        if (import.meta.env.MODE === 'test') window.__artKit = { garage: function(id) { startGaragePreview(id); }, shop: function(id) { startShopPreview(id); }, liftCar: liftCar, THREE: THREE, memes: Memes, renderDiorama: renderDiorama, lanes: ART_LANES, tracks: CAMPAIGN_TRACKS, buildCar: buildShowroomCar, mergeCar: mergeCarParts, landmark: createLandmark, beast: function(k) { return makeAnimal(k); },
             bossHeight: function(idx) { const b = new THREE.Box3().setFromObject(createArcadeBossMesh(CAMPAIGN_BOSSES[idx % CAMPAIGN_BOSSES.length])); return (b.max.y - b.min.y) * 1.5; } };
 
 

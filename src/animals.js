@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { ANIMAL_TYPES } from './data.js';
 import { crossK, durMul } from './animal-rules.js';
-import { zombify } from './zombie-look.js';
+import { zombify, makeAnimal } from './zombie-look.js';
 
 const ANIMAL_KEYS = Object.keys(ANIMAL_TYPES);
 
@@ -23,7 +23,7 @@ export function speedScale(v) {
 function meshFactory(typeId) {
   const fn = (typeof window !== 'undefined' && window.createAnimalMesh) || (typeof createAnimalMesh === 'function' ? createAnimalMesh : null);
   if (!fn) throw new Error('createAnimalMesh не найден — задайте window.createAnimalMesh');
-  return zombify(fn(typeId)); // Пустошь: все звери — бешеные (src/zombie-look.js)
+  return makeAnimal(typeId) || zombify(fn(typeId), typeId); // Пустошь: все звери — бешеные (src/zombie-look.js)
 }
 
 class AnimalSpawner {

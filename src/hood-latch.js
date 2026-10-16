@@ -6,7 +6,7 @@
  * shakeStep(st, x) — учёт рывков по положению машины (чистая функция, тест), createLatch(o) — модель на капоте и показ.
  */
 import * as THREE from 'three';
-import { zombify } from './zombie-look.js';
+import { makeAnimal } from './zombie-look.js';
 
 export const SHAKES = 3, HOLD = 2.6, SWING = 0.3;
 
@@ -47,7 +47,7 @@ export function createLatch(o) {
         get active() { return !!st; },
         grab: function(a, c, onFail) {
             if (st || !c || typeof window === 'undefined' || !window.createAnimalMesh) return false;
-            try { mesh = zombify(window.createAnimalMesh(a.speciesKey)); } catch (e) { return false; }
+            try { mesh = makeAnimal(a.speciesKey); } catch (e) { return false; }
             st = latchState(); car = c; fail = onFail;
             // на капоте: мордой к стеклу, чуть наискосок; масштаб — с поправкой на масштаб машины
             const k = 1 / (c.scale.x || 1);

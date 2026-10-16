@@ -5,6 +5,15 @@
  * sickRgb — цвет пикселя шкуры (чистая функция, тест), zombify(mesh) — перекрасить модель зверя.
  */
 import * as THREE from 'three';
+import { dressBeast } from './beast-kit.js';
+import { buildBeast } from './beast-models.js';
+
+/** Зверь пустоши по виду: своя модель (src/beast-models.js), если есть, иначе прежняя из main.js; окрас и мутации */
+export function makeAnimal(species) {
+    const fn = typeof window !== 'undefined' && window.createAnimalMesh;
+    const m = buildBeast(species) || (fn ? fn(species) : null);
+    return m ? zombify(m, species) : null;
+}
 
 /** Цвет шкуры «больного» зверя: выцветший, темнее, с уходом в болотную зелень */
 export function sickRgb(r, g, b) {
@@ -64,8 +73,9 @@ function eyeGlow() {
 }
 
 /** Перекрасить модель зверя в «бешеную» (повторный вызов ничего не делает) */
-export function zombify(mesh) {
+export function zombify(mesh, species) {
     if (!mesh || mesh.userData.zombie) return mesh;
+    if (species && dressBeast(mesh, species)) return mesh; // у вида своё лицо (src/beast-kit.js)
     mesh.userData.zombie = true;
     const eyes = [];
     mesh.traverse(function(o) {
