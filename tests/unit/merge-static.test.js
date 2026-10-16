@@ -81,6 +81,16 @@ describe('склейка деталей машины', () => {
         expect(box1.min.distanceTo(box0.min)).toBeLessThan(1e-6);
         expect(box1.max.distanceTo(box0.max)).toBeLessThan(1e-6);
     });
+    it('литьё (диски тюнинга) остаётся своей группой — высокая подвеска не поднимает его с кузовом', () => {
+        const { car } = toyCar();
+        const black = car.children.find(o => o.isMesh && !o.userData.bodyPaint && !o.userData.isLight && !o.material.transparent && o.visible).material;
+        const rims = new THREE.Group(); rims.userData.wheelPart = true; car.add(rims);
+        for (let i = 0; i < 4; i++) rims.add(new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.05), black));
+        mergeCarParts(car);
+        expect(rims.parent).toBe(car);
+        expect(rims.children.length).toBe(1);
+        expect(rims.children[0].userData.mergedCar).toBe(4);
+    });
     it('призрак склеивается весь, кроме скрытого', () => {
         const { car } = toyCar();
         const r = mergeCarParts(car, { all: true });
