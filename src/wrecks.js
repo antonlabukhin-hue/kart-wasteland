@@ -49,7 +49,8 @@ export function placeWreck(cars, z, car, free, gap) {
 }
 
 /** Сколько впереди расчистить, пока зверь на капоте: hold — сколько висит (с), ups — скорость (ед./с) */
-export function latchClear(hold, ups) { return Math.max(70, (ups || 0) * (hold + 1.5)); }
+export const LATCH_CALM_K = 0.65; // тишина на 35% короче: стряхнул — и сразу снова дорога (было: весь захват + 1.5 с)
+export function latchClear(hold, ups) { return Math.max(70, (ups || 0) * (hold + 1.5)) * LATCH_CALM_K; }
 
 /** Виды обломков на дороге: попутки из src/traffic-cars.js, БТР и src/wreck-models.js (танк, самолёт, вертолёт, бензовоз, трактор); мотоциклов нет — мелкие, не читаются */
 export const WRECK_KINDS = ['sedan', 'sedan', 'van', 'suv', 'truck', 'bus', 'btr', 'tank', 'plane', 'heli', 'tanker', 'tractor'];
