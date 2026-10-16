@@ -70,8 +70,8 @@ describe('Пустошь: бешеные звери', () => {
         expect(spreadZ(cars, -100, null, cars[0])).not.toBe(-100); // соседняя всё равно мешает
     });
     it('пока зверь на капоте — впереди чисто на всё время захвата и ещё полторы секунды', () => {
-        expect(latchClear(2.6, 30)).toBeCloseTo(123);
-        expect(latchClear(2.6, 0)).toBe(70);
+        expect(latchClear(2.6, 30)).toBeCloseTo(123 * 0.65); // на 35% короче, чем было
+        expect(latchClear(2.6, 0)).toBeCloseTo(70 * 0.65);
     });
 });
 

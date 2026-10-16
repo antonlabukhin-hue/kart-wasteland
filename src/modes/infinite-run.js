@@ -87,7 +87,7 @@ export function createInfiniteRun(ctx) {
     let attackWired = false;
     const latch = createLatch({ plaque: function(t, s, c) { ctx.plaque(t, s, c); }, popup: function(t) { ctx.popup(t); }, onShook: function() { riskEvent(ctx.risk, 'dodge'); } });
     /**
-     * Зверь вцепился в капот: на всё время захвата и ещё полторы секунды впереди — пусто (src/wrecks.js latchClear).
+     * Зверь вцепился в капот: впереди пусто на ~2.7 с хода (на 35% меньше всего захвата + 1.5 с) (src/wrecks.js latchClear).
      * Обломки уезжают дальше по дороге, звери впереди — тоже; стряхиваешь рулём, не думая об объезде.
      */
     function calmAhead(grabbed) {
