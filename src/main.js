@@ -18,7 +18,7 @@ import { SIGNAL_TIME, cutInAllowed, wantsCut, blinkOn, LANE_CHANGE_RATE } from '
 import { zoneFree, calmAhead, MAJOR_GAP, HURDLE_GAP } from './director.js';
 import { nearMissStep } from './near-miss.js';
 import { laneAssist } from './lane-assist.js';
-import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js';
+import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js'; import { crashCine } from './crash-cine.js';
         import * as THREE from 'three';
         import { SoundEngine } from './audio.js';
         import { AnimalSpawner } from './animals.js';
@@ -8083,7 +8083,7 @@ function startGaragePreview(carId) {
                 updateHUD();
 
                 if (strikes >= MAX_STRIKES) {
-                    endGame('crash');
+                    if (INF && playerCar) { gameState = 'chance'; speed = 0; crashCine({ scene: scene, camera: camera, renderer: renderer, car: playerCar, onDone: function() { gameState = 'racing'; endGame('crash'); } }); } else endGame('crash'); /* Пустошь: облёт места аварии (src/crash-cine.js), потом — итоги */
                 }
             }
 
