@@ -13,7 +13,7 @@
 import * as THREE from 'three';
 
 export const EVENT_POOL = {
-    arsenev: ['tractor', 'bus'], // Пустошь: «встречки» (грузовик навстречу) нет — в мёртвом мире никто не едет на обгон
+    arsenev: ['tractor'], // Пустошь: ни «встречки» (грузовик навстречу), ни ПАЗика от остановки — в мёртвом мире никто не ездит
     promzona: ['crane'],
     svalka: ['magnet', 'dozer']
 };
@@ -42,7 +42,7 @@ export function pickSetpieces(mapId, rnd, n) {
  * а не из общего набора (градирня в зоопарке, магнитный кран в деревне). null — в этом пейзаже такого нет.
  */
 export const STYLE_EVENTS = {
-    arsenev: ['tractor', 'bus'], city: ['bus'], village: ['tractor'], // Пустошь: без «встречки»
+    arsenev: ['tractor'], city: [], village: ['tractor'], // Пустошь: без «встречки» и выезжающего автобуса
     industrial: ['crane'], junk: ['magnet', 'dozer'], forest: []
 };
 export const STYLE_LANDMARKS = {
