@@ -32,6 +32,8 @@ export function shakeStep(st, x) {
  */
 export function createLatch(o) {
     let st = null, mesh = null, car = null, fail = null, bar = null, hood = null;
+    // новый заезд: шкала и красные края от прошлого (заезд кончился, пока зверь висел на капоте) — убрать
+    if (typeof document !== 'undefined') { const old = document.getElementById('latch-bar'); if (old) old.remove(); document.body.classList.remove('hood-latch'); }
     const release = function(ok) {
         if (mesh && car) car.remove(mesh);
         mesh = null; car = null;
