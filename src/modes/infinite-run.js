@@ -38,7 +38,6 @@ import { pickMeme, createSideMeme, decorateMemeCar, MEME_EVERY, MEMES } from '..
 import { buildShowroomCar } from '../cars.js';
 import { wreckCount } from '../wrecks.js';
 import { prepAttack, stepAttack } from '../animal-attack.js';
-import { auraLevel, setAura } from '../beast-outline.js';
 import { warnSfx } from '../beast-sfx.js';
 import { createLatch } from '../hood-latch.js';
 import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
@@ -102,7 +101,6 @@ export function createInfiniteRun(ctx) {
         const now = performance.now() / 1000;
         for (let i = 0; i < sp.animals.length; i++) {
             const a = sp.animals[i];
-            setAura(a.mesh, auraLevel(a, now)); // контур зверя краснеет перед броском (src/beast-outline.js)
             if (a.told && !a.triggered && a.role && a.role !== 'cross' && a.mesh) { // заметил машину: смотрит на неё и переминается
                 a.mesh.rotation.y = Math.atan2(ctx.x - a.x, Math.max(1, ctx.z - a.z));
                 a.mesh.position.y = Math.abs(Math.sin(now * 14)) * 0.06;
