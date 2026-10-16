@@ -3,12 +3,15 @@
  * мелко и по одной: новая убирает прежнюю. Создают их разные части игры — здесь только перехват:
  * следим за детьми body и помечаем такие элементы классом .rt (вид — в css/style.css).
  */
+import { toastWanted } from '../toast-filter.js';
+
 export const TOAST_SEL = '.animal-shout, .radio-line, .story-plaque, .big-plaque, .announcer, .penalty-pop, .crash-tag';
 
 let current = null;
 
 function take(el) {
     if (current === el && el.classList.contains('rt')) return; // уже на месте (и не зацикливаемся на своей же смене класса)
+    if (!toastWanted(el.className, el.textContent)) { if (el.classList.contains('announcer')) el.classList.add('out'); else el.remove(); return; } // Пустошь: шум не показываем (src/toast-filter.js)
     if (current && current !== el && current.isConnected) {
         if (current.classList.contains('announcer')) current.classList.add('out'); // ведущего не удаляем — он переиспользует рамку
         else current.remove();

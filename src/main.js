@@ -18,7 +18,7 @@ import { SIGNAL_TIME, cutInAllowed, wantsCut, blinkOn, LANE_CHANGE_RATE } from '
 import { zoneFree, calmAhead, MAJOR_GAP, HURDLE_GAP } from './director.js';
 import { nearMissStep } from './near-miss.js';
 import { laneAssist } from './lane-assist.js';
-import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js';
+import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js'; import { crashCine } from './crash-cine.js';
         import * as THREE from 'three';
         import { SoundEngine } from './audio.js';
         import { AnimalSpawner } from './animals.js';
@@ -6908,7 +6908,7 @@ function startGaragePreview(carId) {
                 if (oo.inLane) { _oncAcc += ONC_POINTS * risk.mult * deltaTime; const _w = Math.floor(_oncAcc); if (_w) { risk.points += _w; _oncAcc -= _w; } /* целыми — на шкале риска не «152,016» */ if (!_oncIn) try { showTimePenaltyPopup(0, '↔ ВСТРЕЧКА ×2 — очки вдвое!'); } catch (e) {} }
                 _oncIn = oo.inLane;
             }
-            const threatMarks = INF ? createThreatMarks(scene) : null, _warnSt = createWarnState(), _tm = []; /* язык угроз: кольцо цвета класса под помехой впереди и звук класса (src/threat-style.js) */
+            const threatMarks = null && createThreatMarks(scene), /* Пустошь: без цветных колец под помехами — портят антураж */ _warnSt = createWarnState(), _tm = []; /* язык угроз: кольцо цвета класса под помехой впереди и звук класса (src/threat-style.js) */
             function threatFrame() {
                 _tm.length = 0;
                 const near = function(z) { const d = zPos - z; return d > 2 && d < MARK_FAR + 2; };
@@ -7161,7 +7161,7 @@ function startGaragePreview(carId) {
                 get lights() { return { ambient: ambient, hemi: hemi, sun: sunLight }; },
                 get z() { return zPos; }, get x() { return xPos; }, get speed() { return speed; }, get strikes() { return strikes; }, get state() { return gameState; },
                 get stats() { return stats; }, get risk() { return risk; }, get powers() { return powers; }, get headstartTo() { return headstartTo; }, get maxSpeed() { return MAX_SPEED; },
-                get nitro() { return nitroTimer; }, get animals() { return animalSpawner; }, get chunks() { return chunkCull; },
+                get nitro() { return nitroTimer; }, get animals() { return animalSpawner; }, get car() { return playerCar; }, get chunks() { return chunkCull; },
                 addNitro: function(sec) { nitroTimer = Math.max(nitroTimer, sec); },
                 setRamp: function(r) { // сложность по километрам; попуток больше — новые далеко впереди
                     infSpeedK = r.speedK; infLaneK = r.laneK; infTrafficK = r.trafficK; animalSpawner.maxAnimals = r.maxAnimals; animalSpawner.speedMul = r.animalSpeed;
@@ -8083,7 +8083,7 @@ function startGaragePreview(carId) {
                 updateHUD();
 
                 if (strikes >= MAX_STRIKES) {
-                    endGame('crash');
+                    if (INF && playerCar) { gameState = 'chance'; speed = 0; crashCine({ scene: scene, camera: camera, renderer: renderer, car: playerCar, onDone: function() { gameState = 'racing'; endGame('crash'); } }); } else endGame('crash'); /* Пустошь: облёт места аварии (src/crash-cine.js), потом — итоги */
                 }
             }
 
@@ -10299,7 +10299,7 @@ function startGaragePreview(carId) {
                                 try { if (typeof showTimePenaltyPopup === 'function') showTimePenaltyPopup(0, 'Перелёт!'); } catch (e) {}
                             } else {
                                 obs.hit = true;
-                                hitOrGraze(obs, dx, hitR);
+                                if (!(inf && inf.grab(obs, function() { hitOrGraze(obs, 0, 1); }))) hitOrGraze(obs, dx, hitR); /* Пустошь: прыгун вцепляется в капот — полсердца, только если не стряхнул */
                             }
                         }
                     }

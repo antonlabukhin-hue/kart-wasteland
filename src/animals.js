@@ -160,7 +160,7 @@ class AnimalSpawner {
             }
         });
 
-        return {
+        const a = {
             type: 'animal',
             speciesKey: typeId,
             speciesId: type.id,
@@ -191,6 +191,8 @@ class AnimalSpawner {
             direction: fromLeft ? 1 : -1,
             hit: false
         };
+        if (this.prep) this.prep(a); // Пустошь: роль нападения (src/animal-attack.js)
+        return a;
     }
 
     update(deltaTime, playerZ) {
@@ -283,6 +285,7 @@ class AnimalSpawner {
             return;
         }
 
+        if (this.behave && this.behave(animal, deltaTime, playerZ)) return; // Пустошь: прыжок, таран, стойка (src/animal-attack.js)
         if (animal.elapsed < animal.duration) {
             animal.elapsed += deltaTime;
             const t = Math.min(animal.elapsed / animal.duration, 1);

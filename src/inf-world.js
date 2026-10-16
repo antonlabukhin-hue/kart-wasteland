@@ -15,6 +15,7 @@ import { mergeStaticMeshes, shareMaterials } from './merge-static.js';
 import { buildScenery } from './scenery.js';
 import { setKitGlow, setKeepOut } from './scenery-kit.js';
 import { placeRoadside } from './roadside.js';
+import { ruinStretch } from './ruin.js';
 import { hasBridge, createBridge, createBridgeTrain } from './railway.js';
 import { createSmoke } from './smoke.js';
 import { hasGulls, createGulls } from './gulls.js';
@@ -224,6 +225,7 @@ export function createInfWorld(o) {
         } catch (e) { console.warn('scenery', e); }
         setKeepOut(null);
         if (bridgeZ != null) { g.add(createBridge(bridgeZ, W)); addMover(i, createBridgeTrain(scene, bridgeZ, null, o.onEvent)); }
+        try { ruinStretch(g, r, o.lite ? { houseFires: 1, treeFires: 1 } : null); } catch (e) { console.warn('ruin', e); } // Пустошь: копоть, выбитые стёкла, мёртвая листва, пожары (src/ruin.js)
         freezeStatic(g);
         return g;
     }

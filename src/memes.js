@@ -1,11 +1,14 @@
 /**
- * Мем-моменты 90-х вдоль дороги — то, что хочется заснять и показать другу. Только картинка, без аварий:
- *   попутки — «Буханка» с коровой на крыше, «Зубило» со шкафом на багажнике;
- *   обочина — бабка с тележкой-«кравчучкой» (катит по обочине), рыбак с удочками голосует,
- *   гаишник с радаром-«феном» в кустах (список MEMES).
+ * Мем-моменты вдоль дороги — то, что хочется заснять и показать другу. Только картинка, без аварий.
+ * Пустошь: всё то же, но после катастрофы —
+ *   попутки — ржавая «Буханка» с бешеной коровой на крыше, «Зубило» беженцев с матрасом и канистрами;
+ *   обочина — бабка в противогазе с тележкой-«кравчучкой», сталкер в противогазе голосует с удочками,
+ *   гаишник-зомби с радаром-«феном» в сухих кустах (список MEMES).
  * Модели — низкополигональные, в стиле машин игры. Расстановка и смена — src/modes/infinite-run.js (pickMeme — чистая, с тестами).
  */
 import * as THREE from 'three';
+import { zombify } from './zombie-look.js';
+import { burnHex } from './wrecks.js';
 
 const mats = {};
 function mat(hex, rough) {
@@ -39,7 +42,16 @@ function checkMat() {
     return new THREE.MeshStandardMaterial({ map: checkTex, roughness: 0.9 });
 }
 
-/** Корова (смотрит в +z): чёрно-белая, розовый нос, рожки. ~1 м длиной */
+/** Противогаз на лицо (смотрит в +z): серая маска, круглые стёкла, коробка фильтра снизу. s — масштаб */
+export function gasMask(g, x, y, z, s) {
+    const k = s || 1, m = new THREE.Group(); m.position.set(x, y, z); m.scale.setScalar(k); g.add(m);
+    box(m, 0.21, 0.19, 0.06, 0x4a4e48, 0, 0, 0);
+    [-0.05, 0.05].forEach(function(dx) { cyl(m, 0.035, 0.035, 0.03, 0x10161a, dx, 0.03, 0.035, 10).rotation.x = Math.PI / 2; });
+    const f = cyl(m, 0.045, 0.05, 0.1, 0x5a6a3a, 0, -0.08, 0.06, 10); f.rotation.x = Math.PI / 2 - 0.4;
+    return m;
+}
+
+/** Корова (смотрит в +z): чёрно-белая, розовый нос, рожки. ~1 м длиной. Пустошь: бешеная — шкура в зелень, глаза горят */
 export function createCow() {
     const g = new THREE.Group();
     box(g, 0.5, 0.42, 0.95, 0xf2f0ea, 0, 0.62, 0);                 // туловище
@@ -53,7 +65,8 @@ export function createCow() {
     [[0.16, 0.32], [-0.16, 0.32], [0.16, -0.32], [-0.16, -0.32]].forEach(function(p) { box(g, 0.1, 0.42, 0.1, 0xf2f0ea, p[0], 0.21, p[1]); box(g, 0.11, 0.06, 0.11, 0x2a2018, p[0], 0.03, p[1]); });
     box(g, 0.16, 0.08, 0.14, 0xf4a6b4, 0, 0.4, -0.12);             // вымя
     const tail = box(g, 0.04, 0.38, 0.04, 0xf2f0ea, 0, 0.56, -0.5); tail.rotation.x = 0.35;
-    return g;
+    [0.08, -0.08].forEach(function(x) { box(g, 0.05, 0.05, 0.03, 0xff2a1a, x, 0.83, 0.765).userData.isEye = true; });
+    return zombify(g);
 }
 
 /** Бабка в платке (смотрит в +z), рядом — тележка-«кравчучка» с клетчатой сумкой */
@@ -62,6 +75,7 @@ export function createBabka() {
     const coat = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.27, 0.62, 10), mat(0x3a4a6a)); coat.position.y = 0.48; coat.castShadow = true; g.add(coat);
     box(g, 0.1, 0.16, 0.12, 0x2a2018, 0.08, 0.08, 0.02); box(g, 0.1, 0.16, 0.12, 0x2a2018, -0.08, 0.08, 0.02); // боты
     box(g, 0.2, 0.2, 0.2, 0xe9c2a0, 0, 0.88, 0.02);                // лицо
+    gasMask(g, 0, 0.86, 0.13, 0.95);                               // Пустошь: в противогазе
     box(g, 0.26, 0.14, 0.24, 0xc22a2a, 0, 0.98, -0.01);            // платок
     box(g, 0.22, 0.2, 0.06, 0xc22a2a, 0, 0.86, -0.12);
     box(g, 0.08, 0.1, 0.08, 0xc22a2a, 0, 0.78, 0.13);              // узелок
@@ -84,6 +98,7 @@ export function createFisherman() {
     box(g, 0.13, 0.5, 0.15, 0x2a2a30, 0.08, 0.25, 0); box(g, 0.13, 0.5, 0.15, 0x2a2a30, -0.08, 0.25, 0); // штаны и сапоги
     box(g, 0.14, 0.12, 0.2, 0x1e2a1a, 0.08, 0.06, 0.03); box(g, 0.14, 0.12, 0.2, 0x1e2a1a, -0.08, 0.06, 0.03);
     box(g, 0.2, 0.2, 0.2, 0xe2b48e, 0, 1.12, 0);                   // лицо
+    gasMask(g, 0, 1.1, 0.11);                                     // Пустошь: сталкер в противогазе
     box(g, 0.24, 0.07, 0.24, 0x2f3a24, 0, 1.24, 0); box(g, 0.16, 0.03, 0.12, 0x2f3a24, 0, 1.2, 0.15); // кепка с козырьком
     // рука голосует: растёт из плеча и уходит в сторону дороги (+x) и вверх; кулак и палец — на конце, в той же группе
     const arm = new THREE.Group(); arm.position.set(0.17, 0.98, 0.04); arm.rotation.z = -1.0; g.add(arm);
@@ -110,19 +125,22 @@ export function createGaishnik() {
     box(g, 0.08, 0.08, 0.06, 0x3a3a3a, 0.2, 1.06, 0.53);
     const st = new THREE.Group(); st.position.set(-0.24, 0.72, 0.06); st.rotation.z = 0.25; g.add(st); // жезл
     for (let i = 0; i < 6; i++) box(st, 0.045, 0.08, 0.045, i % 2 ? 0xf2f2f2 : 0x1a1a1a, 0, i * 0.08 - 0.2, 0);
-    // куст спереди — прячется
+    // куст спереди — прячется (Пустошь: сухой)
     [[0.05, 0.3, 0.42, 0.42], [0.35, 0.22, 0.38, 0.32], [-0.3, 0.24, 0.36, 0.34]].forEach(function(b) {
-        const m = new THREE.Mesh(new THREE.IcosahedronGeometry(b[3], 0), mat(0x3e6a2a)); m.position.set(b[0], b[1], b[2]); m.castShadow = true; g.add(m);
+        const m = new THREE.Mesh(new THREE.IcosahedronGeometry(b[3], 0), mat(0x5a4a30)); m.position.set(b[0], b[1], b[2]); m.castShadow = true; g.add(m);
     });
-    return g;
+    [0.05, -0.05].forEach(function(x) { box(g, 0.05, 0.04, 0.02, 0xff2a1a, x, 1.18, 0.105).userData.isEye = true; }); // Пустошь: гаишник-зомби — глаза горят
+    return zombify(g);
 }
 
-/** Шкаф на крышу «Зубила»: полированный, с зеркалом, примотан верёвкой */
+/** Скарб беженцев на крышу «Зубила»: полосатый матрас, канистры, узел — примотаны верёвкой (Пустошь; было — шкаф) */
 export function createWardrobe() {
     const g = new THREE.Group();
-    box(g, 0.55, 0.32, 1.0, 0x6a3a1e, 0, 0.16, 0, 0.45);
-    box(g, 0.56, 0.02, 0.02, 0x1a1a1a, 0, 0.33, 0.1); box(g, 0.56, 0.02, 0.02, 0x1a1a1a, 0, 0.33, -0.2); // верёвки
-    box(g, 0.02, 0.2, 0.36, 0xbfd6e6, 0.28, 0.16, 0.18, 0.1);      // зеркало на дверце
+    box(g, 0.58, 0.1, 1.0, 0xd8d0b8, 0, 0.05, 0);                 // матрас
+    for (let i = 0; i < 5; i++) box(g, 0.59, 0.101, 0.05, 0x5a6a9a, 0, 0.05, -0.4 + i * 0.2); // полосы
+    box(g, 0.16, 0.26, 0.24, 0xa82a1a, -0.15, 0.23, 0.22, 0.5); box(g, 0.16, 0.26, 0.24, 0x3a5a2a, 0.15, 0.23, 0.22, 0.5); // канистры
+    box(g, 0.34, 0.24, 0.3, 0x8a6a4a, 0, 0.22, -0.22);              // узел
+    box(g, 0.6, 0.02, 0.02, 0x1a1a1a, 0, 0.36, 0.1); box(g, 0.6, 0.02, 0.02, 0x1a1a1a, 0, 0.36, -0.2); // верёвки
     return g;
 }
 
@@ -161,6 +179,7 @@ export function decorateMemeCar(group, id) {
     if (id === 'cow_bus') load.scale.setScalar(Math.min(1.25, len * 0.8)); // корова крупнее — видно с дороги
     load.position.set(0, top - 0.02, cz - (id === 'cow_bus' ? len * 0.05 : 0));
     load.userData.memeLoad = true;
+    group.traverse(function(o) { if (o.isMesh && o.material && o.material.color && !o.material.userData.rusty) { const c = o.material.clone(); c.userData.rusty = true; c.color.setHex(burnHex(c.color.getHex(), 0.2, 0.35)); o.material = c; } }); // Пустошь: машина ржавая, в копоти
     group.add(load);
     return load;
 }
