@@ -107,6 +107,7 @@ export function createInfiniteRun(ctx) {
             if (ctx.state === 'racing') { const rv = riskEvent(ctx.risk, 'dodge'); try { ctx.popup((a.giant ? '🦣 Ушёл от гиганта!' : a.role === 'charge' ? '🐗 Ушёл от тарана!' : '🐺 Увернулся!') + ' ×' + rv.mult); } catch (e) {} }
         }
     }
+    const lapOff = ctx.seed ? 0 : Math.floor(Math.random() * 3); // Пустошь: круги — в своём порядке каждый заезд
     let wasteTo = 0; // Пустошь: придорожные отголоски апокалипсиса (src/wasteland-decor.js) расставлены до этой дальности
     function spawnWaste(it) {
         if (!it.side && L.gaps.some(function(g) { const gd = START_Z - g.zNear; return it.d > gd - 6 && it.d < gd + 30; })) return; // трещина не висит над разломом
@@ -262,7 +263,7 @@ export function createInfiniteRun(ctx) {
             } else if (k > lapK) {
                 lapK = k;
                 genRnd = ctx.seed ? seededRnd((ctx.seed ^ Math.imul(k + 7, 0x85EBCA6B)) >>> 0) : null; // постановочные участки — тоже по сиду
-                gen = ctx.startLap(k, LAP_MAPS[k % 3], k < 2 && !warm ? 'easy' : 'medium'); // первые круги — лёгкая расстановка
+                gen = ctx.startLap(k, LAP_MAPS[(k + lapOff) % 3], k < 2 && !warm ? 'easy' : 'medium'); // первые круги — лёгкая расстановка
             }
             // Пустошь: обочины и асфальт — на 190 м вперёд, по 40 м за раз
             if (d + 190 > wasteTo) { planWaste(wasteTo, wasteTo + 40, Math.random).forEach(spawnWaste); wasteTo += 40; }
