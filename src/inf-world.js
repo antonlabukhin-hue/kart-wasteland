@@ -226,7 +226,7 @@ export function createInfWorld(o) {
         } catch (e) { console.warn('scenery', e); }
         setKeepOut(null);
         if (bridgeZ != null) { g.add(createBridge(bridgeZ, W)); addMover(i, createBridgeTrain(scene, bridgeZ, null, o.onEvent)); }
-        try { ruinStretch(g, r, o.lite ? { houseFires: 1, treeFires: 1, ember: emberColor(th.id), embers: 4 } : { ember: emberColor(th.id) }); } catch (e) { console.warn('ruin', e); }
+        try { ruinStretch(g, r, o.lite ? { houseFires: 1, treeFires: 1, ember: emberColor(th.id), embers: 4 } : { ember: emberColor(th.id), embers: 5 }); } catch (e) { console.warn('ruin', e); }
         try { const fl = accentStretch(g, th.id, z0, STRETCH, W, r, heightAt, o.lite); if (fl) addMover(i, fl); } catch (e) { console.warn('accents', e); } // яркие акценты зоны (src/zone-accents.js) // Пустошь: копоть, выбитые стёкла, мёртвая листва, пожары (src/ruin.js)
         freezeStatic(g);
         return g;

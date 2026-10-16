@@ -94,7 +94,7 @@ function emberMat(c) {
         x.strokeStyle = 'rgba(255,255,255,0.9)'; x.lineWidth = 3; x.beginPath(); x.moveTo(32, 4); x.lineTo(26, 22); x.lineTo(36, 34); x.lineTo(28, 50); x.lineTo(34, 62); x.stroke(); // трещина
         emberTex = new THREE.CanvasTexture(cv); emberTex.userData.keep = true;
     }
-    return embersM[c] || (embersM[c] = new THREE.SpriteMaterial({ map: emberTex, color: c, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+    return embersM[c] || (embersM[c] = new THREE.SpriteMaterial({ map: emberTex, color: c, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending, fog: true })); /* вполсилы и в дымке — декорация не ярче зверей */
 }
 const plain = {};
 function mat(h) { return plain[h] || (plain[h] = new THREE.MeshStandardMaterial({ color: h, roughness: 1, flatShading: true })); }
