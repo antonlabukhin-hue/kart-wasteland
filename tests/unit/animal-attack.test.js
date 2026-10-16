@@ -112,7 +112,7 @@ describe('Пустошь: шкала «стряхни» не переезжае�
     });
 });
 
-import { GIANT, GIANT_SCALE, GIANT_VZ, CHARGE_VZ } from '../../src/animal-attack.js';
+import { GIANT, GIANT_SCALE, GIANT_VZ, CHARGE_VZ, HIT_R_MAX, LANES } from '../../src/animal-attack.js';
 describe('Пустошь: гигант несётся навстречу', () => {
     it('мамонт иногда вырастает и несётся по полосе быстрее тарана; удар шире', () => {
         expect(GIANT).toContain('ELEPHANT');
@@ -125,5 +125,12 @@ describe('Пустошь: гигант несётся навстречу', () =>
         expect(a.phase).toBe('charge');
         expect(a.roar).toBe('new');
         expect(pickRole('DOG', () => 0.1)).not.toBe('giant');
+    });
+    it('гиганта и крупного зверя можно объехать: из соседней полосы не задевают', () => {
+        const mk = (sp, radius, roll) => prepAttack({ speciesKey: sp, x: 4.5, z: -60, radius: radius, mesh: { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 }, scale: { multiplyScalar() {} }, traverse() {} }, hit: false }, () => roll, 15);
+        const giant = mk('HIPPO', 1.25 * 1.3, 0.1), block = mk('BEAR', 1.3 * 1.3, 0.5);
+        expect(giant.role).toBe('giant');
+        const gap = LANES[1] - LANES[0];
+        [giant, block].forEach((a) => { expect(a.radius).toBeLessThanOrEqual(HIT_R_MAX); expect(a.radius + 0.45).toBeLessThan(gap - 0.4); });
     });
 });
