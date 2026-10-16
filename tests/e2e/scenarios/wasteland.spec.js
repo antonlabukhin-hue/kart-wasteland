@@ -49,11 +49,12 @@ test('Пустошь: один режим, обломки стоят, звери
     // зверь на дороге — бешеный: перекрашенный, глаза красные
     const z = await page.evaluate(() => {
         const a = window.__raceDebug.spawnAnimal(20);
-        let eye = null; a.mesh.traverse(o => { if (o.userData && o.userData.isEye) eye = o.material.color.getHex(); });
-        return { zombie: !!a.mesh.userData.zombie, eye };
+        let eye = null; a.mesh.traverse(o => { if (o.userData && o.userData.isEye) eye = o.material.color.getHex(); }); const glows = (a.mesh.getObjectByName('beastFx') || { children: [] }).children.filter(o => o.isSprite).length;
+        return { zombie: !!a.mesh.userData.zombie, eye, glows, beast: a.mesh.userData.beast };
     });
     expect(z.zombie).toBe(true);
-    if (z.eye != null) expect(z.eye).toBe(0xff2a1a);
+    if (z.eye != null) expect(z.eye).not.toBe(0x111111); // глаза горят цветом вида (src/beast-kit.js), не чёрные
+    expect(z.glows).toBeGreaterThan(0);
 
     // гонится босс компании: плашка погони — про босса
     await page.evaluate(() => { clearInterval(window.__keep); const g = window.__raceDebug; g.police.crash(); });

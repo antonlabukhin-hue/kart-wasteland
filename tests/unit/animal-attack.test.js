@@ -10,7 +10,9 @@ describe('Пустошь: звери нападают', () => {
         const yes = () => 0.1, no = () => 0.99;
         expect(pickRole('DOG', yes)).toBe('lunge');
         expect(pickRole('BOAR', yes)).toBe('charge');
-        expect(pickRole('BEAR', yes)).toBe('block');
+        expect(pickRole('BEAR', yes)).toBe('giant'); // часть медведей — гиганты
+        const notGiant = (() => { const q = [0.9, 0.1]; let i = 0; return () => q[i++ % 2]; })();
+        expect(pickRole('BEAR', notGiant)).toBe('block');
         expect(pickRole('CHICKEN', yes)).toBe('cross');
         expect(pickRole('DOG', no)).toBe('cross'); // часть волков всё-таки просто перебегает
     });
@@ -52,7 +54,7 @@ describe('Пустошь: звери нападают', () => {
     });
 
     it('медведь встаёт в полосе и стоит', () => {
-        const a = prepAttack(animal('BEAR', 4.5, -40), () => 0.1, 15);
+        const a = prepAttack(animal('BEAR', 4.5, -40), (() => { const q = [0.9, 0.1, 0.5]; let i = 0; return () => q[i++ % 3]; })(), 15);
         for (let i = 0; i < 90; i++) stepAttack(a, 1 / 60, 0, 0);
         expect(a.phase).toBe('stand');
         const z = a.z;
@@ -83,16 +85,20 @@ describe('Пустошь: зверь на капоте — стряхнуть р
     });
 });
 
-import { crashPose } from '../../src/crash-cine.js';
-describe('Пустошь: кадр последней аварии', () => {
-    it('машину подбрасывает и переворачивает на бок, к концу — лежит на земле', () => {
-        expect(crashPose(0)).toEqual({ y: 0, roll: 0, yaw: 0 });
-        expect(crashPose(0.17).y).toBeGreaterThan(0.5);
-        const end = crashPose(1);
-        expect(end.y).toBeCloseTo(0, 6);
-        expect(end.roll).toBeGreaterThan(1.5);
+import { crashPose, VARIANTS } from '../../src/crash-cine.js';
+describe('Пустошь: ролики последней аварии', () => {
+    it('четыре разных ролика; в каждом машину подбрасывает или крутит, к концу — на земле', () => {
+        expect(VARIANTS.length).toBe(4);
+        VARIANTS.forEach((v) => {
+            expect(crashPose(v, 0).y).toBeCloseTo(0, 6);
+            expect(crashPose(v, 1).y).toBeCloseTo(0, 6);
+            const mid = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7].map((k) => crashPose(v, k));
+            expect(mid.some((p) => p.y > 0.5 || Math.abs(p.yaw) > 2), v).toBe(true);
+        });
+        expect(Math.abs(crashPose('barrel', 1).pitch)).toBeGreaterThan(Math.PI * 4);
+        expect(crashPose('launch', 0.4).y).toBeGreaterThan(3);
     });
-});
+});;
 
 import { createLatch } from '../../src/hood-latch.js';
 describe('Пустошь: шкала «стряхни» не переезжает в следующий заезд', () => {
@@ -103,5 +109,21 @@ describe('Пустошь: шкала «стряхни» не переезжае�
         expect(removed).toEqual(['latch-bar']);
         expect(cls.has('hood-latch')).toBe(false);
         delete globalThis.document;
+    });
+});
+
+import { GIANT, GIANT_SCALE, GIANT_VZ, CHARGE_VZ } from '../../src/animal-attack.js';
+describe('Пустошь: гигант несётся навстречу', () => {
+    it('мамонт иногда вырастает и несётся по полосе быстрее тарана; удар шире', () => {
+        expect(GIANT).toContain('ELEPHANT');
+        const a = prepAttack({ speciesKey: 'ELEPHANT', x: 4.5, z: -60, radius: 0.6, mesh: { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 }, scale: { multiplyScalar(k) { this.k = k; } }, traverse() {} }, hit: false }, () => 0.1, 15);
+        expect(a.role).toBe('giant');
+        expect(a.mesh.scale.k).toBe(GIANT_SCALE);
+        expect(a.radius).toBeGreaterThan(1);
+        expect(GIANT_VZ).toBeGreaterThan(CHARGE_VZ);
+        for (let i = 0; i < 60; i++) stepAttack(a, 1 / 60, 0, 0);
+        expect(a.phase).toBe('charge');
+        expect(a.roar).toBe('new');
+        expect(pickRole('DOG', () => 0.1)).not.toBe('giant');
     });
 });

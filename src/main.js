@@ -18,7 +18,7 @@ import { SIGNAL_TIME, cutInAllowed, wantsCut, blinkOn, LANE_CHANGE_RATE } from '
 import { zoneFree, calmAhead, MAJOR_GAP, HURDLE_GAP } from './director.js';
 import { nearMissStep } from './near-miss.js';
 import { laneAssist } from './lane-assist.js';
-import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js'; import { crashCine } from './crash-cine.js';
+import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx } from './wrecks.js'; import { makeAnimal } from './zombie-look.js'; import { crashCine } from './crash-cine.js';
         import * as THREE from 'three';
         import { SoundEngine } from './audio.js';
         import { AnimalSpawner } from './animals.js';
@@ -37,7 +37,7 @@ import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traff
         } from './boss.js';
         import { CAMPAIGN_TRACKS, CAMPAIGN_STAGE_MODS, CAR_PRESETS, ANIMAL_TYPES, MAP_ANIMALS } from './data.js';
         import { gapStyle, rampTexture, createGapCones, createRoadSign, createGapMesh, createLaneChevrons, createDebrisSource, createBarricade, createWarnMark, createChargeChevrons } from './setpieces.js';
-        import { resolveLayout, SEGMENT_LEN } from './track-layout.js';
+        import { resolveLayout, SEGMENT_LEN, shuffleLayout } from './track-layout.js';
         import { createRoadworks, createTunnel, roadworksLane, approach } from './segments.js';
         import { MAP_ORDER, MAP_NAMES, CAMPAIGN_FINISH_LINES, VILLAIN_INTRO, ACHIEVEMENTS, CAR_SHOP_ORDER, NEW_CARS, NEW_CARS_TAG, shopOrder, CAR_PARTS, CAR_PAINTS, TROPHIES, SEASON_REWARDS, DAILY_CONTRACTS } from './content.js';
         import { DIFFICULTY_CONFIG } from './difficulty.js';
@@ -677,7 +677,7 @@ import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traff
             clearCampaignGlobals();
             pendingMode = 'infinite';
             o = o || {}; const day = dayKey(new Date()); /* сид раскладки: «Заезд дня» — общий на день, вызов — сид друга, обычный — свой */ infRunOpts = o.daily ? { seed: dailySeedOf(day), rule: ruleOf(day), daily: day, fair: true } : o.challenge ? { seed: o.challenge.seed, fair: true, rival: { name: o.challenge.name, dist: o.challenge.score }, challenge: o.challenge } : { seed: randomSeed() }; if (o.daily) { startDaily(currentPlayer, day); saveCurrentPlayer(); trackEvent('daily_start', { rule: infRunOpts.rule.id }); }
-            setSeason((import.meta.env.MODE === 'test' && window.__forceSeason) || seasonFor(new Date())); /* «Новогодний Арсеньев» с 15.12 по 15.01 (src/infinite.js) */ setThemeStart( /* каждый заезд — со своего пейзажа; самый первый — днём, пока учишься; честный заезд — от сида (или условия дня); тестовая сборка — window.__forceTheme */ (import.meta.env.MODE === 'test' && window.__forceTheme != null) ? window.__forceTheme : infRunOpts.rule && infRunOpts.rule.themeStart != null ? infRunOpts.rule.themeStart : infRunOpts.fair ? infRunOpts.seed % THEMES.length : (currentPlayer.infinite && currentPlayer.infinite.runs) ? Math.floor(Math.random() * THEMES.length) : 0);
+            setSeason((import.meta.env.MODE === 'test' && window.__forceSeason) || seasonFor(new Date())); /* «Новогодний Арсеньев» с 15.12 по 15.01 (src/infinite.js) */ setThemeStart( /* каждый заезд — со своего пейзажа; самый первый — днём, пока учишься; честный заезд — от сида (или условия дня); тестовая сборка — window.__forceTheme */ (import.meta.env.MODE === 'test' && window.__forceTheme != null) ? window.__forceTheme : infRunOpts.rule && infRunOpts.rule.themeStart != null ? infRunOpts.rule.themeStart : infRunOpts.fair ? infRunOpts.seed % THEMES.length : (currentPlayer.infinite && currentPlayer.infinite.runs) ? Math.floor(Math.random() * THEMES.length) : [0, 1, 2, 4, 6][Math.floor(Math.random() * 5)]); /* Пустошь: и самый первый — со случайного (но не ночь, не дождь) */
             try { hideMainMenu(); } catch (e) {}
             testDrive = pendingTestDrive; pendingTestDrive = null; /* тест-драйв — один заезд; «Повторить» — уже на своей */ const car = testDrive ? testDrive.car : (currentPlayer.unlockedCars || []).indexOf(currentPlayer.preferredCar) >= 0 ? currentPlayer.preferredCar : 'cheburashka';
             initGame((typeof pendingQuality !== 'undefined' && pendingQuality) || 'medium', 'easy', car, 'arsenev', 'day'); // база — «лёгкая», сложность растёт с километрами (src/infinite.js)
@@ -4055,7 +4055,7 @@ function startGaragePreview(carId) {
         }
         window.createAnimalMesh = createAnimalMesh;
         // только тестовая сборка: набор для рендера картинок игры (tools/art)
-        if (import.meta.env.MODE === 'test') window.__artKit = { garage: function(id) { startGaragePreview(id); }, shop: function(id) { startShopPreview(id); }, liftCar: liftCar, THREE: THREE, memes: Memes, renderDiorama: renderDiorama, lanes: ART_LANES, tracks: CAMPAIGN_TRACKS, buildCar: buildShowroomCar, mergeCar: mergeCarParts, landmark: createLandmark,
+        if (import.meta.env.MODE === 'test') window.__artKit = { garage: function(id) { startGaragePreview(id); }, shop: function(id) { startShopPreview(id); }, liftCar: liftCar, THREE: THREE, memes: Memes, renderDiorama: renderDiorama, lanes: ART_LANES, tracks: CAMPAIGN_TRACKS, buildCar: buildShowroomCar, mergeCar: mergeCarParts, landmark: createLandmark, beast: function(k) { return makeAnimal(k); },
             bossHeight: function(idx) { const b = new THREE.Box3().setFromObject(createArcadeBossMesh(CAMPAIGN_BOSSES[idx % CAMPAIGN_BOSSES.length])); return (b.max.y - b.min.y) * 1.5; } };
 
 
@@ -6972,7 +6972,7 @@ function startGaragePreview(carId) {
             function* populateLap(mapId, difficulty) {
             try {
                 // раскладка участков — из данных (src/tracks/layouts.json): карта → глава кампании
-                const _layout = (isEndlessMode() && window.__layoutOverride) || resolveLayout(null, { mapId: mapId, difficulty: difficulty, campaignId: window.__campaignTrackId || null });
+                let _layout = (isEndlessMode() && window.__layoutOverride) || resolveLayout(null, { mapId: mapId, difficulty: difficulty, campaignId: window.__campaignTrackId || null }); if (INF && !(infRunOpts && infRunOpts.fair) && !window.__layoutOverride) _layout = shuffleLayout(_layout, Math.random); /* Пустошь: каждый заезд — своя раскладка (src/track-layout.js) */
                 window.__trackLayout = _layout;
                 // бесконечная трасса: ещё две арки с грузом на круг — меньше пустой прямой
                 if (INF) _layout.debris = _layout.debris.concat(placeFracs(2, [].concat(_layout.gaps, _layout.debris, [_layout.event], (_layout.segments || []).map(function(sg) { return sg.at; }), (_layout.segments || []).map(function(sg) { return sg.at + 0.07; })), null, 8, 95));
@@ -8014,7 +8014,7 @@ function startGaragePreview(carId) {
             };
             // «задел боком» (src/hit-zones.js): не авария — скорость, множитель и толчок вбок; в правиле «ГАИ на хвосте» — погоня, задел в погоне — авария
             function hitOrGraze(obs, dx, hw) {
-                if (INF && (obs.type === 'animal' || obs.speciesKey)) { obs.halfHeart = true; return handleObstacleHit(obs); } /* зверь — полсердца при любом ударе, и краем тоже: риск должен быть */
+                if (INF && (obs.type === 'animal' || obs.speciesKey)) { obs.halfHeart = !obs.giant; return handleObstacleHit(obs); } /* зверь — полсердца при любом ударе, и краем тоже: риск должен быть */
                 if (hitSeverity(dx, hw, INF) === 'major') return handleObstacleHit(obs);
                 if (gameState !== 'racing') return;
                 _nmBlock = 2;
@@ -8083,7 +8083,7 @@ function startGaragePreview(carId) {
                 updateHUD();
 
                 if (strikes >= MAX_STRIKES) {
-                    if (INF && playerCar) { gameState = 'chance'; speed = 0; crashCine({ scene: scene, camera: camera, renderer: renderer, car: playerCar, onDone: function() { gameState = 'racing'; endGame('crash'); } }); } else endGame('crash'); /* Пустошь: облёт места аварии (src/crash-cine.js), потом — итоги */
+                    if (INF && playerCar) { gameState = 'chance'; speed = 0; crashCine({ scene: scene, camera: camera, renderer: renderer, car: playerCar, variant: import.meta.env.MODE === 'test' ? window.__crashVariant : null, onDone: function() { gameState = 'racing'; endGame('crash'); } }); } else endGame('crash'); /* Пустошь: облёт места аварии (src/crash-cine.js), потом — итоги */
                 }
             }
 

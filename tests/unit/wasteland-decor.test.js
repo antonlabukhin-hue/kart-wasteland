@@ -27,3 +27,17 @@ describe('Пустошь: отголоски апокалипсиса вдоль
         expect(isStaticWaste('shell')).toBe(false); // над ним дым — спрайты
     });
 });
+
+import { shuffleLayout, resolveLayout, validateLayout } from '../../src/track-layout.js';
+describe('Пустошь: каждый заезд — своя раскладка', () => {
+    it('разломы и участки сдвигаются, раскладка остаётся правильной', () => {
+        const base = resolveLayout(null, { mapId: 'arsenev', difficulty: 'easy' });
+        const seen = new Set();
+        for (let i = 0; i < 20; i++) {
+            const l = shuffleLayout(base, Math.random);
+            expect(validateLayout(l)).toEqual([]);
+            seen.add(JSON.stringify(l.gaps) + l.event);
+        }
+        expect(seen.size).toBeGreaterThan(10);
+    });
+});

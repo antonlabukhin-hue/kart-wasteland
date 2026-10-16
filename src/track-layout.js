@@ -73,3 +73,21 @@ export function validateLayout(l) {
     }
     return errs;
 }
+
+/**
+ * Пустошь: каждый заезд — своя раскладка. Разломы, арки с грузом, событие и участки (ремонт, тоннель…) сдвигаются
+ * случайно (до ±spread доли круга, иногда — зеркально, участки — порядок тоже), пока раскладка не пройдёт validateLayout; не вышло
+ * за tries попыток — прежняя. r — генератор [0,1).
+ */
+export function shuffleLayout(base, r, spread, tries) {
+    const s = spread || 0.07, n = tries || 300;
+    for (let t = 0; t < n; t++) {
+        const flip = r() < 0.5; // зеркально: что было в начале круга — в конце
+        const j = function(f) { return Math.round(((flip ? 1.06 - f : f) + (r() * 2 - 1) * s) * 1000) / 1000; };
+        const segs = (base.segments || []).map(function(sg) { return Object.assign({}, sg, { at: j(sg.at) }); });
+        if (segs.length > 1 && r() < 0.5) { const a = segs[0].at; segs[0].at = segs[segs.length - 1].at; segs[segs.length - 1].at = a; }
+        const l = Object.assign({}, base, { gaps: base.gaps.map(j).sort(function(a, b) { return a - b; }), debris: base.debris.map(j), event: j(base.event), segments: segs });
+        if (!validateLayout(l).length) return l;
+    }
+    return base;
+}

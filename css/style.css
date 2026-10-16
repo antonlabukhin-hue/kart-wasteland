@@ -6593,7 +6593,7 @@ body:not(.swipe-ctl) #mobile-controls.active ~ #nitro-btn { right: calc(env(safe
 /* Пустошь: один режим — бесконечная трасса; кампания и «Звериный час» из меню убраны */
 #main-menu-screen .menu-card[data-menu="campaign"], #main-menu-screen .menu-card[data-menu="endless"] { display: none !important; }
 /* Пустошь: вся картинка заезда — выцветшая и пыльная (дома, машины, небо — в одной гамме) */
-#game-container canvas { filter: saturate(0.72) sepia(0.18) contrast(1.06); }
+#game-container canvas { filter: saturate(0.9) sepia(0.08) contrast(1.08); } /* слабее: яркие акценты зон (src/zone-accents.js) должны пробиваться */
 
 /* Пустошь: зверь вцепился в капот — рывки руля и время */
 #latch-bar { position: fixed; left: 50%; top: 27%; transform: translateX(-50%); z-index: 60; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; width: 220px; pointer-events: none; }
@@ -6642,3 +6642,9 @@ body:not(.race-mode).hood-latch #game-container::after { display: none !importan
     :root body.race-mode #risk-hud#risk-hud { bottom: calc(env(safe-area-inset-bottom, 0px) + 4px) !important; transform: translateX(-50%) scale(.85) !important; transform-origin: bottom center !important; }
     #armor-bar, #power-slot { bottom: calc(env(safe-area-inset-bottom, 0px) + 52px) !important; }
 }
+
+/* ролик аварии — без кнопок и плашек поверх */
+body.crash-cine :is(#nitro-btn, .police-hud, .rt, #latch-bar, #power-slot, #armor-bar) { display: none !important; }
+
+/* Пустошь: подзаголовок заставки */
+.splash-title .splash-sub { display: block; font-size: 0.82em; letter-spacing: 0.3em; color: #ff6a2a; text-shadow: 0 0 18px rgba(255,90,20,.8), 0 3px 0 #2a0a00; margin-top: 2px; }

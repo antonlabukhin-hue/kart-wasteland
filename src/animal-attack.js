@@ -14,14 +14,18 @@
 export const LUNGE = ['DOG', 'FOX', 'CAT', 'LION', 'MONKEY'];
 export const CHARGE = ['BOAR', 'RHINO', 'DEER', 'ZEBRA', 'DINO'];
 export const BLOCK = ['BEAR', 'ELEPHANT', 'HIPPO', 'CROC', 'GIRAFFE'];
+/** Гиганты: мамонт, носорог, бегемот, медведь, ящер — бывает, вырастают в 2.4 раза и несутся по полосе, как сорвавшийся грузовик (удар — целое сердце) */
+export const GIANT = ['ELEPHANT', 'RHINO', 'HIPPO', 'BEAR', 'DINO'];
+export const GIANT_SHARE = 0.4, GIANT_SCALE = 2.4, GIANT_VZ = 11;
 /** Доля нападающих среди зверей своей группы (остальные — просто перебегают) */
 export const ATTACK_SHARE = 0.7;
 /** На какой дальности (× порог перебежки) выскакивает зверь каждой роли */
-export const TRIG_K = { lunge: 1.3, charge: 1.9, block: 1.6, cross: 0.85 };
+export const TRIG_K = { lunge: 1.3, charge: 1.9, block: 1.6, cross: 0.85, giant: 3.4 };
 export const LANES = [-2, 0, 2];
 
 /** Роль зверя: по виду и случаю r() */
 export function pickRole(species, r) {
+    if (GIANT.indexOf(species) >= 0 && r() < GIANT_SHARE) return 'giant';
     const g = LUNGE.indexOf(species) >= 0 ? 'lunge' : CHARGE.indexOf(species) >= 0 ? 'charge' : BLOCK.indexOf(species) >= 0 ? 'block' : 'cross';
     return g !== 'cross' && r() < ATTACK_SHARE ? g : 'cross';
 }
@@ -38,6 +42,11 @@ export function prepAttack(a, r, base) {
     a.role = pickRole(a.speciesKey, r);
     a._trigDist = (base || 15) * TRIG_K[a.role] * (0.9 + r() * 0.2);
     a.phase = null; a.pt = 0;
+    if (a.role === 'giant') { // гигант: крупнее, удар — целое сердце, задевает шире
+        a.giant = true;
+        if (a.mesh && a.mesh.scale) a.mesh.scale.multiplyScalar(GIANT_SCALE);
+        a.radius = (a.radius || 0.5) * 1.9;
+    }
     return a;
 }
 
@@ -70,7 +79,7 @@ export function stepAttack(a, dt, pz, px) {
         face(a.tx > a.x0 ? Math.PI / 2 : -Math.PI / 2);
         m.position.y = Math.abs(Math.sin(a.pt * 18)) * 0.08;
         legs(a, a.pt * 18);
-        if (t >= 1) { a.phase = a.role === 'lunge' ? 'crouch' : a.role === 'charge' ? 'charge' : 'stand'; a.pt = 0; }
+        if (t >= 1) { a.phase = a.role === 'lunge' ? 'crouch' : (a.role === 'charge' || a.role === 'giant') ? 'charge' : 'stand'; a.pt = 0; if (a.role === 'giant') a.roar = 'new'; }
     } else if (a.phase === 'crouch') { // присел — сейчас прыгнет
         face(0); m.position.y = 0; m.rotation.x = 0.25;
         if (a.pt >= CROUCH) { a.phase = 'leap'; a.pt = 0; m.rotation.x = 0; }
@@ -84,7 +93,7 @@ export function stepAttack(a, dt, pz, px) {
         face(0);
         if (t >= 1) { a.phase = 'land'; a.pt = 0; m.rotation.x = 0; m.position.y = 0; }
     } else if (a.phase === 'land' || a.phase === 'charge') { // бежит навстречу
-        a.z += (a.phase === 'charge' ? CHARGE_VZ : 2.5) * dt;
+        a.z += (a.phase === 'charge' ? (a.giant ? GIANT_VZ : CHARGE_VZ) : 2.5) * dt;
         face(0);
         m.position.y = Math.abs(Math.sin(a.pt * 16)) * 0.1;
         m.rotation.x = Math.sin(a.pt * 8) * 0.06;
