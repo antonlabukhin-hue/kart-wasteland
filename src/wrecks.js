@@ -11,8 +11,44 @@ import * as THREE from 'three';
 import { buildTraffic } from './traffic-cars.js';
 import { makeAnimal } from './zombie-look.js';
 
-/** Сколько обломков добавить к базовым (как попуток): extra — рост сложности rampAt().traffic (0 → 4) → 2 … 10 */
-export function wreckCount(extra) { return 2 + Math.round((extra || 0) * 2); }
+/**
+ * Раскладка обломков (было 14–22 на дороге, в ближних 120 ед. — в среднем 12, по две полосы закрыты в пяти рядах:
+ * не объехать и не стряхнуть зверя с капота):
+ *   WRECK_BASE — сколько стоит на дороге с начала, wreckCount(extra) — сколько добавить с ростом сложности
+ *   (rampAt().traffic 0 → 4) → всего 7 … 11; WRECK_GAP — обломки не ближе друг к другу по ходу (в любой полосе):
+ *   в каждом ряду — один обломок, две полосы свободны; spreadZ — сдвинуть место вперёд, пока не соблюдён зазор.
+ */
+export const WRECK_BASE = 7, WRECK_GAP = 18;
+export function wreckCount(extra) { return Math.round(extra || 0); }
+
+/** z для нового обломка не ближе gap к другим машинам (дальше по ходу — к −z); skip — не считать эту */
+export function spreadZ(cars, z, gap, skip) {
+    const g = gap || WRECK_GAP;
+    for (let k = 0; k < 40; k++) {
+        let near = null;
+        (cars || []).forEach(function(c) { if (c && c !== skip && c.active !== false && Math.abs(c.z - z) < g && (near === null || c.z < near)) near = c.z; });
+        if (near === null) return z;
+        z = near - g;
+    }
+    return z;
+}
+
+/**
+ * Место для обломка: и не над разломом/трамплином (free(z) → z, из main.js freeZ), и не ближе gap к другим.
+ * free двигает шагами и может снова поставить вплотную — повторяем, пока оба условия не сойдутся.
+ */
+export function placeWreck(cars, z, car, free, gap) {
+    let p = z;
+    for (let k = 0; k < 6; k++) {
+        const s = spreadZ(cars, p, gap, car), f = free ? free(s) : s;
+        if (spreadZ(cars, f, gap, car) === f) return f;
+        p = f - 1;
+    }
+    return free ? free(p) : p;
+}
+
+/** Сколько впереди расчистить, пока зверь на капоте: hold — сколько висит (с), ups — скорость (ед./с) */
+export function latchClear(hold, ups) { return Math.max(70, (ups || 0) * (hold + 1.5)); }
 
 /** Виды обломков на дороге: попутки из src/traffic-cars.js + БТР; мотоциклов нет — мелкие, не читаются */
 export const WRECK_KINDS = ['sedan', 'sedan', 'van', 'suv', 'truck', 'bus', 'btr'];
@@ -128,8 +164,8 @@ export function wreckFx(root, pose, r) {
             fx.add(s);
         }
     }
-    if (pose.fire) { // огонь — объёмные языки пламени (видно днём, сквозь них видно и обломок) и один мягкий отсвет
-        for (let i = 0; i < 5; i++) { const fl = new THREE.Mesh(flameGeo(), flameMat(i % 3)); const h = 0.35 + r() * 0.35; fl.scale.set(h * 0.4, h, h * 0.4); fl.position.set((r() - 0.5) * 0.6, 0.45 + h * 0.4, (r() - 0.5) * 0.7); fl.rotation.set((r() - 0.5) * 0.3, r() * 3, (r() - 0.5) * 0.3); fx.add(fl); }
+    if (pose.fire) { // огонь — объёмные языки пламени (видно днём, сквозь них видно и обломок) и один мягкий отсвет; flames: false — без языков (ролик аварии)
+        if (pose.flames !== false) for (let i = 0; i < 5; i++) { const fl = new THREE.Mesh(flameGeo(), flameMat(i % 3)); const h = 0.35 + r() * 0.35; fl.scale.set(h * 0.4, h, h * 0.4); fl.position.set((r() - 0.5) * 0.6, 0.45 + h * 0.4, (r() - 0.5) * 0.7); fl.rotation.set((r() - 0.5) * 0.3, r() * 3, (r() - 0.5) * 0.3); fx.add(fl); }
         const gl = new THREE.Sprite(fireMat(0)); gl.scale.set(0.9, 0.9, 1); gl.position.set(0, 0.7, 0); fx.add(gl);
     }
     root.add(fx);
