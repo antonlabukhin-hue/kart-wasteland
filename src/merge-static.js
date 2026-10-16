@@ -106,7 +106,7 @@ export function mergeCarParts(car, opts) {
         let pivot = car, shown = true;
         for (let p = o; p && p !== car; p = p.parent) {
             if (!p.visible) shown = false;
-            if (p !== o && pivot === car && p.userData && p.userData.isWheel) pivot = p;
+            if (p !== o && pivot === car && p.userData && (p.userData.isWheel || p.userData.wheelPart)) pivot = p; // детали колёс (литьё) — отдельно от кузова: высокая подвеска поднимает только кузов (src/suspension.js)
         }
         if (!shown || (o.userData && o.userData.noMerge)) return;
         if (!all && (o.userData.bodyPaint || o.userData.isLight || o.material.transparent)) return;
