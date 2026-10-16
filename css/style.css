@@ -6635,3 +6635,10 @@ body.crash-cine #game-container::before { content: ""; position: absolute; left:
 /* шкала «стряхни» — только пока зверь на капоте и идёт заезд */
 body:not(.hood-latch) #latch-bar, body:not(.race-mode) #latch-bar { display: none !important; }
 body:not(.race-mode).hood-latch #game-container::after { display: none !important; }
+
+/* ===== Пустошь: множитель «×N» — под шкалой брони, по центру внизу (над машиной он закрывал обзор) ===== */
+:root body.race-mode #risk-hud#risk-hud { top: auto !important; left: 50% !important; right: auto !important; transform: translateX(-50%) !important; bottom: calc(env(safe-area-inset-bottom, 0px) + 8px) !important; }
+@media (max-height: 560px) {
+    :root body.race-mode #risk-hud#risk-hud { bottom: calc(env(safe-area-inset-bottom, 0px) + 4px) !important; transform: translateX(-50%) scale(.85) !important; transform-origin: bottom center !important; }
+    #armor-bar, #power-slot { bottom: calc(env(safe-area-inset-bottom, 0px) + 52px) !important; }
+}
