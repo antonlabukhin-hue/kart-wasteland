@@ -67,7 +67,7 @@ function eyeGlow() {
         g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.35, 'rgba(255,80,40,0.8)'); g.addColorStop(1, 'rgba(255,0,0,0)');
         x.fillStyle = g; x.fillRect(0, 0, 32, 32);
         const t = new THREE.CanvasTexture(c); t.userData.keep = true;
-        glowMat = new THREE.SpriteMaterial({ map: t, color: 0xff3020, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+        glowMat = new THREE.SpriteMaterial({ map: t, color: 0xff3020, transparent: true, opacity: 0.5, depthWrite: false, fog: false });
     }
     return new THREE.Sprite(glowMat);
 }
@@ -87,7 +87,7 @@ export function zombify(mesh, species) {
     if (typeof document !== 'undefined' && eyes.length) {
         mesh.updateMatrixWorld(true);
         const inv = new THREE.Matrix4().copy(mesh.matrixWorld).invert(), v = new THREE.Vector3();
-        eyes.forEach(function(e) { const s = eyeGlow(); e.getWorldPosition(v).applyMatrix4(inv); s.position.copy(v); s.scale.setScalar(0.32); s.userData.eyeGlow = true; mesh.add(s); });
+        eyes.forEach(function(e) { const s = eyeGlow(); e.getWorldPosition(v).applyMatrix4(inv); s.position.copy(v); s.scale.setScalar(0.12); s.userData.eyeGlow = true; mesh.add(s); });
     }
     return mesh;
 }

@@ -36,7 +36,10 @@ function kit(g) {
             });
         },
         eyes: function(y, z, x, r) {
-            [-x, x].forEach(function(sx) { const e = add(SPH(), 0x111111, [sx, y, z], [r, r, r]); e.userData.isEye = true; });
+            // глаз — шарик своего размера, масштаб 1: спавнер зверей (src/animals.js) сбрасывает масштаб глаз на 1 (ночью — 1.6),
+            // и шарик, уменьшенный масштабом, раздувался в огромный цветной шар, закрывавший зверя
+            const geo = G('eye' + r, function() { return new THREE.SphereGeometry(r, 8, 6); });
+            [-x, x].forEach(function(sx) { const e = add(geo, 0x111111, [sx, y, z], [1, 1, 1]); e.userData.isEye = true; });
         }
     };
 }

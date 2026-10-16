@@ -86,7 +86,7 @@ function fissure(g, r) {
     m.scale.set(1, len, 1); m.rotation.x = -Math.PI / 2; m.rotation.z = (r() - 0.5) * 0.5;
     const char = mesh(G('char', function() { return new THREE.PlaneGeometry(2.2, 1); }), flat('charMat', function() { return new THREE.MeshBasicMaterial({ color: 0x0c0806, transparent: true, opacity: 0.55, depthWrite: false }); }), 0, 0.03, 0, g);
     char.scale.set(1, len, 1); char.rotation.copy(m.rotation);
-    for (let i = 0; i < 4; i++) { const s = glow(0xff5a1a, 2 + r() * 1.5, 0.7); s.position.set((r() - 0.5) * 0.6, 0.35, (i - 1) * len * 0.3); g.add(s); }
+    for (let i = 0; i < 4; i++) { const s = glow(0xff5a1a, 1 + r() * 0.6, 0.45); s.position.set((r() - 0.5) * 0.6, 0.35, (i - 1) * len * 0.3); g.add(s); }
 }
 /** Ядовитая лужа: ярко-зелёная, светится, пузыри */
 function toxicPool(g, r) {

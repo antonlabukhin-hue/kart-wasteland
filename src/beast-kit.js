@@ -46,7 +46,11 @@ function glowTex() {
     glowT = new THREE.CanvasTexture(c); glowT.userData.keep = true; return glowT;
 }
 const sm = {}, bm = {}, lm = {};
-function glow(color, size) { const m = sm[color] || (sm[color] = new THREE.SpriteMaterial({ map: glowTex(), color: color, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false })); const s = new THREE.Sprite(m); s.scale.setScalar(size); return s; }
+/** Ореол: небольшой и полупрозрачный — подсвечивает деталь, но не закрывает зверя (сложение ореолов днём давало сплошной цветной шар) */
+export const GLOW_MAX = 0.18, GLOW_OPACITY = 0.45;
+function glow(color, size) { const m = sm[color] || (sm[color] = new THREE.SpriteMaterial({ map: glowTex(), color: color, transparent: true, opacity: GLOW_OPACITY, depthWrite: false, fog: false })); const s = new THREE.Sprite(m); s.scale.setScalar(Math.min(GLOW_MAX, size)); return s; }
+/** Язык пламени: светящийся конус (виден днём, не прячет зверя) */
+function flame(add, color, x, y, z, h, tilt) { const c = add(new THREE.Mesh(G('flame', function() { return new THREE.ConeGeometry(0.5, 1, 5); }), lit(color))); c.scale.set(h * 0.35, h, h * 0.35); c.position.set(x, y + h * 0.4, z); c.rotation.set(tilt || 0, 0, 0); return c; }
 function lit(color) { return bm[color] || (bm[color] = new THREE.MeshBasicMaterial({ color: color })); }
 function solid(color) { return lm[color] || (lm[color] = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, metalness: 0.3, flatShading: true })); }
 const geos = {};
@@ -116,14 +120,14 @@ function addFeatures(mesh, def, eyes) {
             });
         } else if (kind === 'tailFire') {
             const p = new THREE.Vector3(0, (topAt(mesh, parts, 0, box.min.z + size * 0.05) || box.max.y * 0.6), box.min.z);
-            const a = glow(0xffd040, size * 0.5), b = glow(col, size * 0.9); a.position.copy(p); b.position.copy(p).add(new THREE.Vector3(0, size * 0.1, -size * 0.05)); add(a); add(b);
+            for (let i = 0; i < 4; i++) flame(add, i % 2 ? col : 0xffd040, p.x + (i - 1.5) * size * 0.04, p.y, p.z - (i % 2) * size * 0.05, size * (0.22 - i * 0.03), -0.4);
         } else if (kind === 'mane') {
-            for (let i = 0; i < 8; i++) { const ang = i / 8 * Math.PI * 2, g = glow(i % 2 ? col : 0xffb040, size * 0.32); g.position.set(head.x + Math.cos(ang) * size * 0.2, head.y + Math.sin(ang) * size * 0.2, head.z - size * 0.08); add(g); }
+            for (let i = 0; i < 9; i++) { const ang = i / 9 * Math.PI * 2, fl = flame(add, i % 2 ? col : 0xffb040, head.x + Math.cos(ang) * size * 0.17, head.y + Math.sin(ang) * size * 0.17, head.z - size * 0.1, size * 0.16, 0); fl.position.y -= size * 0.06; fl.rotation.z = ang - Math.PI / 2; }
         } else if (kind === 'patches') {
             for (let i = 0; i < n; i++) {
                 const z = box.min.z + (box.max.z - box.min.z) * (0.2 + 0.6 * (i / Math.max(1, n - 1))), sd = i % 2 ? 1 : -1;
                 const y = topAt(mesh, parts, 0, z); if (y == null) continue;
-                const g = glow(col, size * 0.2); g.position.set(sd * size * 0.18, y - size * 0.12, z); add(g);
+                const pt = add(new THREE.Mesh(G('blot', function() { return new THREE.SphereGeometry(0.5, 7, 5); }), lit(col))); pt.scale.set(size * 0.05, size * 0.09, size * 0.11); pt.position.set(sd * size * 0.16, y - size * 0.1, z);
             }
         } else if (kind === 'plate') {
             const p = add(new THREE.Mesh(G('plate', function() { return new THREE.BoxGeometry(1, 0.25, 0.7); }), solid(col)));

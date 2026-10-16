@@ -104,8 +104,12 @@ function smokeMat(i) {
     if (!smokeMats[i]) { const v = 0.13 + i * 0.06; smokeMats[i] = new THREE.SpriteMaterial({ map: puffTex(), color: new THREE.Color().setRGB(v, v * 0.95, v * 0.9, THREE.SRGBColorSpace), transparent: true, opacity: 0.92 - i * 0.1, depthWrite: false, fog: false }); } // тёмный и без тумана — столб видно издалека на светлом небе
     return smokeMats[i];
 }
+let flameG = null; const flameMs = [];
+function flameGeo() { if (!flameG) { flameG = new THREE.ConeGeometry(0.5, 1, 5); flameG.userData.keep = true; } return flameG; }
+function flameMat(i) { return flameMs[i] || (flameMs[i] = new THREE.MeshBasicMaterial({ color: [0xff5a10, 0xff9a20, 0xffd040][i], transparent: true, opacity: 0.85 })); }
 function fireMat(i) {
-    if (!fireMats[i]) fireMats[i] = new THREE.SpriteMaterial({ map: glowTex(), color: i ? 0xff7a1a : 0xffc040, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+    // обычное смешивание и полупрозрачно: сложение трёх ореолов днём давало сплошной оранжевый диск, закрывавший обломок и зверей
+    if (!fireMats[i]) fireMats[i] = new THREE.SpriteMaterial({ map: glowTex(), color: i ? 0xff7a1a : 0xffc040, transparent: true, opacity: 0.4, depthWrite: false });
     return fireMats[i];
 }
 
@@ -124,7 +128,10 @@ export function wreckFx(root, pose, r) {
             fx.add(s);
         }
     }
-    if (pose.fire) for (let i = 0; i < 3; i++) { const s = new THREE.Sprite(fireMat(i % 2)); const sz = 0.45 + r() * 0.35; s.scale.set(sz, sz, 1); s.position.set((r() - 0.5) * 0.5, 0.45 + r() * 0.3, (r() - 0.5) * 0.6); fx.add(s); }
+    if (pose.fire) { // огонь — объёмные языки пламени (видно днём, сквозь них видно и обломок) и один мягкий отсвет
+        for (let i = 0; i < 5; i++) { const fl = new THREE.Mesh(flameGeo(), flameMat(i % 3)); const h = 0.35 + r() * 0.35; fl.scale.set(h * 0.4, h, h * 0.4); fl.position.set((r() - 0.5) * 0.6, 0.45 + h * 0.4, (r() - 0.5) * 0.7); fl.rotation.set((r() - 0.5) * 0.3, r() * 3, (r() - 0.5) * 0.3); fx.add(fl); }
+        const gl = new THREE.Sprite(fireMat(0)); gl.scale.set(0.9, 0.9, 1); gl.position.set(0, 0.7, 0); fx.add(gl);
+    }
     root.add(fx);
     return fx;
 }
