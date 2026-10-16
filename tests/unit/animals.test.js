@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as THREE from 'three';
-import { AnimalSpawner, speedScale, REF_SPEED } from '../../src/animals.js';
+import { AnimalSpawner, speedScale, REF_SPEED, TELL_S } from '../../src/animals.js';
 
 // Модуль видит index.html только через window: createAnimalMesh и showAnimalShout
 let shout;
@@ -114,5 +114,19 @@ describe('звери видят скорость машины', () => {
         const sp = new AnimalSpawner(new THREE.Scene(), 10, 0, -1000, 15, 3, 0.5, 1, 0);
         sp.update(1 / 60, -100); sp.update(1 / 60, -600); sp.update(1 / 60, -600.4);
         expect(sp._k).toBe(1);
+    });
+    it('пустошь: зверь заметен и подаёт голос за ~TELL_S до выхода (onTell один раз, раньше перебежки)', () => {
+        const sp = new AnimalSpawner(new THREE.Scene(), 10, 0, -1000, 15, 3, 0.5, 1, 0);
+        const told = []; sp.onTell = (a) => told.push(a);
+        const a = sp.createAnimal(-100, 'DOG'); a._trigDist = 15; sp.animals.push(a);
+        let z = -40, tellAt = null, trigAt = null;
+        sp.update(1 / 60, z);
+        for (let i = 0; i < 400 && trigAt == null; i++) {
+            z -= REF_SPEED / 60; sp.updateAnimal(a, 1 / 60, z); sp._v = REF_SPEED;
+            if (tellAt == null && told.length) { tellAt = z; expect(a.mesh.visible).toBe(true); expect(a.triggered).toBe(false); }
+            if (a.triggered) trigAt = z;
+        }
+        expect(told.length).toBe(1);
+        expect((tellAt - trigAt) / REF_SPEED).toBeGreaterThan(TELL_S * 0.8);
     });
 });
