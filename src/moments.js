@@ -6,14 +6,15 @@
  * третьем заезде. Выбор и расписание — чистые функции (с тестами); сценки — меши и поведение по положению игрока.
  */
 import * as THREE from 'three';
+import { gasMask } from './memes.js';
 
 export const MOMENTS = [
-    { id: 'granny_cross', name: 'Бабушка с огурцами', styles: ['village', 'arsenev', 'city'], news: 'бабушка с ведром огурцов — перебегает трассу' },
-    { id: 'zapor_nitro', name: 'Запорожец на нитро', styles: null, news: '«Запорожец» на реактивной тяге — обгоняет всех' },
-    { id: 'hedgehog', name: 'Ёжик в тумане', styles: ['forest', 'village'], news: 'ёжик с узелком — ищет лошадку в тумане' },
-    { id: 'ufo', name: 'НЛО', styles: ['forest', 'village', 'arsenev'], news: 'НЛО над лесом — светит лучом в кусты' },
-    { id: 'wheelie', name: 'Мотоциклист без колеса', styles: null, news: 'мотоциклист едет на одном колесе' },
-    { id: 'cow', name: 'Корова у трассы', styles: ['village', 'arsenev'], news: 'корова пасётся прямо у трассы' }
+    { id: 'granny_cross', name: 'Бабушка в противогазе', styles: ['village', 'arsenev', 'city'], news: 'бабушка в противогазе с ведром огурцов — перебегает трассу' },
+    { id: 'zapor_nitro', name: 'Запорожец пустоши', styles: null, news: '«Запорожец» на реактивной тяге — пустошь ему нипочём' },
+    { id: 'hedgehog', name: 'Ёжик в дыму', styles: ['forest', 'village'], news: 'ёжик с узелком — ищет лошадку в дыму пожарищ' },
+    { id: 'ufo', name: 'НЛО', styles: ['forest', 'village', 'arsenev'], news: 'НЛО над пожарищем — светит лучом в руины' },
+    { id: 'wheelie', name: 'Байкер пустоши', styles: null, news: 'байкер пустоши едет на одном колесе' },
+    { id: 'cow', name: 'Бешеная корова', styles: ['village', 'arsenev'], news: 'бешеная корова с горящими глазами пасётся у трассы' }
 ];
 export const RARE_CHANCE = 0.35;   // ≈ каждый третий заезд — ещё один редкий момент
 
@@ -62,6 +63,7 @@ function granny() {
     const coat = M(0x7a3a3a), legs = M(0x2a2a2a);
     const body = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.32, 0.8, 10), coat); body.position.y = 0.75; g.add(body);
     ball(g, 0.14, M(0xe8b898), 0, 1.3, 0); ball(g, 0.16, M(0x2e86c1), 0, 1.33, -0.02, 0.8);
+    gasMask(g, 0, 1.27, 0.13, 0.9); // Пустошь: в противогазе
     const lA = box(g, 0.08, 0.4, 0.08, legs, -0.08, 0.2, 0), lB = box(g, 0.08, 0.4, 0.08, legs, 0.08, 0.2, 0);
     const bucket = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.28, 10), M(0x9aa0a8, { metalness: 0.4 })); bucket.position.set(0.33, 0.55, 0); g.add(bucket);
     for (let k = 0; k < 4; k++) box(g, 0.05, 0.05, 0.16, M(0x3a8a3a), 0.28 + (k % 2) * 0.09, 0.71, -0.04 + Math.floor(k / 2) * 0.08); // огурцы
@@ -88,7 +90,7 @@ function hedgehog() {
     for (let k = 0; k < 14; k++) { const a = k / 14 * Math.PI * 2, s = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.25, 5), M(0x3a2a1a)); s.position.set(Math.cos(a) * 0.22, 0.38 + Math.sin(k) * 0.05, Math.sin(a) * 0.22); s.rotation.set(Math.sin(a) * 0.9, 0, -Math.cos(a) * 0.9); g.add(s); }
     ball(g, 0.13, M(0x8a6a4a), 0, 0.27, -0.3); ball(g, 0.04, M(0x111111), 0, 0.29, -0.43);
     box(g, 0.02, 0.6, 0.02, M(0x5a4026), 0.25, 0.55, -0.1); ball(g, 0.14, M(0xf2ece0), 0.25, 0.9, -0.1); // узелок на палке
-    const fog = new THREE.Mesh(new THREE.SphereGeometry(2.2, 14, 10), new THREE.MeshBasicMaterial({ color: 0xf2f4f6, transparent: true, opacity: 0.35, depthWrite: false }));
+    const fog = new THREE.Mesh(new THREE.SphereGeometry(2.2, 14, 10), new THREE.MeshBasicMaterial({ color: 0x6a6460, transparent: true, opacity: 0.42, depthWrite: false }) /* Пустошь: дым, не туман */);
     fog.position.y = 0.6; fog.scale.y = 0.55; g.add(fog);
     return g;
 }
