@@ -7,16 +7,13 @@
 import * as THREE from 'three';
 import { dressBeast } from './beast-kit.js';
 import { buildBeast } from './beast-models.js';
-import { addOutline } from './beast-outline.js';
 
-/** Зверь пустоши по виду: своя модель (src/beast-models.js), если есть, иначе прежняя из main.js; окрас, мутации и тёмный контур (src/beast-outline.js) */
+/** Зверь пустоши по виду: своя модель (src/beast-models.js), если есть, иначе прежняя из main.js; окрас и мутации */
 export function makeAnimal(species) {
     const fn = typeof window !== 'undefined' && window.createAnimalMesh;
     const m = buildBeast(species) || (fn ? fn(species) : null);
     if (!m) return null;
-    zombify(m, species);
-    try { addOutline(m); } catch (e) {}
-    return m;
+    return zombify(m, species);
 }
 
 /** Цвет шкуры «больного» зверя: выцветший, темнее, с уходом в болотную зелень */

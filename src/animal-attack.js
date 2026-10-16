@@ -16,7 +16,13 @@ export const CHARGE = ['BOAR', 'RHINO', 'DEER', 'ZEBRA', 'DINO'];
 export const BLOCK = ['BEAR', 'ELEPHANT', 'HIPPO', 'CROC', 'GIRAFFE'];
 /** Гиганты: мамонт, носорог, бегемот, медведь, ящер — бывает, вырастают в 2.4 раза и несутся по полосе, как сорвавшийся грузовик (удар — целое сердце) */
 export const GIANT = ['ELEPHANT', 'RHINO', 'HIPPO', 'BEAR', 'DINO'];
-export const GIANT_SHARE = 0.4, GIANT_SCALE = 2.4, GIANT_VZ = 11;
+export const GIANT_SHARE = 0.4, GIANT_SCALE = 2.0, GIANT_VZ = 11;
+/**
+ * Наибольший радиус удара зверя, ед. Полосы — через 2 ед., к радиусу при проверке прибавляется 0.45 (полмашины):
+ * с радиусом больше ~1.15 зверь задевал машину и в соседней полосе — бегемота-гиганта (было 1.25 × 1.9 ≈ 2.5) нельзя было объехать.
+ * Гигант — во всю свою полосу, но не дальше.
+ */
+export const HIT_R_MAX = 1.1;
 /** Доля нападающих среди зверей своей группы (остальные — просто перебегают) */
 export const ATTACK_SHARE = 0.7;
 /** На какой дальности (× порог перебежки) выскакивает зверь каждой роли */
@@ -42,10 +48,11 @@ export function prepAttack(a, r, base) {
     a.role = pickRole(a.speciesKey, r);
     a._trigDist = (base || 15) * TRIG_K[a.role] * (0.9 + r() * 0.2);
     a.phase = null; a.pt = 0;
-    if (a.role === 'giant') { // гигант: крупнее, удар — целое сердце, задевает шире
+    a.radius = Math.min(a.radius || 0.5, HIT_R_MAX); // крупный зверь бьёт только в своей полосе — соседняя безопасна
+    if (a.role === 'giant') { // гигант: крупнее, удар — целое сердце, во всю свою полосу
         a.giant = true;
-        if (a.mesh && a.mesh.scale) a.mesh.scale.multiplyScalar(GIANT_SCALE);
-        a.radius = (a.radius || 0.5) * 1.9;
+        if (a.mesh && a.mesh.scale) { if (a.mesh.scale.setScalar) a.mesh.scale.setScalar(GIANT_SCALE); else a.mesh.scale.multiplyScalar(GIANT_SCALE); }
+        a.radius = HIT_R_MAX;
     }
     return a;
 }
