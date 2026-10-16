@@ -97,9 +97,14 @@ export function createInfiniteRun(ctx) {
         latch.tick(dt, ctx.x);
         for (let i = 0; i < sp.animals.length; i++) {
             const a = sp.animals[i];
+            if (a.roar === 'new') { // гигант выбежал на полосу: рёв и надпись — видно издалека
+                a.roar = 'done';
+                try { if (window.soundEngine) window.soundEngine.playSfx('boss_roar', 1.2, 0.55); } catch (e) {}
+                try { ctx.popup('⚠ ' + (a.speciesKey === 'ELEPHANT' ? 'МАМОНТ' : a.speciesKey === 'RHINO' ? 'НОСОРОГ' : a.speciesKey === 'HIPPO' ? 'БЕГЕМОТ' : a.speciesKey === 'DINO' ? 'ЯЩЕР' : 'МЕДВЕДЬ') + ' НЕСЁТСЯ НАВСТРЕЧУ!'); } catch (e) {}
+            }
             if (a.dodged !== 'new') continue;
             a.dodged = 'done';
-            if (ctx.state === 'racing') { const rv = riskEvent(ctx.risk, 'dodge'); try { ctx.popup((a.role === 'charge' ? '🐗 Ушёл от тарана!' : '🐺 Увернулся!') + ' ×' + rv.mult); } catch (e) {} }
+            if (ctx.state === 'racing') { const rv = riskEvent(ctx.risk, 'dodge'); try { ctx.popup((a.giant ? '🦣 Ушёл от гиганта!' : a.role === 'charge' ? '🐗 Ушёл от тарана!' : '🐺 Увернулся!') + ' ×' + rv.mult); } catch (e) {} }
         }
     }
     let wasteTo = 0; // Пустошь: придорожные отголоски апокалипсиса (src/wasteland-decor.js) расставлены до этой дальности

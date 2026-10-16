@@ -8014,7 +8014,7 @@ function startGaragePreview(carId) {
             };
             // «задел боком» (src/hit-zones.js): не авария — скорость, множитель и толчок вбок; в правиле «ГАИ на хвосте» — погоня, задел в погоне — авария
             function hitOrGraze(obs, dx, hw) {
-                if (INF && (obs.type === 'animal' || obs.speciesKey)) { obs.halfHeart = true; return handleObstacleHit(obs); } /* зверь — полсердца при любом ударе, и краем тоже: риск должен быть */
+                if (INF && (obs.type === 'animal' || obs.speciesKey)) { obs.halfHeart = !obs.giant; return handleObstacleHit(obs); } /* зверь — полсердца при любом ударе, и краем тоже: риск должен быть */
                 if (hitSeverity(dx, hw, INF) === 'major') return handleObstacleHit(obs);
                 if (gameState !== 'racing') return;
                 _nmBlock = 2;
