@@ -10,10 +10,13 @@ import * as THREE from 'three';
 import { createDiorama, ROAD_W } from './art-scene.js';
 import { addNitroFlames } from './cars.js';
 import { setCurve } from './curved-world.js';
+import { ruinStretch } from './ruin.js';
+import { buildAccent } from './zone-accents.js';
+import { makeAnimal } from './zombie-look.js';
 
 const SPEED = 16;          // ед./с — скорость «прокрутки» мира
 const SPAN = 150;          // длина петли декораций
-const CRITTERS = ['DOG', 'FOX', 'DEER', 'BOAR', 'BEAR'];
+const CRITTERS = ['DOG', 'FOX', 'DEER', 'BOAR', 'BEAR', 'LION', 'RHINO', 'CAT'];
 const CROSS_X = 11;          // от обочины до обочины: −11 → +11
 const CROSS_SPEED = 8;       // ед./с поперёк дороги
 // за время перебежки мир уезжает на SPEED·(2·CROSS_X/CROSS_SPEED) ≈ 44 ед. — стартуем дальше, чтобы зверь
@@ -57,6 +60,7 @@ export function startMenuBg(opts) {
         boards: [{ x: -(ROAD_W / 2 + 2.6), z: 20, ad: 0 }, { x: ROAD_W / 2 + 2.6, z: 65, ad: 2 }, { x: -(ROAD_W / 2 + 2.6), z: 110, ad: 4 }]
     });
     d.apply(renderer);
+    wasteland(d);
     st = {
         renderer: renderer, d: d, scene: d.scene, camera: d.camera, carId: carId, look: o.look, raf: 0, t: 0, last: performance.now(),
         still: !!o.still, critters: [], nextCritter: 1.5, intro: !!o.intro, shotT: 0,
@@ -83,12 +87,33 @@ export function startMenuBg(opts) {
     if (!st.still) loop();
 }
 
+/**
+ * Пустошь: диорама меню после катастрофы — копоть и выбитые окна (src/ruin.js), пыльное небо, на горизонте пожары,
+ * у обочин — костры и лавовые трещины (src/zone-accents.js); всё «едет» вместе с декорациями.
+ */
+function wasteland(d) {
+    const own = (d.cars || []).map(function(c) { return c.group; }).filter(function(g) { return g && g.parent; }); // машина игрока — в своей краске
+    own.forEach(function(g) { g.userData._p = g.parent; g.parent.remove(g); });
+    try { ruinStretch(d.scene, Math.random, { houseFires: 3, treeFires: 3, ember: 0xff6a1a, embers: 10 }); } catch (e) {}
+    own.forEach(function(g) { g.userData._p.add(g); });
+    const sky = 0x6a3a22, fog = 0x8a5a38;
+    if (d.scene.background && d.scene.background.isColor) d.scene.background.setHex(sky);
+    if (d.scene.fog) { d.scene.fog.color.setHex(fog); d.scene.fog.near = Math.min(d.scene.fog.near, 30); }
+    const place = function(kind, x, z, sc) {
+        try { const a = buildAccent({ kind: kind }, Math.random, []); a.position.set(x, 0, z); if (sc) a.scale.setScalar(sc); d.scene.add(a); d.deco.push(a); } catch (e) {}
+    };
+    for (let z = 10; z < SPAN; z += 30) {
+        place('fissure', -(ROAD_W / 2 + 0.8), z, 1); place('bonfire', ROAD_W / 2 + 4 + Math.random() * 4, z + 12, 1);
+        place('inferno', (Math.random() < 0.5 ? -1 : 1) * (28 + Math.random() * 20), z + 8, 1);
+    }
+}
+
 function spawnCritter() {
     const mk = typeof window !== 'undefined' && window.createAnimalMesh;
     if (!mk) return;
     try {
         const kind = CRITTERS[Math.floor(Math.random() * CRITTERS.length)];
-        const m = mk(kind);
+        const m = makeAnimal(kind) || mk(kind);
         const dir = Math.random() < 0.5 ? 1 : -1;
         m.visible = true;
         m.rotation.y = dir > 0 ? Math.PI / 2 : -Math.PI / 2;
