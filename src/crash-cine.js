@@ -69,7 +69,7 @@ export function crashCine(o) {
     const sfx = function(n, v, p) { try { if (window.soundEngine) window.soundEngine.playSfx(n, v, p); } catch (e) {} };
     // огонь и дым — над машиной (едут вместе с ней)
     const fx = new THREE.Group(); scene.add(fx);
-    wreckFx(fx, { smoke: true, fire: true }, Math.random);
+    wreckFx(fx, { smoke: true, fire: true, flames: false }, Math.random); // без треугольников-языков пламени: только отсвет и дым
     const sparks = [];
     for (let i = 0; i < 22; i++) { const s = spark(); s.scale.setScalar(0.12 + Math.random() * 0.12); s.userData.v = new THREE.Vector3((Math.random() - 0.5) * 7, 2 + Math.random() * 5, (Math.random() - 0.5) * 7); scene.add(s); sparks.push(s); }
     let flash = null, boomed = false;
