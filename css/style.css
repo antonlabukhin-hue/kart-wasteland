@@ -6609,3 +6609,25 @@ body.crash-cine #game-container::before { content: ""; position: absolute; left:
 #crash-cine-cap b { display: block; font: 900 clamp(34px, 7vw, 64px)/1 system-ui, sans-serif; letter-spacing: .08em; color: #ff6a2a; }
 #crash-cine-cap small { display: block; margin-top: 6px; font: 700 clamp(13px, 2.4vw, 18px)/1.2 system-ui, sans-serif; color: #f2d8b8; }
 @keyframes cineIn { from { opacity: 0; transform: translate(-50%, 14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* ===== Пустошь: заезд вертикально — плашки компактные, дорогу не закрывают =====
+   слева сверху — время и сердечки, под ними «Е» с метрами; справа — «Меню», под ним пауза и камера;
+   надписи — одна строка под плашками; пауза — наверху (внизу мешала свайпам) */
+@media (orientation: portrait) {
+    :root body.race-mode #game-hud.hud-v2#game-hud { font-size: 13px !important; padding: 6px 10px !important; max-width: 46vw !important; border-radius: 12px !important; border-width: 1px !important; }
+    :root body.race-mode #game-hud.hud-v2 .hud-big { font-size: 1.6em !important; }
+    :root body.race-mode #game-hud.hud-v2 .hud-hearts i { font-size: 1em !important; }
+    :root body.race-mode #e-counter#e-counter { top: calc(max(8px, env(safe-area-inset-top)) + 70px) !important; padding: 3px 12px 3px 8px !important; border-radius: 12px !important; min-width: 0 !important; }
+    :root body.race-mode #e-counter i, :root body.race-mode #e-counter b { font-size: 18px !important; }
+    :root body.race-mode #e-counter .ec-m { font-size: 12px !important; }
+    :root body.race-mode #hud-menu-btn#hud-menu-btn { top: max(8px, env(safe-area-inset-top)) !important; min-height: 0 !important; padding: 7px 12px !important; font-size: 14px !important; border-radius: 12px !important; border-width: 1px !important; }
+    :root body.race-mode #mobile-controls .mc-cam { top: calc(max(8px, env(safe-area-inset-top)) + 92px) !important; }
+    :root body.race-mode #mobile-controls .mc-cam .cam-btn { width: 40px !important; height: 40px !important; border-radius: 12px !important; border-width: 1px !important; }
+    :root body.race-mode #btnPauseMobile#btnPauseMobile, :root body.race-mode.swipe-ctl #btnPauseMobile#btnPauseMobile { position: fixed !important; top: calc(max(8px, env(safe-area-inset-top)) + 46px) !important; right: max(8px, env(safe-area-inset-right)) !important; left: auto !important; bottom: auto !important;
+        width: 40px !important; height: 40px !important; min-width: 0 !important; min-height: 0 !important; padding: 0 !important; font-size: 16px !important; border-radius: 12px !important; transform: none !important; z-index: 120 !important; }
+    :root body.race-mode .police-hud.police-hud { top: calc(max(8px, env(safe-area-inset-top)) + 140px) !important; transform: scale(.8) !important; transform-origin: top right !important; }
+    :root body.race-mode .rt.rt.rt { top: calc(max(8px, env(safe-area-inset-top)) + 112px) !important; font-size: 12px !important; padding: 3px 10px !important; max-width: 70vw !important; }
+    :root body.race-mode .rt.rt.rt small { display: none !important; }
+    :root body.race-mode #hud-speedo#hud-speedo { transform: scale(.66) !important; }
+    #latch-bar { top: calc(max(8px, env(safe-area-inset-top)) + 140px) !important; }
+}
