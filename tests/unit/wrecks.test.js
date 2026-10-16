@@ -45,8 +45,8 @@ describe('Пустошь: обломки на трассе', () => {
     });
 
     it('обломков с ростом сложности больше; виды — без мотоциклов, есть БТР', () => {
-        expect(WRECK_BASE + wreckCount(0)).toBe(7);
-        expect(WRECK_BASE + wreckCount(4)).toBe(11);
+        expect(WRECK_BASE + wreckCount(0)).toBe(8);
+        expect(WRECK_BASE + wreckCount(4)).toBe(12);
         expect(WRECK_KINDS).toContain('btr');
         expect(WRECK_KINDS).not.toContain('moto');
     });

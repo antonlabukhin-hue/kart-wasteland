@@ -24,7 +24,7 @@ test('Пустошь: один режим, обломки стоят, звери
         const g = window.__raceDebug;
         const z0 = g.cars.map(c => c.z);
         return new Promise(res => setTimeout(() => {
-            const kinds = ['sedan', 'van', 'suv', 'truck', 'bus', 'btr'];
+            const kinds = ['sedan', 'van', 'suv', 'truck', 'bus', 'btr', 'tank', 'plane', 'heli', 'tanker', 'tractor'];
             let waste = 0, cracks = 0;
             g.scene.children.forEach(o => { if (/^waste:/.test(o.name)) { waste++; if (/crack|scorch/.test(o.name)) cracks++; } });
             res({
@@ -38,7 +38,7 @@ test('Пустошь: один режим, обломки стоят, звери
             });
         }, 1500));
     });
-    expect(s.n).toBeGreaterThanOrEqual(7); // обломков 7–11, не стена (src/wrecks.js WRECK_BASE)
+    expect(s.n).toBeGreaterThanOrEqual(8); // обломков 8–12, не стена (src/wrecks.js WRECK_BASE)
     expect(s.tight).toBe(false);
     expect(s.notWrecks).toEqual([]);
     expect(s.moved).toBe(0);

@@ -4055,7 +4055,7 @@ function startGaragePreview(carId) {
         }
         window.createAnimalMesh = createAnimalMesh;
         // только тестовая сборка: набор для рендера картинок игры (tools/art)
-        if (import.meta.env.MODE === 'test') window.__artKit = { garage: function(id) { startGaragePreview(id); }, shop: function(id) { startShopPreview(id); }, liftCar: liftCar, THREE: THREE, memes: Memes, renderDiorama: renderDiorama, lanes: ART_LANES, tracks: CAMPAIGN_TRACKS, buildCar: buildShowroomCar, mergeCar: mergeCarParts, landmark: createLandmark, beast: function(k) { return makeAnimal(k); },
+        if (import.meta.env.MODE === 'test') window.__artKit = { garage: function(id) { startGaragePreview(id); }, shop: function(id) { startShopPreview(id); }, liftCar: liftCar, THREE: THREE, memes: Memes, renderDiorama: renderDiorama, lanes: ART_LANES, tracks: CAMPAIGN_TRACKS, buildCar: buildShowroomCar, mergeCar: mergeCarParts, landmark: createLandmark, beast: function(k) { return makeAnimal(k); }, wreck: function(k) { return makeWreck(k, 0x8a8a8a, Math.random); },
             bossHeight: function(idx) { const b = new THREE.Box3().setFromObject(createArcadeBossMesh(CAMPAIGN_BOSSES[idx % CAMPAIGN_BOSSES.length])); return (b.max.y - b.min.y) * 1.5; } };
 
 
@@ -6394,7 +6394,7 @@ function startGaragePreview(carId) {
                 const tm = window.__campaignTrafficMul || 1;
                 if (tm !== 1) maxCars = Math.max(4, Math.min(28, Math.round(maxCars * tm)));
             } catch (e) {}
-            if (INF) { maxCars = WRECK_BASE; infCarsBase = maxCars; } /* Пустошь: обломков 7–11, по одному в ряду (src/wrecks.js) */ // бесконечная трасса: попуток как в обычном заезде, дальше — больше
+            if (INF) { maxCars = WRECK_BASE; infCarsBase = maxCars; } /* Пустошь: обломков 8–12, по одному в ряду (src/wrecks.js) */ // бесконечная трасса: попуток как в обычном заезде, дальше — больше
             for (let i = 0; i < maxCars; i++) {
                 const z = INF ? spreadZ(cars, START_Z - 70 - Math.random() * 330) : -TRACK_LENGTH / 2 + 20 + Math.random() * (TRACK_LENGTH - 60);
                 const lane = spawnLane(cars, z, Math.floor(Math.random() * 3)); // строго по полосам, одна в ряду всегда свободна (src/traffic-lanes.js)

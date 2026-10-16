@@ -8,7 +8,7 @@
 import { HURDLES } from './hop-duck.js';
 import { HAZARD_KIND } from './hazards.js';
 
-const CAR_NAMES = { bus: 'автобус', truck: 'грузовик', van: 'фургон', moto: 'мотоцикл', sedan: 'попутка', car: 'попутка' };
+const CAR_NAMES = { btr: 'БТР', tank: 'танк', plane: 'самолёт', heli: 'вертолёт', tanker: 'бензовоз', tractor: 'трактор', bus: 'автобус', truck: 'грузовик', van: 'фургон', moto: 'мотоцикл', sedan: 'попутка', car: 'попутка' };
 
 /** Причина аварии → { name (кто/что, именительный), cls (класс угрозы) } */
 export function causeInfo(cause, animalNames) {

@@ -10,15 +10,16 @@
 import * as THREE from 'three';
 import { buildTraffic } from './traffic-cars.js';
 import { makeAnimal } from './zombie-look.js';
+import { WRECK_MODELS } from './wreck-models.js';
 
 /**
  * Раскладка обломков (было 14–22 на дороге, в ближних 120 ед. — в среднем 12, по две полосы закрыты в пяти рядах:
  * не объехать и не стряхнуть зверя с капота):
  *   WRECK_BASE — сколько стоит на дороге с начала, wreckCount(extra) — сколько добавить с ростом сложности
- *   (rampAt().traffic 0 → 4) → всего 7 … 11; WRECK_GAP — обломки не ближе друг к другу по ходу (в любой полосе):
+ *   (rampAt().traffic 0 → 4) → всего 8 … 12; WRECK_GAP — обломки не ближе друг к другу по ходу (в любой полосе):
  *   в каждом ряду — один обломок, две полосы свободны; spreadZ — сдвинуть место вперёд, пока не соблюдён зазор.
  */
-export const WRECK_BASE = 7, WRECK_GAP = 18;
+export const WRECK_BASE = 8, WRECK_GAP = 18;
 export function wreckCount(extra) { return Math.round(extra || 0); }
 
 /** z для нового обломка не ближе gap к другим машинам (дальше по ходу — к −z); skip — не считать эту */
@@ -50,8 +51,8 @@ export function placeWreck(cars, z, car, free, gap) {
 /** Сколько впереди расчистить, пока зверь на капоте: hold — сколько висит (с), ups — скорость (ед./с) */
 export function latchClear(hold, ups) { return Math.max(70, (ups || 0) * (hold + 1.5)); }
 
-/** Виды обломков на дороге: попутки из src/traffic-cars.js + БТР; мотоциклов нет — мелкие, не читаются */
-export const WRECK_KINDS = ['sedan', 'sedan', 'van', 'suv', 'truck', 'bus', 'btr'];
+/** Виды обломков на дороге: попутки из src/traffic-cars.js, БТР и src/wreck-models.js (танк, самолёт, вертолёт, бензовоз, трактор); мотоциклов нет — мелкие, не читаются */
+export const WRECK_KINDS = ['sedan', 'sedan', 'van', 'suv', 'truck', 'bus', 'btr', 'tank', 'plane', 'heli', 'tanker', 'tractor'];
 /** Габариты БТР для столкновений: ширина, длина (как HIT в traffic-cars.js) */
 export const BTR_HIT = [1.0, 2.3];
 
@@ -80,7 +81,7 @@ export function burnHex(h, r, k) {
  * smoke / fire — дымит и горит. Высокие (автобус, грузовик) на бок не ложатся — встали бы стеной.
  */
 export function wreckPose(kind, r) {
-    const tall = kind === 'bus' || kind === 'truck' || kind === 'btr';
+    const tall = kind === 'bus' || kind === 'truck' || kind === 'btr' || !!WRECK_MODELS[kind]; // танк, самолёт, вертолёт… — не на бок
     const a = r();
     const roll = tall ? 0 : a < 0.3 ? Math.PI : a < 0.5 ? (r() < 0.5 ? 1 : -1) * Math.PI / 2 : 0; // автобус на крыше — просто коробка с колёсами, не читается
     const yaw = (r() - 0.5) * (roll ? 0.6 : 0.8);
@@ -207,6 +208,7 @@ export function makeWreck(kind, paint, r) {
     const pose = wreckPose(kind, r);
     let group, hw, hl;
     if (kind === 'btr') { group = buildBtr(roofAnimal(r)); hw = BTR_HIT[0]; hl = BTR_HIT[1]; pose.yaw *= 0.5; }
+    else if (WRECK_MODELS[kind]) { const m = WRECK_MODELS[kind](r); group = m.group; hw = m.hitW; hl = m.hitL; pose.yaw *= 0.4; } // длинные — почти вдоль полосы
     else { const tb = buildTraffic(kind, paint); group = tb.group; hw = tb.hitW; hl = tb.hitL; }
     dressWreck(group, pose, r);
     const hit = wreckHit(hw, hl, pose);

@@ -9,7 +9,7 @@ import * as THREE from 'three';
 export const KINDS = ['sedan', 'sedan', 'truck', 'bus', 'moto', 'van', 'suv'];
 /** Габариты для столкновений (как были): ширина, длина */
 /** Высокие — выше прыжка с места (пик ~1.1, у «Горбатого» ~1.5): перепрыгнуть можно только легковые */
-export const TALL_H = { truck: 1.55, bus: 1.5 };
+export const TALL_H = { truck: 1.55, bus: 1.5, heli: 1.4, tanker: 1.5, tractor: 1.45 }; // heli, tanker, tractor — обломки пустоши (src/wreck-models.js)
 /** Прыжок с места перелетает попутку kind на высоте y? (с трамплина — перелетает всё, как раньше) */
 export function hopClears(kind, y) { return !TALL_H[kind] || y > TALL_H[kind]; }
 export const HIT = { moto: [0.44, 1.21], truck: [0.95, 2.2], bus: [1.0, 2.6], van: [0.85, 1.7], suv: [0.9, 1.6], sedan: [0.8, 1.45] };
