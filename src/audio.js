@@ -2,7 +2,7 @@
  * SoundEngine — Web Audio (двигатель, SFX) + HTML5 (музыка гонки)
  */
 import { loadSettings } from './settings.js';
-import { playKit, makeNoise } from './sfx-kit.js';
+import { playKit, makeNoise } from './sfx-kit.js'; import { playBeast } from './beast-sfx.js';
 
 // музыка заставки и меню — на 30% тише прежнего (было ×0.85 от громкости музыки): на старте игры не оглушает
 export const MENU_MUSIC_K = 0.21; // музыка меню тихо, фоном (было 0.6 → 0.3 → ещё −30%)
@@ -734,6 +734,7 @@ class SoundEngine {
             // звуки событий заезда — свои для каждого, громкость как у «Е» (src/sfx-kit.js)
             const kit = { crash: 'crash', crate: 'crate', heart: 'heart', armor: 'shield', nitro_pick: 'nitro', scrape: 'scrape' }[type];
             if (kit) { this._kitNoise = this._kitNoise || makeNoise(this.audioCtx); playKit(kit, this.audioCtx, this.audioCtx.destination, t0, vs, this._kitNoise, pitch); return; }
+            if (type.indexOf('beast_') === 0) { this._kitNoise = this._kitNoise || makeNoise(this.audioCtx); playBeast(type, this.audioCtx, this.audioCtx.destination, t0, vs, this._kitNoise); return; } // Пустошь: предупреждения зверей (src/beast-sfx.js)
             const mk = (wave, freq, dur, peak, slide, delay) => { // delay — с от начала (второй слог сигнала)
                 const o = this.audioCtx.createOscillator();
                 const g = this.audioCtx.createGain();

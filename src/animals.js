@@ -16,6 +16,8 @@ const ANIMAL_KEYS = Object.keys(ANIMAL_TYPES);
  * REF_SPEED — её крейсерская скорость, ед./с. Возвращает множитель 1..2.2.
  */
 export const REF_SPEED = 25;
+/** Пустошь: за сколько секунд до выхода зверь «замечает» машину — виден на обочине, рычит (onTell) */
+export const TELL_S = 1.0;
 export function speedScale(v) {
     return Math.max(1, Math.min(2.2, (v || 0) / REF_SPEED));
 }
@@ -262,6 +264,11 @@ class AnimalSpawner {
             if (animal._trigDist == null) {
                 const base = this.triggerLookahead || 15;
                 animal._trigDist = base * (0.9 + Math.random() * 0.2);
+            }
+            // Пустошь: за TELL_S до выхода зверь уже виден на обочине и подаёт голос — честная подсказка (src/modes/infinite-run.js)
+            if (this.onTell && !animal.told && distanceAhead > 1.2 && distanceAhead <= animal._trigDist * (this._k || 1) + (this._v || 0) * TELL_S) {
+                animal.told = true; animal.mesh.visible = true;
+                try { this.onTell(animal); } catch (e) {}
             }
             if (distanceAhead > 1.2 && distanceAhead <= animal._trigDist * (this._k || 1)) {
                 animal.triggered = true;

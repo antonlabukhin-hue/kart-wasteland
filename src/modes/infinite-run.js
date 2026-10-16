@@ -38,6 +38,8 @@ import { pickMeme, createSideMeme, decorateMemeCar, MEME_EVERY, MEMES } from '..
 import { buildShowroomCar } from '../cars.js';
 import { wreckCount } from '../wrecks.js';
 import { prepAttack, stepAttack } from '../animal-attack.js';
+import { auraLevel, setAura } from '../beast-outline.js';
+import { warnSfx } from '../beast-sfx.js';
 import { createLatch } from '../hood-latch.js';
 import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
 
@@ -90,16 +92,23 @@ export function createInfiniteRun(ctx) {
             sp.mandatoryPool = (sp.mandatoryPool || []).filter(function(k) { return k !== 'HUMAN' && k !== 'CHICKEN' && k !== 'PEACOCK'; }); // стартовый набор зверей — без людей, кур и павлинов
             sp.prep = function(a) { prepAttack(a, Math.random, sp.triggerLookahead); };
             sp.behave = function(a, d, pz) { return stepAttack(a, d, pz, ctx.x); };
+            // за ~1 с до броска зверь виден на обочине и подаёт голос своего нападения (src/beast-sfx.js) — вой, топот, рык, рёв
+            sp.onTell = function(a) { const s = warnSfx(a.role); if (s && ctx.state === 'racing') try { if (window.soundEngine) window.soundEngine.playSfx(s, a.giant ? 1.1 : 0.85); } catch (e) {} };
             // у разлома, ворот, события звери не пропадают совсем (как было), а выбегают вдвое реже — их должно быть много
             const calm = sp.densityFn;
             if (calm) sp.densityFn = function(z) { const v = calm(z); return v > 0 ? v : run.animalDensity() * 0.5; };
         }
         latch.tick(dt, ctx.x);
+        const now = performance.now() / 1000;
         for (let i = 0; i < sp.animals.length; i++) {
             const a = sp.animals[i];
+            setAura(a.mesh, auraLevel(a, now)); // контур зверя краснеет перед броском (src/beast-outline.js)
+            if (a.told && !a.triggered && a.role && a.role !== 'cross' && a.mesh) { // заметил машину: смотрит на неё и переминается
+                a.mesh.rotation.y = Math.atan2(ctx.x - a.x, Math.max(1, ctx.z - a.z));
+                a.mesh.position.y = Math.abs(Math.sin(now * 14)) * 0.06;
+            }
             if (a.roar === 'new') { // гигант выбежал на полосу: рёв и надпись — видно издалека
                 a.roar = 'done';
-                try { if (window.soundEngine) window.soundEngine.playSfx('boss_roar', 1.2, 0.55); } catch (e) {}
                 try { ctx.popup('⚠ ' + (a.speciesKey === 'ELEPHANT' ? 'МАМОНТ' : a.speciesKey === 'RHINO' ? 'НОСОРОГ' : a.speciesKey === 'HIPPO' ? 'БЕГЕМОТ' : a.speciesKey === 'DINO' ? 'ЯЩЕР' : 'МЕДВЕДЬ') + ' НЕСЁТСЯ НАВСТРЕЧУ!'); } catch (e) {}
             }
             if (a.dodged !== 'new') continue;
