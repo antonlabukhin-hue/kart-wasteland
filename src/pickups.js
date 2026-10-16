@@ -41,7 +41,7 @@ export function nitroArrowsMesh() {
     );
     glow.rotation.x = -Math.PI / 2;
     glow.position.set(0, 0.025, -0.6);
-    group.add(glow);
+    // Пустошь: без цветной подставки под бонусом — портит антураж
 
     return group;
 }
@@ -72,7 +72,7 @@ export function heartGumMesh() {
     );
     glow.rotation.x = -Math.PI / 2;
     glow.position.y = 0.03;
-    group.add(glow);
+    // Пустошь: без цветной подставки под бонусом — портит антураж
 
     return group;
 }

@@ -6908,7 +6908,7 @@ function startGaragePreview(carId) {
                 if (oo.inLane) { _oncAcc += ONC_POINTS * risk.mult * deltaTime; const _w = Math.floor(_oncAcc); if (_w) { risk.points += _w; _oncAcc -= _w; } /* целыми — на шкале риска не «152,016» */ if (!_oncIn) try { showTimePenaltyPopup(0, '↔ ВСТРЕЧКА ×2 — очки вдвое!'); } catch (e) {} }
                 _oncIn = oo.inLane;
             }
-            const threatMarks = INF ? createThreatMarks(scene) : null, _warnSt = createWarnState(), _tm = []; /* язык угроз: кольцо цвета класса под помехой впереди и звук класса (src/threat-style.js) */
+            const threatMarks = null && createThreatMarks(scene), /* Пустошь: без цветных колец под помехами — портят антураж */ _warnSt = createWarnState(), _tm = []; /* язык угроз: кольцо цвета класса под помехой впереди и звук класса (src/threat-style.js) */
             function threatFrame() {
                 _tm.length = 0;
                 const near = function(z) { const d = zPos - z; return d > 2 && d < MARK_FAR + 2; };
