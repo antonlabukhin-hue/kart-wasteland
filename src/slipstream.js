@@ -99,8 +99,8 @@ export function createNitroButton(o) {
     el.type = 'button';
     el.id = 'nitro-btn';
     el.className = 'control-btn';
-    el.setAttribute('aria-label', 'Нитро');
-    el.innerHTML = '<i>🔥</i><b>НИТРО</b>' + (o && o.keyHint ? '<kbd>' + o.keyHint + '</kbd>' : '');
+    el.setAttribute('aria-label', (o && o.label) || 'Нитро'); // Пустошь: кнопка — «Гудок» (src/horn.js)
+    el.innerHTML = '<i>' + ((o && o.icon) || '🔥') + '</i><b>' + ((o && o.label) || 'НИТРО').toUpperCase() + '</b>' + (o && o.keyHint ? '<kbd>' + o.keyHint + '</kbd>' : '');
     const fire = function(e) { if (e) { e.preventDefault(); e.stopPropagation(); } if (o && o.onFire) o.onFire(); };
     el.addEventListener('touchstart', fire, { passive: false });
     el.addEventListener('mousedown', fire);

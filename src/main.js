@@ -6892,7 +6892,7 @@ function startGaragePreview(carId) {
                 return { mesh: m, x: x, z: z, type: 'vhs', active: true, bob: 0, radius: 0.7, baseY: y };
             }
             let nearMissCount = 0;
-            const slipSt = INF ? createSlip() : null; /* слипстрим и нитро по кнопке (src/slipstream.js) */ const draftFx = slipSt ? createDraftFx(scene) : null; const nitroBtn = slipSt ? createNitroButton({ keyHint: isMobile ? '' : 'E', onFire: function() { fireNitro(); } }) : null;
+            const slipSt = INF ? createSlip() : null; /* слипстрим и нитро по кнопке (src/slipstream.js) */ const draftFx = slipSt ? createDraftFx(scene) : null; const nitroBtn = slipSt ? createNitroButton({ keyHint: isMobile ? '' : 'E', icon: CUT.horn ? '📯' : '', label: CUT.horn ? 'Гудок' : '', onFire: function() { fireNitro(); } }) : null; /* Пустошь: вместо нитро — гудок (src/horn.js) */
             const oncLane = null && createOncomingLane; /* Пустошь: встречки нет */ let _oncK = -1, _oncIn = false, _oncAcc = 0; /* «Встречка ×2» (src/oncoming-lane.js) */
             function oncomingFrame(deltaTime) { // шаг кадра — параметром: функция объявлена вне кадра
                 const k = oncIndexAt(infWorld ? infWorld.dist : 0, 260);
@@ -6922,7 +6922,7 @@ function startGaragePreview(carId) {
                 threatMarks.update(marks, raceTime);
                 const wc = warnPick(_warnSt, marks, raceTime); if (wc) try { if (window.soundEngine) window.soundEngine.playSfx(THREAT_CLASSES[wc].sfx, 0.6); } catch (e) {}
             }
-            function fireNitro() { if (!slipSt || gameState !== 'racing' || !useNitro(slipSt)) return; nitroTimer = Math.max(nitroTimer, NITRO_TIME); fovPunch = Math.max(fovPunch, 14); try { if (window.soundEngine) window.soundEngine.playSfx('nitro_pick', 1.1); } catch (e) {} try { showTimePenaltyPopup(0, '🔥 НИТРО!'); } catch (e) {} }
+            function fireNitro() { if (CUT.horn) { if (inf && gameState === 'racing') inf.horn(); return; } if (!slipSt || gameState !== 'racing' || !useNitro(slipSt)) return; nitroTimer = Math.max(nitroTimer, NITRO_TIME); fovPunch = Math.max(fovPunch, 14); try { if (window.soundEngine) window.soundEngine.playSfx('nitro_pick', 1.1); } catch (e) {} try { showTimePenaltyPopup(0, '🔥 НИТРО!'); } catch (e) {} }
             let _nmCooldown = 0, _nmBlock = 0;
             // стоп-кадр: секунды реального времени, пока игра почти стоит (только короткий удар по боссу).
             // Замедление на «На волоске!» и при появлении босса убрано — ощущалось как подвисание
@@ -9010,7 +9010,7 @@ function startGaragePreview(carId) {
 
                 if (oncLane && gameState === 'racing') oncomingFrame(deltaTime);
                 if (threatMarks && gameState === 'racing') threatFrame();
-                if (slipSt) { const pn = !!(window.__padKeys && window.__padKeys.n); if (pn && !slipSt.padN) fireNitro(); slipSt.padN = pn; const so = stepSlip(slipSt, cars, xPos, zPos, deltaTime, gameState === 'racing' && !(risk.fever > 0) && !rideOn(ride) && !carAirborne); if (so.sling) { addSlipCharge(slipSt, SLING_CHARGE); try { if (window.soundEngine) window.soundEngine.playSfx('whoosh', 0.8); } catch (e) {} } /* «Рывок» — не ускорение, а доливка бака: ускоряешься кнопкой */ if (so.ready) { try { showTimePenaltyPopup(0, isMobile ? '🔥 Нитро готово — жми!' : '🔥 Нитро готово — жми E'); if (window.soundEngine) window.soundEngine.playSfx('nitro_pick', 0.7); } catch (e) {} } if (slipHintDue(slipSt, localStorage)) try { showTimePenaltyPopup(0, '💨 За попуткой копится нитро'); } catch (e) {} draftFx.update(deltaTime, slipSt, xPos, zPos); nitroBtn.render(slipSt, nitroTimer > 0); } /* слипстрим: мешок за попуткой копит бак, выход вбок — «Рывок» (src/slipstream.js) */
+                if (slipSt) { const pn = !!(window.__padKeys && window.__padKeys.n); if (pn && !slipSt.padN) fireNitro(); slipSt.padN = pn; const so = stepSlip(slipSt, cars, xPos, zPos, deltaTime, !CUT.horn && gameState === 'racing' && !(risk.fever > 0) && !rideOn(ride) && !carAirborne); if (so.sling) { addSlipCharge(slipSt, SLING_CHARGE); try { if (window.soundEngine) window.soundEngine.playSfx('whoosh', 0.8); } catch (e) {} } /* «Рывок» — не ускорение, а доливка бака: ускоряешься кнопкой */ if (so.ready) { try { showTimePenaltyPopup(0, isMobile ? '🔥 Нитро готово — жми!' : '🔥 Нитро готово — жми E'); if (window.soundEngine) window.soundEngine.playSfx('nitro_pick', 0.7); } catch (e) {} } if (slipHintDue(slipSt, localStorage)) try { showTimePenaltyPopup(0, '💨 За попуткой копится нитро'); } catch (e) {} draftFx.update(deltaTime, slipSt, xPos, zPos); nitroBtn.render(CUT.horn && inf ? inf.hornState() : slipSt, nitroTimer > 0); } /* слипстрим: мешок за попуткой копит бак, выход вбок — «Рывок» (src/slipstream.js) */
                 // Трубы и шлагбаумы (src/hop-duck.js): перепрыгнуть, поднырнуть или объехать
                 for (let hi = 0; hi < hurdles.length; hi++) {
                     const h = hurdles[hi];
@@ -10285,7 +10285,7 @@ function startGaragePreview(carId) {
                     const _anims = animalSpawner.animals;
                     for (let ai = 0; ai < _anims.length; ai++) {
                         const obs = _anims[ai];
-                        if (!obs || !obs.triggered || obs.hit || rideFlies(ride)) continue; // самолёт пролетает над зверями
+                        if (!obs || !obs.triggered || obs.hit || obs.fled || rideFlies(ride)) continue; /* спугнутый гудком убегает — не бьёт (src/horn.js) */ // самолёт пролетает над зверями
                         const dx = xPos - obs.x;
                         const dz = zPos - obs.z;
                         const dist = Math.sqrt(dx * dx + dz * dz);
