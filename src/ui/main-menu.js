@@ -10,6 +10,7 @@ import { CHESTS } from '../streak.js';
 import { lootChance } from '../chest-loot.js';
 import { scoreMult } from '../missions.js';
 import { weekTheme } from '../infinite.js';
+import { CUT } from '../wasteland-cut.js';
 import { renderAvatars, openProfileScreen } from './profile-screen.js';
 
 let chestAutoShown = null; // сундук дня предлагаем сам один раз за день
@@ -54,9 +55,9 @@ export function refreshMainMenu(d) {
     setBadge('garage-up-badge', ups);
     const upTab = document.querySelector('.garage-tab[data-gtab="upgrades"]');
     if (upTab) upTab.classList.toggle('has-new', ups > 0);
-    setBadge('mm-badge-season', seasonBadge(p, d.rewards) + (d.giftsCount || 0));
+    setBadge('mm-badge-season', CUT.giftsAfterRuns ? 0 : seasonBadge(p, d.rewards) + (d.giftsCount || 0)); // Пустошь: без красного «9+» — не спорит с «Поехали»
     const gt = document.querySelector('.mm-tab[data-menu="season"]'); // «Подарки» сияет, пока есть что забрать или прочитать
-    if (gt) gt.classList.toggle('glow', (d.giftsCount || 0) + unclaimedRewards(p, d.rewards) > 0);
+    if (gt) { gt.classList.toggle('glow', !CUT.giftsAfterRuns && (d.giftsCount || 0) + unclaimedRewards(p, d.rewards) > 0); gt.hidden = ((p.infinite && p.infinite.runs) || 0) < (CUT.giftsAfterRuns || 0); } // новичку — после 3 заездов
     setBadge('.sb-rewards', unclaimedRewards(p, d.rewards));
     setBadge('.sb-events', p.daily && p.daily.done ? 0 : 1);
     const st = p.stats || {};

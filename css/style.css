@@ -6678,3 +6678,10 @@ body.crash-cine :is(#nitro-btn, .police-hud, .rt, #latch-bar, #power-slot, #armo
     :root body.race-mode #e-counter i, :root body.race-mode #e-counter b { font-size: 21px !important; }
     :root body.race-mode #hud-menu-btn#hud-menu-btn { font-size: 15px !important; padding: 8px 10px !important; }
 }
+
+/* ===== Пустошь: чистка меню (src/wasteland-cut.js) — без кассет, красных бейджей, дубля «Поехали», слова дня, заезда дня и тест-драйвов ===== */
+#main-menu-screen span:has(> #mm-vhs), #main-menu-screen #mm-badge-chest, #main-menu-screen #mm-badge-season,
+#main-menu-screen .menu-card[data-menu="infinite"], #main-menu-screen #mm-word, #main-menu-screen #mm-daily, #main-menu-screen #mm-td { display: none !important; }
+#main-menu-screen .mm-extras { grid-template-columns: 1fr; }
+#main-menu-screen .mm-dock:has(.mm-tab[hidden]) { display: flex !important; } #main-menu-screen .mm-dock:has(.mm-tab[hidden]) > .mm-tab { flex: 1 1 0; min-width: 0; } /* без «Подарков» — разделы в один ряд поровну */
+#main-menu-screen .mm-tab[hidden] { display: none !important; }
