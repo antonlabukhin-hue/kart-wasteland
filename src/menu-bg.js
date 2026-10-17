@@ -13,6 +13,8 @@ import { setCurve } from './curved-world.js';
 import { ruinStretch } from './ruin.js';
 import { buildAccent } from './zone-accents.js';
 import { makeAnimal } from './zombie-look.js';
+import { poseAlert } from './beast-behavior.js';
+import { setEyes } from './beast-kit.js';
 
 const SPEED = 16;          // ед./с — скорость «прокрутки» мира
 const SPAN = 150;          // длина петли декораций
@@ -108,6 +110,24 @@ function wasteland(d) {
     }
 }
 
+/**
+ * Звери — лицо меню: двое стоят у обочины и провожают машину взглядом (глаза разгораются, когда она рядом),
+ * вдалеке бредёт гигант. Создаются один раз, едут вместе с миром и возвращаются в начало петли.
+ */
+function spawnWatchers() {
+    if (!st || st.watchers) return;
+    st.watchers = [];
+    try {
+        [['DOG', -1, 40], ['BOAR', 1, 95]].forEach(function(w) {
+            const m = makeAnimal(w[0]); if (!m) return;
+            m.visible = true; m.position.set(w[1] * (ROAD_W / 2 + 2.6), 0, w[2]); st.scene.add(m);
+            st.watchers.push({ mesh: m });
+        });
+        const g = makeAnimal('ELEPHANT');
+        if (g) { g.visible = true; g.scale.setScalar(2.3); g.position.set(-(ROAD_W / 2 + 20), 0, 120); g.rotation.y = Math.PI / 2; st.scene.add(g); st.giant = { mesh: g, t: 0 }; }
+    } catch (e) {}
+}
+
 function spawnCritter() {
     const mk = typeof window !== 'undefined' && window.createAnimalMesh;
     if (!mk) return;
@@ -140,6 +160,21 @@ function step(dt) {
         st.wheels.forEach(function(w) { if (w.hub) w.hub.rotation.x += move / 0.24; });
         // иногда — рывок на нитро
         if (st.flames) st.flames.update(t, st.intro ? introNitro(t) : (t % 7) > 5.6);
+    }
+    // звери у обочины смотрят на машину, гигант бредёт вдали (spawnWatchers)
+    if (!st.watchers) spawnWatchers();
+    (st.watchers || []).forEach(function(w) {
+        const m = w.mesh; m.position.z -= move;
+        if (m.position.z < -6) m.position.z += SPAN;
+        poseAlert(m, t, Math.atan2((st.car ? st.car.position.x : 0) - m.position.x, -m.position.z));
+        setEyes(m, m.position.z < 22 ? 1 : 0.5, t);
+    });
+    if (st.giant) {
+        const g = st.giant, m = g.mesh; g.t += dt;
+        m.position.z -= move * 0.35; m.position.x += 0.6 * dt;
+        if (m.position.z < 30 || m.position.x > 40) { m.position.z = 130; m.position.x = -(ROAD_W / 2 + 22); }
+        m.position.y = Math.abs(Math.sin(g.t * 3)) * 0.05;
+        m.traverse(function(n) { if (n.userData && n.userData.isLeg) n.rotation.x = Math.sin(g.t * 3 + (n.userData.legIndex === 0 || n.userData.legIndex === 3 ? 0 : Math.PI)) * 0.35; });
     }
     // зверь иногда перебегает дорогу вдали
     st.nextCritter -= dt;

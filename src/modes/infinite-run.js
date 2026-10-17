@@ -49,6 +49,8 @@ import { setEyes } from '../beast-kit.js';
 import { createDust } from '../beast-fx.js';
 import { createHorn } from '../horn.js';
 import { createAmbient } from '../ambient-beasts.js';
+import { recordBeast, EMOJI } from '../bestiary.js';
+import { BEASTS } from '../beast-kit.js';
 import { makeAnimal } from '../zombie-look.js';
 import { createLatch, HOLD } from '../hood-latch.js';
 import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
@@ -98,14 +100,22 @@ export function createInfiniteRun(ctx) {
     let attackWired = false, runDist = 0, dust = null, ambient = null;
     let nextScene = SCENE_FROM + Math.random() * 150, lastScene = null; // звериные сценки (src/beast-scenes.js)
     const hintSeen = loadHints();
+    let latchSp = null; // кто сейчас на капоте — для бестиария
+    /** Бестиарий (src/bestiary.js): встретил впервые — короткая надпись «новый зверь» */
+    function metBeast(a) {
+        if (!player || !a || !a.speciesKey) return;
+        const first = !(player.bestiary && player.bestiary[a.speciesKey] && player.bestiary[a.speciesKey].met);
+        recordBeast(player, a.speciesKey, 'met');
+        if (first && EMOJI[a.speciesKey] && ctx.state === 'racing') try { ctx.popup(EMOJI[a.speciesKey] + ' Новый зверь: ' + (BEASTS[a.speciesKey] ? BEASTS[a.speciesKey].name : a.speciesKey)); } catch (e) {}
+    }
     /** «Рывок»: стряхнул или увернулся — короткое ускорение, награда за прочитанного зверя (вместо слипстрима за обломками) */
     const RUSH_T = 0.8;
     function rush() { if (ctx.state === 'racing' && ctx.addNitro) ctx.addNitro(RUSH_T); }
     // гудок (src/horn.js): пугает волков и лис, злит кабанов и медведей, олень замирает — кнопка на месте нитро
-    const horn = createHorn({ animals: function() { return ctx.animals ? ctx.animals.animals : []; }, z: function() { return ctx.z; }, popup: function(t) { try { ctx.popup(t); } catch (e) {} }, sfx: function(n, v, p) { try { if (window.soundEngine) window.soundEngine.playSfx(n, v, p); } catch (e) {} } });
+    const horn = createHorn({ animals: function() { return ctx.animals ? ctx.animals.animals : []; }, z: function() { return ctx.z; }, popup: function(t) { try { ctx.popup(t); } catch (e) {} }, sfx: function(n, v, p) { try { if (window.soundEngine) window.soundEngine.playSfx(n, v, p); } catch (e) {} }, onReact: function(a, r) { if (r === 'flee') recordBeast(player, a.speciesKey, 'scared'); } });
     const HORN_HINT = 'kw_horn_hint_v1';
     let hornHinted = false; try { hornHinted = !!localStorage.getItem(HORN_HINT); } catch (e) {}
-    const latch = createLatch({ plaque: function(t, s, c) { ctx.plaque(t, s, c); }, popup: function(t) { ctx.popup(t); }, onShook: function() { riskEvent(ctx.risk, 'dodge'); ctx.stats.shook = (ctx.stats.shook || 0) + 1; rush(); } });
+    const latch = createLatch({ plaque: function(t, s, c) { ctx.plaque(t, s, c); }, popup: function(t) { ctx.popup(t); }, onShook: function() { riskEvent(ctx.risk, 'dodge'); ctx.stats.shook = (ctx.stats.shook || 0) + 1; recordBeast(player, latchSp, 'shook'); rush(); } });
     /**
      * Зверь вцепился в капот: впереди пусто на ~2.7 с хода (на 35% меньше всего захвата + 1.5 с) (src/wrecks.js latchClear).
      * Обломки уезжают дальше по дороге, звери впереди — тоже; стряхиваешь рулём, не думая об объезде.
@@ -145,6 +155,7 @@ export function createInfiniteRun(ctx) {
             dust = createDust(scene);
             // за ~1 с до броска зверь виден на обочине и подаёт голос своего нападения (src/beast-sfx.js) — вой, топот, рык, рёв
             sp.onTell = function(a) {
+                metBeast(a);
                 const s = warnSfx(a.role); if (s && ctx.state === 'racing') try { if (window.soundEngine) window.soundEngine.playSfx(s, a.giant ? 1.1 : 0.85); } catch (e) {}
             };
             // у разлома, ворот, события звери не пропадают совсем (как было), а выбегают вдвое реже — их должно быть много
@@ -174,7 +185,7 @@ export function createInfiniteRun(ctx) {
             }
             if (a.dodged !== 'new') continue;
             a.dodged = 'done';
-            if (ctx.state === 'racing') { const st = ctx.stats; st.dodges = (st.dodges || 0) + 1; if (a.giant) st.giants = (st.giants || 0) + 1; const rv = riskEvent(ctx.risk, 'dodge'); rush(); /* счётчики для заданий (src/missions.js) */ try { ctx.popup((a.giant ? '🦣 Ушёл от гиганта!' : a.role === 'charge' ? '🐗 Ушёл от тарана!' : '🐺 Увернулся!') + ' 💨 Рывок! ×' + rv.mult); } catch (e) {} }
+            if (ctx.state === 'racing') { const st = ctx.stats; st.dodges = (st.dodges || 0) + 1; recordBeast(player, a.speciesKey, 'dodged'); if (a.giant) st.giants = (st.giants || 0) + 1; const rv = riskEvent(ctx.risk, 'dodge'); rush(); /* счётчики для заданий (src/missions.js) */ try { ctx.popup((a.giant ? '🦣 Ушёл от гиганта!' : a.role === 'charge' ? '🐗 Ушёл от тарана!' : '🐺 Увернулся!') + ' 💨 Рывок! ×' + rv.mult); } catch (e) {} }
         }
     }
     const lapOff = ctx.seed ? 0 : Math.floor(Math.random() * 3); // Пустошь: круги — в своём порядке каждый заезд
@@ -292,7 +303,7 @@ export function createInfiniteRun(ctx) {
         spawnMeme: function(id, ahead) { return spawnMeme((world ? world.dist : 0) + ahead, id); },
         /** Зверь-прыгун долетел до машины: вцепляется в капот — true (полсердца — потом, если не стряхнул: onFail) */
         horn: function() { return ctx.state === 'racing' && horn.fire(); }, hornState: function() { return horn.state(); },
-        grab: function(a, onFail) { if (a.role !== 'lunge' || !latch.grab(a, ctx.car, onFail)) return false; calmAhead(a); return true; },
+        grab: function(a, onFail) { if (a.role !== 'lunge' || !latch.grab(a, ctx.car, onFail)) return false; latchSp = a.speciesKey; calmAhead(a); return true; },
         /** Каждый кадр заезда */
         tick: function(dt) {
             const t = world.tick(ctx.z), d = world.dist, stats = ctx.stats, risk = ctx.risk, powers = ctx.powers, z = ctx.z;

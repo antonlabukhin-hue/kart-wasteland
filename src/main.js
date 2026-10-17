@@ -18,7 +18,7 @@ import { SIGNAL_TIME, cutInAllowed, wantsCut, blinkOn, LANE_CHANGE_RATE } from '
 import { zoneFree, calmAhead, MAJOR_GAP, HURDLE_GAP } from './director.js';
 import { nearMissStep } from './near-miss.js';
 import { laneAssist } from './lane-assist.js';
-import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx, WRECK_BASE, WRECK_GAP, spreadZ, placeWreck } from './wrecks.js'; import { CUT } from './wasteland-cut.js'; import { makeAnimal } from './zombie-look.js'; import { crashCine } from './crash-cine.js';
+import { buildTraffic, KINDS as TRAFFIC_KINDS, hopClears, TALL_H } from './traffic-cars.js'; import { WRECK_KINDS, makeWreck, wreckFx, WRECK_BASE, WRECK_GAP, spreadZ, placeWreck } from './wrecks.js'; import { CUT } from './wasteland-cut.js'; import { openBestiary } from './ui/bestiary-screen.js'; import { makeAnimal } from './zombie-look.js'; import { crashCine } from './crash-cine.js';
         import * as THREE from 'three';
         import { SoundEngine } from './audio.js';
         import { AnimalSpawner } from './animals.js';
@@ -11360,6 +11360,8 @@ function showLoreScreen(quality, difficulty) {
                         beginRaceFlow();
                     } else if (m === 'garage' && typeof openGarage === 'function') {
                         openGarage();
+                    } else if (m === 'beasts') {
+                        openBestiary(currentPlayer); // «Звери пустоши» — бестиарий (src/ui/bestiary-screen.js)
                     } else if (m === 'season') {
                         openGiftsScreen(); // «Подарки»: подарки и прогресс, награды сезона, события — вкладки одного раздела
                     } else if (m === 'trophies') {
