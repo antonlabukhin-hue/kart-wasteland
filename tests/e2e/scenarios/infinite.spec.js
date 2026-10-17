@@ -7,7 +7,7 @@ test('бесконечная трасса: пейзажи, «Е», уборка 
     const problems = watchProblems(page);
     await login(page);
     await expect(page.locator('.menu-card[data-menu="race"]')).toBeHidden();
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     // первый раз — витрина машин (как выбор персонажа в Subway Surfers): «Ушастик» бесплатный — поехали на нём
     await expect(page.locator('#shop-action')).toContainText('ПОЕХАЛИ');
     await page.locator('#shop-action').click();
@@ -85,7 +85,7 @@ test('бесконечная трасса: усиление подбираетс
     await page.reload();
     await page.locator('#splash-screen').click();
     await page.locator('#profile-list').getByText('Тестер').click();
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     // первый раз — витрина машин (как выбор персонажа в Subway Surfers): «Ушастик» бесплатный — поехали на нём
     await expect(page.locator('#shop-action')).toContainText('ПОЕХАЛИ');
     await page.locator('#shop-action').click();
@@ -130,7 +130,7 @@ test('бесконечная трасса: рекорд — салют, пото
     await page.reload();
     await page.locator('#splash-screen').click();
     await page.locator('#profile-list').getByText('Тестер').click();
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     await page.evaluate(() => { const g = window.__raceDebug; g.setZ(g.z - 300); });
@@ -150,7 +150,7 @@ test('бесконечная трасса: рекорд — салют, пото
 test('бесконечная трасса: ящик «?» разбивается с исходом, шипы тормозят без аварии', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     /* газ жмётся сам (W — прыжок) */
@@ -196,7 +196,7 @@ test('первое знакомство: пауза с плашкой перед
     const problems = watchProblems(page);
     await page.addInitScript(() => sessionStorage.setItem('keep_meet', '1'));
     await login(page, 'Тестер', './', { tutorial: true });
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     /* газ жмётся сам (W — прыжок) */
@@ -230,7 +230,7 @@ test('бесконечная трасса: «назад» из витрины м
     await login(page);
     // событие недели — на карточке режима
     await expect(page.locator('.menu-infinite .mm-note')).toContainText('×2 Е · ');
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await expect(page.locator('#shop-screen')).toBeVisible();
     await page.locator('#shop-close').click();
     await expect(page.locator('#main-menu-screen')).toBeVisible();
@@ -284,7 +284,7 @@ test('бусты: «Разгон» и «Запаска» покупаются в
     await page.reload();
     await page.locator('#splash-screen').click();
     await page.locator('#profile-list').getByText('Тестер').click();
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await expect(page.locator('#shop-boosts')).toBeVisible();
     await page.locator('#shop-boosts .bb-item[data-b="headstart"]').click();
     await page.locator('#shop-boosts .bb-item[data-b="spare"]').click();
@@ -338,7 +338,7 @@ test('горячий старт: опытному игроку — плашка 
     await page.locator('#splash-screen').click();
     await page.locator('#profile-list').getByText('Тестер').click();
     await page.evaluate(() => { window.__sawWarm = ''; new MutationObserver(() => { const p = document.querySelector('.big-plaque'); if (p && p.textContent.includes('ГОРЯЧИЙ')) window.__sawWarm = p.textContent; }).observe(document.body, { childList: true, subtree: true }); });
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     /* газ жмётся сам (W — прыжок) */
@@ -351,7 +351,7 @@ test('горячий старт: опытному игроку — плашка 
 test('«В ударе»: на ×5 неуязвим, попутки сносятся за «Е», потом гаснет', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     /* газ жмётся сам (W — прыжок) */
@@ -382,7 +382,7 @@ test('«В ударе»: на ×5 неуязвим, попутки сносят�
 test('узоры: чистый проход засчитан (множитель — только за сложные, src/patterns.js patternCounts)', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     /* газ жмётся сам (W — прыжок) */
@@ -405,7 +405,7 @@ test('узоры: чистый проход засчитан (множитель
 test('событие пейзажа: кортеж — плашка, машины кортежа, награда без аварии', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     /* газ жмётся сам (W — прыжок) */
@@ -437,7 +437,7 @@ test('цели на дороге: растяжка рекорда и щиты с
     await page.reload();
     await page.locator('#splash-screen').click();
     await page.locator('#profile-list').getByText('Тестер').click();
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     /* газ жмётся сам (W — прыжок) */
@@ -457,7 +457,7 @@ test('цели на дороге: растяжка рекорда и щиты с
 test('«Повторить» в бесконечном заезде: сразу снова в путь', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     const car0 = await page.evaluate(() => window.__raceDebug.carStats && window.__raceDebug.carStats.name);
@@ -510,7 +510,7 @@ test('итоги бесконечной трассы: «до рекорда не
     await page.reload();
     await page.locator('#splash-screen').click();
     await page.locator('#profile-list').getByText('Тестер').click();
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     await page.evaluate(() => { const g = window.__raceDebug; g.setZ(g.startZ - 300); });
@@ -528,7 +528,7 @@ test('машина дня: тест-драйв и покупка со скидк
     await page.reload();
     await page.locator('#splash-screen').click();
     await page.locator('#profile-list').getByText('Тестер').click();
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     const tile = page.locator('.shop-car-btn', { hasText: '−30%' });
     await expect(tile).toHaveCount(1);
     const carId = await tile.getAttribute('data-car');
@@ -576,7 +576,7 @@ test('заезд дня: одна попытка, результат и мест
 test('вызов другу в бесконечной трассе: ссылка, та же трасса, итог', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     const layout1 = await page.evaluate(() => window.__raceDebug.obstacles.slice(0, 12).map(o => Math.round(o.z) + ':' + o.x).join('|'));

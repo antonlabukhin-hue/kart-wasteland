@@ -3,7 +3,7 @@ import { login, waitRacing } from '../helpers.js';
 // отпустил руль между полосами — машина встаёт в центр; ехал на попутку и ушёл в соседнюю полосу в последний момент — «на волоске»
 test('центр полосы и «на волоске» при увороте', async ({ page }) => {
     await login(page);
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     await page.waitForTimeout(1500);

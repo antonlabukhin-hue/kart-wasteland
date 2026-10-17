@@ -131,7 +131,7 @@ test('секретная краска и тест-драйв за вехи: пл
     await page.locator('#splash-screen').click();
     await page.locator('#profile-list').getByText('Тестер').click();
     await expect(page.locator('#mm-td')).not.toHaveClass(/has/);
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     await page.evaluate(() => window.__raceDebug.end('crash'));
@@ -187,7 +187,7 @@ test('подарок за возвращение, именной номер, м�
     await expect(page.locator('.chest-modal')).toBeVisible(); // сундук дня — после «Привет», а не поверх
     await page.locator('.chest-modal .ch-later').click();
     // машина недели — прогресс на итогах бесконечной
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await waitRacing(page);
     /* газ жмётся сам (W — прыжок) */

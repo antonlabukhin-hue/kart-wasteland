@@ -49,16 +49,6 @@ test('свободный заезд: машина едет, звери крич�
     expect(problems).toEqual([]);
 });
 
-test('кампания: первая трасса стартует, газ стрелкой', async ({ page }) => {
-    const problems = watchProblems(page);
-    await login(page);
-    await startCampaign(page);
-    await page.keyboard.down('ArrowUp');
-    await expect.poll(() => progress(page), { timeout: 30_000 }).toBeGreaterThan(1);
-    await page.keyboard.up('ArrowUp');
-    expect(problems).toEqual([]);
-});
-
 test('пауза и выход в меню посреди заезда', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);

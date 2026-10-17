@@ -6,7 +6,7 @@ import { login, watchProblems, waitRacing } from '../helpers.js';
 test('площадка: второй шанс и ×2 «Е» за рекламу, «Касса» в витрине', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page, 'Тестер', './?ads=mock');
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await expect(page.locator('#shop-action')).toContainText('ПОЕХАЛИ');
     // «Касса» с тестовыми ценами
     await expect(page.locator('#shop-pay .pay-item')).toHaveCount(4);
@@ -54,7 +54,7 @@ test('площадка: второй шанс и ×2 «Е» за рекламу,
 
 test('площадка: на обычном сайте рекламы и «Кассы» нет', async ({ page }) => {
     await login(page);
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await expect(page.locator('#shop-action')).toContainText('ПОЕХАЛИ');
     await expect(page.locator('#shop-pay')).toBeHidden();
 });
