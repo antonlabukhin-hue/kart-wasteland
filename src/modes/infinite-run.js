@@ -37,8 +37,10 @@ import * as Decor from '../decor.js';
 import { pickMeme, createSideMeme, decorateMemeCar, MEME_EVERY, MEMES } from '../memes.js';
 import { buildShowroomCar } from '../cars.js';
 import { wreckCount, latchClear, spreadZ, WRECK_GAP } from '../wrecks.js';
-import { prepAttack, stepAttack } from '../animal-attack.js';
+import { prepAttack, stepAttack, attackLead } from '../animal-attack.js';
+import { TELL_S } from '../animals.js';
 import { warnSfx } from '../beast-sfx.js';
+import { hintDue, loadHints, saveHints } from '../attack-hints.js';
 import { createLatch, HOLD } from '../hood-latch.js';
 import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
 
@@ -84,7 +86,8 @@ export function createInfiniteRun(ctx) {
     // мем-моменты 90-х (src/memes.js): попутка с коровой или шкафом, бабка с тележкой, рыбак, гаишник — раз в 475–775 м
     let nextMeme = 375 + Math.random() * 250, lastMeme = null;
     // Пустошь: звери нападают (src/animal-attack.js), прыгнувший вцепляется в капот (src/hood-latch.js)
-    let attackWired = false;
+    let attackWired = false, runDist = 0;
+    const hintSeen = loadHints();
     const latch = createLatch({ plaque: function(t, s, c) { ctx.plaque(t, s, c); }, popup: function(t) { ctx.popup(t); }, onShook: function() { riskEvent(ctx.risk, 'dodge'); } });
     /**
      * Зверь вцепился в капот: впереди пусто на ~2.7 с хода (на 35% меньше всего захвата + 1.5 с) (src/wrecks.js latchClear).
@@ -108,10 +111,21 @@ export function createInfiniteRun(ctx) {
         if (!attackWired) {
             attackWired = true;
             sp.mandatoryPool = (sp.mandatoryPool || []).filter(function(k) { return k !== 'HUMAN' && k !== 'CHICKEN' && k !== 'PEACOCK'; }); // стартовый набор зверей — без людей, кур и павлинов
-            sp.prep = function(a) { prepAttack(a, Math.random, sp.triggerLookahead); };
+            sp.prep = function(a) {
+                prepAttack(a, Math.random, sp.triggerLookahead, runDist + (warm || 0)); // нападения открываются по метрам (src/animal-attack.js ROLE_FROM)
+                if (a.role !== 'cross') { // нападающий — дальше: успеть увидеть его на обочине и услышать до броска
+                    const need = attackLead(a._trigDist, sp._k, sp._v, TELL_S);
+                    if (ctx.z - a.z < need) { a.z = ctx.z - need; if (a.mesh) a.mesh.position.z = a.z; sp._lastSpawnZ = Math.min(sp._lastSpawnZ == null ? a.z : sp._lastSpawnZ, a.z); }
+                }
+                // новое нападение — один раз подсказка (src/attack-hints.js), сразу при появлении зверя: за 2–3 с до броска, успеть прочитать
+                const h = ctx.state === 'racing' ? hintDue(a.role, hintSeen) : null;
+                if (h) { hintSeen.add(a.role); saveHints(hintSeen); try { ctx.plaque(h.icon + ' ' + h.title, h.text, 'crate-bad attack-hint'); } catch (e) {} }
+            };
             sp.behave = function(a, d, pz) { return stepAttack(a, d, pz, ctx.x); };
             // за ~1 с до броска зверь виден на обочине и подаёт голос своего нападения (src/beast-sfx.js) — вой, топот, рык, рёв
-            sp.onTell = function(a) { const s = warnSfx(a.role); if (s && ctx.state === 'racing') try { if (window.soundEngine) window.soundEngine.playSfx(s, a.giant ? 1.1 : 0.85); } catch (e) {} };
+            sp.onTell = function(a) {
+                const s = warnSfx(a.role); if (s && ctx.state === 'racing') try { if (window.soundEngine) window.soundEngine.playSfx(s, a.giant ? 1.1 : 0.85); } catch (e) {}
+            };
             // у разлома, ворот, события звери не пропадают совсем (как было), а выбегают вдвое реже — их должно быть много
             const calm = sp.densityFn;
             if (calm) sp.densityFn = function(z) { const v = calm(z); return v > 0 ? v : run.animalDensity() * 0.5; };
@@ -231,6 +245,7 @@ export function createInfiniteRun(ctx) {
         /** Каждый кадр заезда */
         tick: function(dt) {
             const t = world.tick(ctx.z), d = world.dist, stats = ctx.stats, risk = ctx.risk, powers = ctx.powers, z = ctx.z;
+            runDist = d;
             animalsTick(dt);
             themeEv.tick(d, z, dt);
             if (roadGoals) roadGoals.tick(d);
