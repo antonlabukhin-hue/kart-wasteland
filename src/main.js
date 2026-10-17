@@ -4592,7 +4592,7 @@ function startGaragePreview(carId) {
                         + (lvUp ? '\n⬆ Уровень сезона: +' + lvUp * 100 + ' Е' : '') + (rewards.boardRank ? '\n🏆 Место на неделе: #' + rewards.boardRank : '')
                         + '\n' + (ib.isNew ? '🎉 НОВЫЙ РЕКОРД ДАЛЬНОСТИ!' : '🏆 Рекорд: ' + (ib.best || ir.dist) + ' м');
                     infHero = { dist: ir.dist, time: formatTime(timeTaken), score: ir.score, mult: ir.mult, isNew: !!ib.isNew, best: ib.best || ir.dist, place: rewards.boardRank, lvUp: lvUp }; // новая раскладка итогов (src/ui/finish-ui.js infFinishHtml)
-                    infHero.goal = runGoalHtml(runGoal({ dist: ir.dist, best: ib.best || 0, isNew: ib.isNew, crashes: hitLog, animalNames: Object.fromEntries(Object.keys(ANIMAL_TYPES).map(function(k) { return [k, ANIMAL_TYPES[k].name]; })), near: nearlyLines({ dist: ir.dist, best: ib.isNew ? 0 : (ib.best || 0), isNew: ib.isNew, targets: chase ? chase.targets : [], missions: rewards.missions ? rewards.missions.progressed : [] }) })); /* одна цель: что остановило, куда целиться, как (src/run-goal.js) — вместо строк «почти» */ if (infRunOpts && infRunOpts.daily) nearHtml += dailyFinishHtml({ profile: currentPlayer, day: infRunOpts.daily, dist: ir.dist, car: carId, online: onlineBoard(), submit: onlineBoard() }); if (infRunOpts && infRunOpts.challenge) { nearHtml += challengeFinishHtml(infRunOpts.challenge, ir.dist); addHooks(null, null, [friendExtra(grantFriendChest(currentPlayer, infRunOpts.challenge.name, dayKey(new Date()), ir.dist > infRunOpts.challenge.score), infRunOpts.challenge.name)]); saveCurrentPlayer(); } if (testDrive && testDrive.car === carId) nearHtml += testDriveHtml({ name: carPreset.name, ability: carPreset.ability, dist: ir.dist, myBest: ib.isNew ? 0 : ib.best, price: testDrive.price, cost: dayPrice(testDrive.price), how: testDrive.how }); finStats = [['🛣', 'Проехано', ir.dist + ' м'], ['Е', 'Собрано «Е»', ir.e], ['🐾', 'Удары по зверям', stats.animalsHit],
+                    infHero.goal = runGoalHtml(runGoal({ dist: ir.dist, best: ib.best || 0, isNew: ib.isNew, crashes: hitLog, animalNames: Object.fromEntries(Object.keys(ANIMAL_TYPES).map(function(k) { return [k, ANIMAL_TYPES[k].name]; })), animalIcons: Object.fromEntries(Object.keys(ANIMAL_TYPES).map(function(k) { return [k, ANIMAL_TYPES[k].emoji]; })), near: nearlyLines({ dist: ir.dist, best: ib.isNew ? 0 : (ib.best || 0), isNew: ib.isNew, targets: chase ? chase.targets : [], missions: rewards.missions ? rewards.missions.progressed : [] }) })); /* одна цель: что остановило, куда целиться, как (src/run-goal.js) — вместо строк «почти» */ if (infRunOpts && infRunOpts.daily) nearHtml += dailyFinishHtml({ profile: currentPlayer, day: infRunOpts.daily, dist: ir.dist, car: carId, online: onlineBoard(), submit: onlineBoard() }); if (infRunOpts && infRunOpts.challenge) { nearHtml += challengeFinishHtml(infRunOpts.challenge, ir.dist); addHooks(null, null, [friendExtra(grantFriendChest(currentPlayer, infRunOpts.challenge.name, dayKey(new Date()), ir.dist > infRunOpts.challenge.score), infRunOpts.challenge.name)]); saveCurrentPlayer(); } if (testDrive && testDrive.car === carId) nearHtml += testDriveHtml({ name: carPreset.name, ability: carPreset.ability, dist: ir.dist, myBest: ib.isNew ? 0 : ib.best, price: testDrive.price, cost: dayPrice(testDrive.price), how: testDrive.how }); finStats = [['🛣', 'Проехано', ir.dist + ' м'], ['Е', 'Собрано «Е»', ir.e], ['🐾', 'Удары по зверям', stats.animalsHit],
                         ['📼', 'Кассеты', stats.vhs || 0], ['🗺', 'Пейзажей', ir.lands], ['⚡', 'На волоске', nearMissCount]];
                 } else if (isEndlessMode()) {
                     const ft = beast.finishText({ state: state, strikes: strikes, maxStrikes: MAX_STRIKES, best: currentPlayer.endlessBest }); const bch = beast.run && beast.run.challenge; if (bch) { addHooks(null, null, [friendExtra(grantFriendChest(currentPlayer, bch.name, dayKey(new Date()), beast.run.score > bch.score), bch.name)]); saveCurrentPlayer(); } /* сундук за вызов друга */ // src/modes/beast-hour.js
@@ -7845,8 +7845,9 @@ function startGaragePreview(carId) {
                 el.firstChild.textContent = title;
                 el.lastChild.textContent = sub || '';
                 document.body.appendChild(el);
-                setTimeout(function() { el.classList.add('out'); }, 1700);
-                setTimeout(function() { try { el.remove(); } catch (e) {} }, 2100);
+                const hold = /attack-hint/.test(cls || '') ? 3400 : 1700; /* подсказка о новом нападении — дольше: успеть прочитать */
+                setTimeout(function() { el.classList.add('out'); }, hold);
+                setTimeout(function() { try { el.remove(); } catch (e) {} }, hold + 400);
             }
             function setShieldVisible(on) {
                 try {
@@ -8007,9 +8008,9 @@ function startGaragePreview(carId) {
 
             // журнал аварий заезда (причина, доля трассы) — для баланса, читается тестами через __raceDebug
             const hitLog = [];
-            const logHit = function(cause) {
+            const logHit = function(cause, role) { /* role — вид нападения зверя (src/animal-attack.js): на итогах «прыжок», «таран», «гигант» */
                 cleanRun.reset(); if (stats.cleanDist == null) stats.cleanDist = INF && infWorld ? Math.round(infWorld.dist) : 0; /* задание «без аварий»: сколько проехал до первой */
-                hitLog.push({ cause: cause, at: Math.round((START_Z - zPos) / (START_Z - FINISH_Z) * 100), dist: INF && infWorld ? Math.round(infWorld.dist) : undefined });
+                hitLog.push({ cause: cause, role: role || undefined, at: Math.round((START_Z - zPos) / (START_Z - FINISH_Z) * 100), dist: INF && infWorld ? Math.round(infWorld.dist) : undefined });
                 trackEvent('crash', { cause: cause, at: hitLog[hitLog.length - 1].at, dist: hitLog[hitLog.length - 1].dist, map: mapId, chapter: window.__campaignTrackId || null });
             };
             // «задел боком» (src/hit-zones.js): не авария — скорость, множитель и толчок вбок; в правиле «ГАИ на хвосте» — погоня, задел в погоне — авария
@@ -8045,7 +8046,7 @@ function startGaragePreview(carId) {
                     if (comboTime > comboMax) comboMax = comboTime;
                     return;
                 }
-                logHit(obs.cause || obs.speciesKey || obs.type || 'animal');
+                logHit(obs.cause || obs.speciesKey || obs.type || 'animal', obs.giant ? 'giant' : obs.role);
                 strikes += obs.halfHeart ? 0.5 : 1; /* зверь — полсердца */
                 const _pr = police && (FAIL.chaseAll || String(obs.cause || '').indexOf('car:') === 0) ? police.crash() : null; /* «сердца»: ГАИ — только за столкновение с машиной; «ГАИ на хвосте» (src/fail-rules.js) — за любую аварию */
                 if (_pr === 'caught' && FAIL.chaseAll && strikes < MAX_STRIKES) police.crash(); /* «Рафик» в погоне выдержал удар — погоня заново */
