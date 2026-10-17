@@ -7108,9 +7108,9 @@ function startGaragePreview(carId) {
                     riskGum.risk = 'arch';
                     collectibles.push(riskGum);
                     // перед аркой с бонусом под ней — нитро в той же полосе: проскочить под грузом на рывке
-                    const archN = createCollectible(z + 30, 'nitro');
-                    archN.x = riskGum.x; archN.mesh.position.x = archN.x; archN.archNitro = true;
-                    collectibles.push(archN);
+                    if (!(INF && CUT.nitro)) { const archN = createCollectible(z + 30, 'nitro');
+                    archN.x = riskGum.x; archN.mesh.position.x = archN.x; archN.archNitro = true; /* Пустошь: без нитро (src/wasteland-cut.js) */
+                    collectibles.push(archN); }
                     if (INF) infArch.push(z);
                 });
                 yield;
@@ -7180,7 +7180,7 @@ function startGaragePreview(carId) {
                 clear: clearZone,
                 ramp: function(z) { ramps.push(createRamp(z, 0, 0.85)); scene.add(createLaneChevrons(0, z + 30, 8)); },
                 board: function(z) { if (CUT.billboards) return; const b = createSmashBoard(0, z, 1); scene.add(b.group); smashBoards.push(b); },
-                nitro: function(z) { const c = createCollectible(z, 'nitro'); c.x = 0; c.mesh.position.x = 0; collectibles.push(c); },
+                nitro: function(z) { if (CUT.nitro) return; const c = createCollectible(z, 'nitro'); c.x = 0; c.mesh.position.x = 0; collectibles.push(c); },
                 animal: function(z) { firstAnimalZ = z; }
             });
             // обычные трассы: случайное нитро — не ближе 45 ед. к арке с падающим грузом (кроме нитро «под бонус»)

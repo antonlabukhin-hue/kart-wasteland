@@ -25,16 +25,26 @@ export const CUT = {
     secretPaints: true,
     giftCars: true,
     artifacts: true,
-    horn: true // кнопка нитро — гудок, слипстрима за обломками нет (src/horn.js)
+    horn: true, // кнопка нитро — гудок, слипстрима за обломками нет (src/horn.js)
+    nitro: true, // подбираемого нитро нет, «В УДАРЕ» и уклонения не ускоряют (отзыв 18.10: «куча лишних ускорений»)
+    slides: true // скользких пятен (масло, лёд, кислота) втрое меньше (отзыв 18.10)
 };
 
 /** Пропустить ли предмет плана трассы (src/plan-place.js): кассета, ящик «?», выключенное усиление */
+/** Скользкое пятно → яма (в Пустоши остаётся каждое третье): плана трассы касается до расстановки (src/plan-place.js) */
+export function softenSlide(it) {
+    if (!CUT.slides || !it || it.kind !== 'obstacle' || ['slide', 'oil', 'ice', 'acid'].indexOf(it.type) < 0) return it;
+    if (Math.floor(Math.abs(it.d || 0) / 7) % 3 !== 0) it.type = 'pothole';
+    return it;
+}
+
 export function cutPlanItem(it) {
     if (!it) return false;
     if (it.kind === 'vhs') return !!CUT.vhs;
     if (it.kind === 'crate') return !!CUT.crates;
     if (it.kind === 'power') return CUT.powers.indexOf(it.type) >= 0;
     if (it.kind === 'letter') return !!CUT.wordDay;
+    if (it.kind === 'nitro') return !!CUT.nitro;
     return false;
 }
 

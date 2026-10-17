@@ -103,7 +103,14 @@ function legs(a, cycle) {
  * Шаг нападения после выхода зверя на дорогу. pz, px — машина игрока (едет к −z; зверь впереди — z меньше).
  * Возвращает true, если зверя двигал этот модуль.
  */
-export function stepAttack(a, dt, pz, px) {
+/**
+ * С какой дальности прыгун прыгает (ед.): за время прыжка LEAP зверь пролетает LEAP_VZ·LEAP, машина — v·LEAP, —
+ * встречаются в конце прыжка. Раньше прыгал сразу после подготовки и не долетал (отзыв 18.10). v — скорость машины, ед./с.
+ */
+export const LEAP_WAIT = 2.5; // дольше в засаде не сидит — прыгает как есть
+export function leapReach(v) { return ((v || 0) + LEAP_VZ) * LEAP; }
+
+export function stepAttack(a, dt, pz, px, v) {
     if (!a.role || (a.role === 'cross' && a.phase !== 'leave' && a.phase !== 'freeze')) return false; // перебежчика двигает спавнер — кроме спугнутого гудком (src/horn.js)
     const m = a.mesh;
     if (!a.phase) { a.phase = 'run'; a.pt = 0; a.x0 = a.x; a.tx = a.role === 'block' ? LANES[Math.floor(Math.abs(Math.sin(a.z * 12.9898)) * 3) % 3] : laneNear(px); }
@@ -119,7 +126,8 @@ export function stepAttack(a, dt, pz, px) {
     } else if (a.phase === 'crouch' || a.phase === 'prep') { // подготовка — подпись вида (src/beast-behavior.js): прыгун приседает, таран роет землю…
         const T = a.angry ? 0.05 : (prepTime(a) || CROUCH); // разозлённый гудком — без подготовки
         a.dust = poseSignature(signatureOf(a), m, a.pt, T, 0);
-        if (a.pt >= T) { a.phase = a.phase === 'crouch' ? 'leap' : 'charge'; a.pt = 0; m.rotation.x = 0; m.position.y = 0; }
+        const lunge = a.phase === 'crouch', far = lunge && v > 0 && pz - a.z > leapReach(v) + 1 && a.pt < T + LEAP_WAIT; // прыгун в засаде ждёт, пока машина подъедет
+        if (a.pt >= T && !far) { a.phase = lunge ? 'leap' : 'charge'; a.pt = 0; m.rotation.x = 0; m.position.y = 0; }
     } else if (a.phase === 'leap') { // прыжок навстречу машине, чуть доворачивает
         const t = Math.min(1, a.pt / LEAP);
         a.z += LEAP_VZ * dt;

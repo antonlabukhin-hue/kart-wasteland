@@ -110,7 +110,7 @@ export function createInfiniteRun(ctx) {
     }
     /** «Рывок»: стряхнул или увернулся — короткое ускорение, награда за прочитанного зверя (вместо слипстрима за обломками) */
     const RUSH_T = 0.8;
-    function rush() { if (ctx.state === 'racing' && ctx.addNitro) ctx.addNitro(RUSH_T); }
+    function rush() { if (!CUT.nitro && ctx.state === 'racing' && ctx.addNitro) ctx.addNitro(RUSH_T); } // в Пустоши — без ускорения (отзыв 18.10)
     // гудок (src/horn.js): пугает волков и лис, злит кабанов и медведей, олень замирает — кнопка на месте нитро
     const horn = createHorn({ animals: function() { return ctx.animals ? ctx.animals.animals : []; }, z: function() { return ctx.z; }, popup: function(t) { try { ctx.popup(t); } catch (e) {} }, sfx: function(n, v, p) { try { if (window.soundEngine) window.soundEngine.playSfx(n, v, p); } catch (e) {} }, onReact: function(a, r) { if (r === 'flee') recordBeast(player, a.speciesKey, 'scared'); } });
     const HORN_HINT = 'kw_horn_hint_v1';
@@ -150,7 +150,7 @@ export function createInfiniteRun(ctx) {
                 const h = ctx.state === 'racing' ? hintDue(a.role, hintSeen) : null;
                 if (h) { hintSeen.add(a.role); saveHints(hintSeen); try { ctx.plaque(h.icon + ' ' + h.title, h.text, 'crate-bad attack-hint'); } catch (e) {} }
             };
-            sp.behave = function(a, d, pz) { return stepAttack(a, d, pz, ctx.x); };
+            sp.behave = function(a, d, pz) { return stepAttack(a, d, pz, ctx.x, sp._v); }; // скорость машины — прыгун прыгает, когда долетит
             sp.showIdle = true; // звери видны с появления — спокойными на обочине (src/beast-behavior.js), а не выскакивают из ниоткуда
             dust = createDust(scene);
             // за ~1 с до броска зверь виден на обочине и подаёт голос своего нападения (src/beast-sfx.js) — вой, топот, рык, рёв
@@ -185,7 +185,7 @@ export function createInfiniteRun(ctx) {
             }
             if (a.dodged !== 'new') continue;
             a.dodged = 'done';
-            if (ctx.state === 'racing') { const st = ctx.stats; st.dodges = (st.dodges || 0) + 1; recordBeast(player, a.speciesKey, 'dodged'); if (a.giant) st.giants = (st.giants || 0) + 1; const rv = riskEvent(ctx.risk, 'dodge'); rush(); /* счётчики для заданий (src/missions.js) */ try { ctx.popup((a.giant ? '🦣 Ушёл от гиганта!' : a.role === 'charge' ? '🐗 Ушёл от тарана!' : '🐺 Увернулся!') + ' 💨 Рывок! ×' + rv.mult); } catch (e) {} }
+            if (ctx.state === 'racing') { const st = ctx.stats; st.dodges = (st.dodges || 0) + 1; recordBeast(player, a.speciesKey, 'dodged'); if (a.giant) st.giants = (st.giants || 0) + 1; const rv = riskEvent(ctx.risk, 'dodge'); rush(); /* счётчики для заданий (src/missions.js) */ try { ctx.popup((a.giant ? '🦣 Ушёл от гиганта!' : a.role === 'charge' ? '🐗 Ушёл от тарана!' : '🐺 Увернулся!') + ' ×' + rv.mult); } catch (e) {} }
         }
     }
     const lapOff = ctx.seed ? 0 : Math.floor(Math.random() * 3); // Пустошь: круги — в своём порядке каждый заезд
@@ -311,7 +311,7 @@ export function createInfiniteRun(ctx) {
             horn.tick(dt);
             if (!hornHinted && d + (warm || 0) >= 360 && ctx.state === 'racing') { // перед первым прыгуном — про гудок (раз на устройстве)
                 hornHinted = true; try { localStorage.setItem(HORN_HINT, '1'); } catch (e) {}
-                try { ctx.plaque('📯 ГУДОК', 'Волки, лисы и обезьяны от него убегают, кабан и медведь — звереют, олень замирает', 'crate-good attack-hint'); } catch (e) {}
+                try { ctx.plaque('📯 ГУДОК', 'Зверь собирается напасть — жми гудок: спугнёшь, он убежит. Кнопка светится, когда есть кого пугать', 'crate-good attack-hint'); } catch (e) {}
             }
             animalsTick(dt);
             if (ambient) try { ambient.tick(dt, ctx.z, performance.now() / 1000, ctx.animals && ctx.animals.animalPool); } catch (e) { ambient = null; console.warn('ambient', e); }
@@ -333,7 +333,7 @@ export function createInfiniteRun(ctx) {
             }
             // «В УДАРЕ» (src/fever.js) и сочность (src/juice.js)
             const fv = feverHold(risk, powers);
-            if (fv) ctx.addNitro(fv);
+            if (fv && !CUT.nitro) ctx.addNitro(fv); // «В УДАРЕ» в Пустоши не разгоняет — неуязвимость и ×5 остаются
             renderFeverFx(risk);
             renderSpeedLines(speedLinesK(ctx.speed / ctx.maxSpeed, ctx.nitro > 0, risk.fever > 0));
             if ((risk.fever > 0) !== feverOn) {

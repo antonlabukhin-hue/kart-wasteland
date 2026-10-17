@@ -162,3 +162,18 @@ describe('Пустошь: нападающий появляется заране
         expect(attackLead(20, 1, 0, 1)).toBe(24);
     });
 });
+
+import { leapReach, LEAP, LEAP_VZ } from '../../src/animal-attack.js';
+describe('Пустошь: прыгун долетает до машины (отзыв 18.10)', () => {
+    it('ждёт в засаде, пока машина не подъедет на дальность прыжка', () => {
+        const mesh = { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 }, scale: { multiplyScalar() {} }, traverse() {} };
+        const a = prepAttack({ speciesKey: 'DOG', x: 4.5, z: -80, radius: 0.6, mesh, hit: false }, () => 0.1, 15, 2000);
+        const v = 25; let pz = 0;
+        for (let i = 0; i < 60; i++) stepAttack(a, 1 / 60, pz, 0, v); // выбежал и присел, машина ещё далеко
+        expect(a.phase).toBe('crouch');
+        let leapAt = null;
+        for (let i = 0; i < 400 && a.phase === 'crouch'; i++) { pz -= v / 60; stepAttack(a, 1 / 60, pz, 0, v); if (a.phase === 'leap') leapAt = pz - a.z; }
+        expect(leapAt).toBeLessThanOrEqual(leapReach(v) + 1.5);
+        expect(leapReach(v)).toBeCloseTo((v + LEAP_VZ) * LEAP);
+    });
+});

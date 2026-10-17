@@ -9,7 +9,7 @@
 import { dropBusy } from './patterns.js';
 import { createLaneCone, createCrateMesh, createSpikesMesh } from './hazards.js';
 import { createLetterToken } from './word-day.js';
-import { cutPlanItem } from './wasteland-cut.js';
+import { cutPlanItem, softenSlide } from './wasteland-cut.js';
 
 const LX = [-2, 0, 2];
 
@@ -18,7 +18,7 @@ export function placePlan(items, env) {
     dropBusy(items, function(d) { const z = S - d; return (env.busy || []).some(function(b) { return z >= b[0] - 4 && z <= b[1] + 4; }); }).forEach(function(it) {
         const z = S - it.d;
         let c = null;
-        if (cutPlanItem(it)) return; // Пустошь: кассеты, ящики «?», магнит и ×2, буквы — выключены (src/wasteland-cut.js)
+        if (cutPlanItem(it)) return; softenSlide(it); // Пустошь: кассеты, ящики «?», магнит и ×2, буквы — выключены (src/wasteland-cut.js)
         if (it.kind === 'patEnd') { if (env.onPatEnd) env.onPatEnd(z, it.pat, it.name); return; }
         if (it.kind === 'echip') { L.collectibles.push(make.eChip(it.x != null ? it.x : LX[it.lane], it.y, z)); return; }
         if (it.kind === 'vhs') { L.collectibles.push(make.vhs(LX[it.lane], 0.75, z)); return; }
