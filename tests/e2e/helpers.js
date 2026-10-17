@@ -46,6 +46,8 @@ export async function login(page, name = 'Тестер', url = './', { briefing 
     await page.addInitScript(() => { if (!sessionStorage.getItem('keep_newcars') && !localStorage.getItem('kw_road_racing_new_cars_seen')) localStorage.setItem('kw_road_racing_new_cars_seen', 'all'); });
     // «первое знакомство» (пауза перед новым на дороге) проверяет свой тест — остальным всё уже знакомо
     await page.addInitScript(() => { if (!sessionStorage.getItem('keep_meet') && !localStorage.getItem('kw_road_racing_met_v1')) localStorage.setItem('kw_road_racing_met_v1', 'all'); });
+    // подсказки «новое нападение зверя» (src/attack-hints.js) — остальным тестам уже знакомы
+    await page.addInitScript(() => { if (!sessionStorage.getItem('keep_hints') && !localStorage.getItem('kw_attack_hints_v1')) localStorage.setItem('kw_attack_hints_v1', 'all'); });
     // плашку «Машины в подарок» проверяет свой тест — остальным она не мешает
     await page.addInitScript(() => { if (!sessionStorage.getItem('keep_giftintro')) localStorage.setItem('kw_road_racing_gift_cars_intro_v1', '1'); });
     // «Привет, Имя!» с новостями (src/ui/hello-news.js) проверяет свой тест — остальным не мешает

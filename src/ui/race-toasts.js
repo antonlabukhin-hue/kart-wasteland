@@ -12,6 +12,8 @@ let current = null;
 function take(el) {
     if (current === el && el.classList.contains('rt')) return; // уже на месте (и не зацикливаемся на своей же смене класса)
     if (!toastWanted(el.className, el.textContent)) { if (el.classList.contains('announcer')) el.classList.add('out'); else el.remove(); return; } // Пустошь: шум не показываем (src/toast-filter.js)
+    // подсказка о новом нападении (src/attack-hints.js) держит место, пока не погаснет: мелочь её не перебивает — только сердце и «Вцепился»
+    if (current && current !== el && current.isConnected && current.classList.contains('attack-hint') && !current.classList.contains('out') && !el.classList.contains('attack-hint') && !/♥|ВЦЕПИЛСЯ|Вцепился/.test(el.textContent)) { if (el.classList.contains('announcer')) el.classList.add('out'); else el.remove(); return; }
     if (current && current !== el && current.isConnected) {
         if (current.classList.contains('announcer')) current.classList.add('out'); // ведущего не удаляем — он переиспользует рамку
         else current.remove();

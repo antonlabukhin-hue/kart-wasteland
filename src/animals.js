@@ -247,7 +247,7 @@ class AnimalSpawner {
             if (animal.triggered) animal.aliveTime += deltaTime;
 
             const staleTimeout = animal.aliveTime > 12;
-            if (animal.z > playerZ + 30 || animal.hit || staleTimeout || animal.z < playerZ - 150) {
+            if (animal.z > playerZ + 30 || animal.hit || staleTimeout || animal.z < playerZ - 230) { // гигант на скорости появляется далеко (src/animal-attack.js attackLead)
                 this.disposeAnimal(animal);
                 if (animal.speciesKey) {
                     this.speciesCount[animal.speciesKey] = Math.max(0, (this.speciesCount[animal.speciesKey] || 0) - 1);
