@@ -54,7 +54,7 @@ function flame(add, color, x, y, z, h, tilt) { const c = add(new THREE.Mesh(G('f
 function lit(color) { return bm[color] || (bm[color] = new THREE.MeshBasicMaterial({ color: color })); }
 /** Мутация без неона: цвет вида, приглушённый к серому и темнее, с обычным светом сцены */
 const mm = {};
-function muted(color) { if (mm[color]) return mm[color]; const c = new THREE.Color(color), g = (c.r + c.g + c.b) / 3; c.lerp(new THREE.Color(g, g, g), 0.45).multiplyScalar(0.75); return (mm[color] = new THREE.MeshStandardMaterial({ color: c, roughness: 0.7, flatShading: true })); }
+function muted(color) { if (mm[color]) return mm[color]; const c = new THREE.Color(color), g = (c.r + c.g + c.b) / 3; c.lerp(new THREE.Color(g, g, g), 0.6).multiplyScalar(0.7); return (mm[color] = new THREE.MeshStandardMaterial({ color: c, roughness: 0.7, flatShading: true })); }
 /** Глаза бешеного зверя — один цвет у всех видов: горят перед нападением, у спокойного — тусклые (src/beast-behavior.js eyeLevel) */
 export const EYE_HOT = 0xff3a10, EYE_DIM = 0x2a140c;
 function solid(color) { return lm[color] || (lm[color] = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, metalness: 0.3, flatShading: true })); }
