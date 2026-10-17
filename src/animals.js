@@ -247,7 +247,7 @@ class AnimalSpawner {
             if (animal.triggered) animal.aliveTime += deltaTime;
 
             const staleTimeout = animal.aliveTime > 12;
-            if (animal.z > playerZ + 30 || animal.hit || staleTimeout || animal.z < playerZ - 230) { // гигант на скорости появляется далеко (src/animal-attack.js attackLead)
+            if (animal.z > playerZ + 30 || animal.hit || staleTimeout || animal.z < playerZ - 300) { // гигант на скорости появляется далеко (src/animal-attack.js attackLead)
                 this.disposeAnimal(animal);
                 if (animal.speciesKey) {
                     this.speciesCount[animal.speciesKey] = Math.max(0, (this.speciesCount[animal.speciesKey] || 0) - 1);
@@ -265,6 +265,8 @@ class AnimalSpawner {
                 const base = this.triggerLookahead || 15;
                 animal._trigDist = base * (0.9 + Math.random() * 0.2);
             }
+            // Пустошь: зверь виден с появления — спокойным на обочине (showIdle, src/beast-behavior.js), в тумане его не видно
+            if (this.showIdle && !animal.mesh.visible && distanceAhead > 1.2 && distanceAhead < 160) animal.mesh.visible = true;
             // Пустошь: за TELL_S до выхода зверь уже виден на обочине и подаёт голос — честная подсказка (src/modes/infinite-run.js)
             if (this.onTell && !animal.told && distanceAhead > 1.2 && distanceAhead <= animal._trigDist * (this._k || 1) + (this._v || 0) * TELL_S) {
                 animal.told = true; animal.mesh.visible = true;
@@ -272,6 +274,7 @@ class AnimalSpawner {
             }
             if (distanceAhead > 1.2 && distanceAhead <= animal._trigDist * (this._k || 1)) {
                 animal.triggered = true;
+                if (animal.mesh.rotation) { animal.mesh.rotation.y = animal.direction * Math.PI / 2; animal.mesh.rotation.x = 0; animal.mesh.position.y = 0; } // смотрел на машину — теперь бежит через дорогу
                 if (this.speciesRules) animal.duration *= durMul(animal.speciesKey); // своё правило у вида (src/animal-rules.js): курица мечется, медведь встаёт
                 animal.mesh.visible = true;
                 try {

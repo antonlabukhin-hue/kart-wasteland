@@ -7,6 +7,7 @@
  */
 import * as THREE from 'three';
 import { makeAnimal } from './zombie-look.js';
+import { setEyes } from './beast-kit.js';
 
 export const SHAKES = 3, HOLD = 2.6, SWING = 0.3;
 
@@ -57,7 +58,8 @@ export function createLatch(o) {
         grab: function(a, c, onFail) {
             if (st || !c || typeof window === 'undefined' || !window.createAnimalMesh) return false;
             try { mesh = makeAnimal(a.speciesKey); } catch (e) { return false; }
-            st = latchState(); car = c; fail = onFail;
+            st = latchState(); car = c; fail = onFail; st.sp = a.speciesKey;
+            setEyes(mesh, 1, 0); // на капоте — глаза горят
             // на капоте: мордой к стеклу, чуть наискосок; масштаб — с поправкой на масштаб машины
             const k = 1 / (c.scale.x || 1);
             // на капоте: точка в мире (над капотом перед лобовым) → в координаты машины (у неё свой масштаб и сдвиг модели)
@@ -85,6 +87,10 @@ export function createLatch(o) {
             const n0 = st.shakes, n = shakeStep(st, x);
             if (n > n0 && n < SHAKES) sfx('bump', 1.0, 0.8 + n * 0.15); // рывок — зверя мотает
             if (mesh) { mesh.rotation.z = Math.sin(st.t * 22) * 0.12 + (st.dir || 0) * 0.15; mesh.position.y = hood.y + Math.abs(Math.sin(st.t * 11)) * 0.05 / (car.scale.x || 1); }
+            if (mesh && st.sp === 'MONKEY') { // обезьяна стучит по капоту: подскакивает и бьёт лапами — слышно (подпись вида, src/beast-behavior.js)
+                const ph = Math.sin(st.t * 16); mesh.position.y = hood.y + Math.abs(ph) * 0.14 / (car.scale.x || 1);
+                if (ph < 0 && (st.lastPh || 0) >= 0) sfx('bump', 0.45, 1.7); st.lastPh = ph;
+            }
             if (bar) { const is = bar.querySelectorAll('i'); for (let i = 0; i < is.length; i++) is[i].className = i < n ? 'on' : ''; bar.querySelector('b').style.width = Math.max(0, 100 - st.t / HOLD * 100) + '%'; }
             if (n >= SHAKES) release(true);
             else if (st.t >= HOLD) release(false);

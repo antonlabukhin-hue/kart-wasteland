@@ -47,11 +47,16 @@ function glowTex() {
 }
 const sm = {}, bm = {}, lm = {};
 /** Ореол: небольшой и полупрозрачный — подсвечивает деталь, но не закрывает зверя (сложение ореолов днём давало сплошной цветной шар) */
-export const GLOW_MAX = 0.18, GLOW_OPACITY = 0.45;
+export const GLOW_MAX = 0.18, GLOW_OPACITY = 0.22; // мутации — вполсилы: узнаём зверя по анатомии и повадке, свечение лишь подчёркивает (70/30)
 function glow(color, size) { const m = sm[color] || (sm[color] = new THREE.SpriteMaterial({ map: glowTex(), color: color, transparent: true, opacity: GLOW_OPACITY, depthWrite: false, fog: false })); const s = new THREE.Sprite(m); s.scale.setScalar(Math.min(GLOW_MAX, size)); return s; }
 /** Язык пламени: светящийся конус (виден днём, не прячет зверя) */
 function flame(add, color, x, y, z, h, tilt) { const c = add(new THREE.Mesh(G('flame', function() { return new THREE.ConeGeometry(0.5, 1, 5); }), lit(color))); c.scale.set(h * 0.35, h, h * 0.35); c.position.set(x, y + h * 0.4, z); c.rotation.set(tilt || 0, 0, 0); return c; }
 function lit(color) { return bm[color] || (bm[color] = new THREE.MeshBasicMaterial({ color: color })); }
+/** Мутация без неона: цвет вида, приглушённый к серому и темнее, с обычным светом сцены */
+const mm = {};
+function muted(color) { if (mm[color]) return mm[color]; const c = new THREE.Color(color), g = (c.r + c.g + c.b) / 3; c.lerp(new THREE.Color(g, g, g), 0.6).multiplyScalar(0.7); return (mm[color] = new THREE.MeshStandardMaterial({ color: c, roughness: 0.7, flatShading: true })); }
+/** Глаза бешеного зверя — один цвет у всех видов: горят перед нападением, у спокойного — тусклые (src/beast-behavior.js eyeLevel) */
+export const EYE_HOT = 0xff3a10, EYE_DIM = 0x2a140c;
 function solid(color) { return lm[color] || (lm[color] = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, metalness: 0.3, flatShading: true })); }
 const geos = {};
 function G(k, make) { if (!geos[k]) { geos[k] = make(); geos[k].userData.keep = true; } return geos[k]; }
@@ -94,29 +99,29 @@ function addFeatures(mesh, def, eyes) {
                 const z = z0 + (z1 - z0) * (i / Math.max(1, n - 1)), y = topAt(mesh, parts, 0, z);
                 if (y == null) continue;
                 const h = size * (0.13 - 0.05 * Math.abs(i / n - 0.4));
-                const s = add(new THREE.Mesh(G('spike', function() { return new THREE.ConeGeometry(0.5, 1, 5); }), ft[3] ? lit(col) : solid(col)));
+                const s = add(new THREE.Mesh(G('spike', function() { return new THREE.ConeGeometry(0.5, 1, 5); }), ft[3] ? muted(col) : solid(col)));
                 s.scale.set(h * 0.45, h, h * 0.45); s.position.set(0, y + h * 0.4, z); s.rotation.x = -0.35;
                 if (ft[3]) { const g = glow(col, h * 2.2); g.position.copy(s.position); add(g); }
             }
         } else if (kind === 'tusks' || kind === 'horn') {
             const sides = kind === 'horn' ? [0] : [-1, 1];
             sides.forEach(function(sd) {
-                const t = add(new THREE.Mesh(G('tusk', function() { return new THREE.ConeGeometry(0.5, 1, 6); }), lit(col)));
+                const t = add(new THREE.Mesh(G('tusk', function() { return new THREE.ConeGeometry(0.5, 1, 6); }), muted(col)));
                 const L = size * (kind === 'horn' ? 0.26 : 0.2);
                 t.scale.set(L * 0.22, L, L * 0.22);
                 t.position.set(head.x + sd * size * 0.09, head.y - size * (kind === 'horn' ? 0.02 : 0.12), head.z + size * 0.14);
                 t.rotation.x = kind === 'horn' ? 0.6 : 1.1; t.rotation.z = -sd * 0.3;
-                const g = glow(col, L * 1.6); g.position.copy(t.position); add(g);
+                const g = glow(col, L * 0.8); g.position.copy(t.position); add(g);
             });
         } else if (kind === 'antlers') {
             [-1, 1].forEach(function(sd) {
                 for (let k = 0; k < 3; k++) {
-                    const b = add(new THREE.Mesh(G('antler', function() { return new THREE.CylinderGeometry(0.02, 0.03, 1, 5); }), lit(col)));
+                    const b = add(new THREE.Mesh(G('antler', function() { return new THREE.CylinderGeometry(0.02, 0.03, 1, 5); }), muted(col)));
                     const L = size * (0.32 - k * 0.07);
                     b.scale.y = L; b.position.set(head.x + sd * (size * 0.06 + k * size * 0.05), head.y + size * 0.12 + k * size * 0.1, head.z - size * 0.02);
                     b.rotation.z = -sd * (0.5 + k * 0.35);
                 }
-                const g = glow(col, size * 0.6); g.position.set(head.x + sd * size * 0.15, head.y + size * 0.3, head.z); add(g);
+                const g = glow(col, size * 0.3); g.position.set(head.x + sd * size * 0.15, head.y + size * 0.3, head.z); add(g);
             });
         } else if (kind === 'tailFire') {
             const p = new THREE.Vector3(0, (topAt(mesh, parts, 0, box.min.z + size * 0.05) || box.max.y * 0.6), box.min.z);
@@ -127,7 +132,7 @@ function addFeatures(mesh, def, eyes) {
             for (let i = 0; i < n; i++) {
                 const z = box.min.z + (box.max.z - box.min.z) * (0.2 + 0.6 * (i / Math.max(1, n - 1))), sd = i % 2 ? 1 : -1;
                 const y = topAt(mesh, parts, 0, z); if (y == null) continue;
-                const pt = add(new THREE.Mesh(G('blot', function() { return new THREE.SphereGeometry(0.5, 7, 5); }), lit(col))); pt.scale.set(size * 0.05, size * 0.09, size * 0.11); pt.position.set(sd * size * 0.16, y - size * 0.1, z);
+                const pt = add(new THREE.Mesh(G('blot', function() { return new THREE.SphereGeometry(0.5, 7, 5); }), muted(col))); pt.scale.set(size * 0.05, size * 0.09, size * 0.11); pt.position.set(sd * size * 0.16, y - size * 0.1, z);
             }
         } else if (kind === 'plate') {
             const p = add(new THREE.Mesh(G('plate', function() { return new THREE.BoxGeometry(1, 0.25, 0.7); }), solid(col)));
@@ -138,15 +143,16 @@ function addFeatures(mesh, def, eyes) {
             c.scale.setScalar(size * 0.2); c.position.set(head.x, head.y - size * 0.12, head.z - size * 0.15);
             for (let i = 0; i < 6; i++) { const ang = i / 6 * Math.PI * 2, s = add(new THREE.Mesh(G('cspike', function() { return new THREE.ConeGeometry(0.5, 1, 4); }), solid(0xcfd3d6))); s.scale.set(size * 0.025, size * 0.06, size * 0.025); s.position.set(c.position.x + Math.cos(ang) * size * 0.11, c.position.y + Math.sin(ang) * size * 0.11, c.position.z); s.rotation.z = ang - Math.PI / 2; }
         } else if (kind === 'slime') {
-            for (let i = 0; i < 4; i++) { const d = add(new THREE.Mesh(G('drip', function() { return new THREE.SphereGeometry(0.5, 6, 5); }), lit(col))); d.scale.set(size * 0.03, size * 0.07, size * 0.03); d.position.set(head.x + (i - 1.5) * size * 0.06, head.y - size * 0.2 - (i % 2) * size * 0.05, head.z + size * 0.12); }
+            for (let i = 0; i < 4; i++) { const d = add(new THREE.Mesh(G('drip', function() { return new THREE.SphereGeometry(0.5, 6, 5); }), muted(col))); d.scale.set(size * 0.03, size * 0.07, size * 0.03); d.position.set(head.x + (i - 1.5) * size * 0.06, head.y - size * 0.2 - (i % 2) * size * 0.05, head.z + size * 0.12); }
             const g = glow(col, size * 0.45); g.position.set(head.x, head.y - size * 0.2, head.z + size * 0.1); add(g);
         } else if (kind === 'goggles') {
             [-1, 1].forEach(function(sd) { const gg = add(new THREE.Mesh(G('goggle', function() { return new THREE.CylinderGeometry(0.5, 0.5, 0.4, 10); }), solid(col))); gg.scale.setScalar(size * 0.09); gg.rotation.x = Math.PI / 2; gg.position.set(head.x + sd * size * 0.07, head.y + size * 0.01, head.z + size * 0.04); });
             const strap = add(new THREE.Mesh(G('strap', function() { return new THREE.BoxGeometry(1, 0.15, 0.6); }), solid(0x2a1a10))); strap.scale.setScalar(size * 0.32); strap.position.set(head.x, head.y + size * 0.01, head.z - size * 0.05);
         }
     });
-    // глаза горят цветом вида
-    eyes.forEach(function(e) { const g = glow(def.eye, size * 0.16); e.getWorldPosition(g.position); fx.worldToLocal(g.position); add(g); });
+    // глаза: своё свечение у каждого зверя (материал — свой), разгорается по состоянию (setEyes)
+    const eg = mesh.userData.eyeGlows = [];
+    eyes.forEach(function(e) { const g = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: EYE_HOT, transparent: true, opacity: 0, depthWrite: false, fog: false })); g.scale.setScalar(Math.min(GLOW_MAX, size * 0.16)); g.userData.base = g.scale.x; e.getWorldPosition(g.position); fx.worldToLocal(g.position); add(g); eg.push(g); });
     return fx;
 }
 
@@ -155,7 +161,7 @@ export function dressBeast(mesh, species) {
     const def = BEASTS[species];
     if (!def || !mesh || mesh.userData.beast) return !!(mesh && mesh.userData.beast);
     mesh.userData.beast = species; mesh.userData.zombie = true;
-    const eyes = [], eyeMat = lit(def.eye);
+    const eyes = [], eyeMat = mesh.userData.eyeMat = new THREE.MeshBasicMaterial({ color: EYE_DIM }); // свой у каждого зверя — глаза разгораются по состоянию
     const own = !!mesh.userData.beastModel; // своя модель (src/beast-models.js) — уже в цветах вида
     mesh.traverse(function(o) {
         if (!o.isMesh || !o.material) return;
@@ -168,4 +174,18 @@ export function dressBeast(mesh, species) {
     });
     if (typeof document !== 'undefined') addFeatures(mesh, def, eyes);
     return true;
+}
+
+/**
+ * Глаза по состоянию (v 0..1 — src/beast-behavior.js eyeLevel): 0 — тусклые без свечения, 0.5 — тлеют, 1 — горят и пульсируют.
+ * t — время, с (пульс). Ничего не делает у модели без своих глаз.
+ */
+const _dim = new THREE.Color(EYE_DIM), _hot = new THREE.Color(EYE_HOT);
+export function setEyes(mesh, v, t) {
+    const u = mesh && mesh.userData; if (!u || !u.eyeMat) return;
+    const k = Math.max(0, Math.min(1, v || 0)), p = k >= 1 ? 0.85 + 0.15 * Math.sin((t || 0) * 14) : 1;
+    if (u.eyeK === k && k < 1) return;
+    u.eyeK = k;
+    u.eyeMat.color.copy(_dim).lerp(_hot, Math.min(1, k * 1.4));
+    (u.eyeGlows || []).forEach(function(g) { g.material.opacity = k * 0.9 * p; g.scale.setScalar(g.userData.base * (0.6 + 0.9 * k) * p); });
 }

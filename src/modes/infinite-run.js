@@ -42,6 +42,9 @@ import { TELL_S } from '../animals.js';
 import { warnSfx } from '../beast-sfx.js';
 import { hintDue, loadHints, saveHints } from '../attack-hints.js';
 import { CUT } from '../wasteland-cut.js';
+import { eyeLevel, poseIdle, poseAlert, IDLE_S } from '../beast-behavior.js';
+import { setEyes } from '../beast-kit.js';
+import { createDust } from '../beast-fx.js';
 import { createLatch, HOLD } from '../hood-latch.js';
 import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
 
@@ -87,7 +90,7 @@ export function createInfiniteRun(ctx) {
     // мем-моменты 90-х (src/memes.js): попутка с коровой или шкафом, бабка с тележкой, рыбак, гаишник — раз в 475–775 м
     let nextMeme = 375 + Math.random() * 250, lastMeme = null;
     // Пустошь: звери нападают (src/animal-attack.js), прыгнувший вцепляется в капот (src/hood-latch.js)
-    let attackWired = false, runDist = 0;
+    let attackWired = false, runDist = 0, dust = null;
     const hintSeen = loadHints();
     const latch = createLatch({ plaque: function(t, s, c) { ctx.plaque(t, s, c); }, popup: function(t) { ctx.popup(t); }, onShook: function() { riskEvent(ctx.risk, 'dodge'); ctx.stats.shook = (ctx.stats.shook || 0) + 1; } });
     /**
@@ -115,7 +118,7 @@ export function createInfiniteRun(ctx) {
             sp.prep = function(a) {
                 prepAttack(a, Math.random, sp.triggerLookahead, runDist + (warm || 0)); // нападения открываются по метрам (src/animal-attack.js ROLE_FROM)
                 if (a.role !== 'cross') { // нападающий — дальше: успеть увидеть его на обочине и услышать до броска
-                    const need = attackLead(a._trigDist, sp._k, sp._v, TELL_S);
+                    const need = attackLead(a._trigDist, sp._k, sp._v, TELL_S + IDLE_S); // ещё и спокойным на обочине — до того, как насторожится
                     if (ctx.z - a.z < need) { a.z = ctx.z - need; if (a.mesh) a.mesh.position.z = a.z; sp._lastSpawnZ = Math.min(sp._lastSpawnZ == null ? a.z : sp._lastSpawnZ, a.z); }
                 }
                 // новое нападение — один раз подсказка (src/attack-hints.js), сразу при появлении зверя: за 2–3 с до броска, успеть прочитать
@@ -123,6 +126,8 @@ export function createInfiniteRun(ctx) {
                 if (h) { hintSeen.add(a.role); saveHints(hintSeen); try { ctx.plaque(h.icon + ' ' + h.title, h.text, 'crate-bad attack-hint'); } catch (e) {} }
             };
             sp.behave = function(a, d, pz) { return stepAttack(a, d, pz, ctx.x); };
+            sp.showIdle = true; // звери видны с появления — спокойными на обочине (src/beast-behavior.js), а не выскакивают из ниоткуда
+            dust = createDust(scene);
             // за ~1 с до броска зверь виден на обочине и подаёт голос своего нападения (src/beast-sfx.js) — вой, топот, рык, рёв
             sp.onTell = function(a) {
                 const s = warnSfx(a.role); if (s && ctx.state === 'racing') try { if (window.soundEngine) window.soundEngine.playSfx(s, a.giant ? 1.1 : 0.85); } catch (e) {}
@@ -134,12 +139,16 @@ export function createInfiniteRun(ctx) {
         latch.tick(dt, ctx.x);
         if (latch.active) sp.spawnTimer = 0; // зверь на капоте — новых не выпускаем, пока не стряхнёшь
         const now = performance.now() / 1000;
+        if (dust) dust.tick(dt);
         for (let i = 0; i < sp.animals.length; i++) {
             const a = sp.animals[i];
-            if (a.told && !a.triggered && a.role && a.role !== 'cross' && a.mesh) { // заметил машину: смотрит на неё и переминается
-                a.mesh.rotation.y = Math.atan2(ctx.x - a.x, Math.max(1, ctx.z - a.z));
-                a.mesh.position.y = Math.abs(Math.sin(now * 14)) * 0.06;
+            if (!a.mesh) continue;
+            setEyes(a.mesh, eyeLevel(a), now); // глаза: тусклые у спокойного, горят перед броском (src/beast-kit.js)
+            if (!a.triggered && a.mesh.visible) { // спокоен — пасётся; заметил машину — поднял голову и смотрит на неё
+                if (!a.told) poseIdle(a.mesh, now, a.z * 0.37);
+                else poseAlert(a.mesh, now, Math.atan2(ctx.x - a.x, Math.max(1, ctx.z - a.z)));
             }
+            if (a.dust) { a.dust = false; if (dust) dust.puff(a.x + (Math.random() - 0.5) * 0.4, 0.08, a.z + (a.giant ? 1.2 : 0.55), a.giant ? 0.9 : 0.38); } // пыль из-под копыт и лап (src/beast-fx.js)
             if (a.roar === 'new') { // гигант выбежал на полосу: рёв и надпись — видно издалека
                 a.roar = 'done';
                 try { ctx.popup('⚠ ' + (a.speciesKey === 'ELEPHANT' ? 'МАМОНТ' : a.speciesKey === 'RHINO' ? 'НОСОРОГ' : a.speciesKey === 'HIPPO' ? 'БЕГЕМОТ' : a.speciesKey === 'DINO' ? 'ЯЩЕР' : 'МЕДВЕДЬ') + ' НЕСЁТСЯ НАВСТРЕЧУ!'); } catch (e) {}
