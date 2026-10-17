@@ -6707,3 +6707,7 @@ body.crash-cine :is(#nitro-btn, .police-hud, .rt, #latch-bar, #power-slot, #armo
 :root body.race-mode .rt.rt.rt.attack-hint.attack-hint { max-width: min(92vw, 460px) !important; font-size: 14px !important; padding: 5px 12px !important; }
 :root body.race-mode .rt.rt.rt.attack-hint.attack-hint small { display: block !important; margin-top: 2px !important; font-size: 12px !important; }
 :root body.race-mode .rt.rt.rt.attack-hint.attack-hint small::before { content: none; }
+/* Пустошь: гудок светится и пульсирует, когда впереди есть кого спугнуть (src/horn.js state().k) */
+#nitro-btn.ready.drafting { border-color: #ffd23c !important; box-shadow: 0 0 22px rgba(255,200,60,0.95), 0 6px 18px rgba(0,0,0,0.45) !important; animation: hornPulse .5s ease-in-out infinite alternate; }
+@keyframes hornPulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+#nitro-btn[aria-label="Гудок"].ready:not(.drafting) { animation: none; box-shadow: 0 6px 18px rgba(0,0,0,0.45); } /* готов, но пугать некого — спокойная */

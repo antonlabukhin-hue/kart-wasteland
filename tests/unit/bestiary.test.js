@@ -13,7 +13,7 @@ describe('Пустошь: бестиарий — звери, которых вс
         recordBeast(p, 'BOAR', 'met'); recordBeast(p, 'BOAR', 'dodged'); recordBeast(p, 'NOPE', 'met');
         const boar = bestiaryRows(p).find((r) => r.sp === 'BOAR');
         expect(boar.open).toBe(true); expect(boar.name).toContain('Кабан');
-        expect(boar.how).toContain('таран'); expect(boar.horn).toContain('звереет'); expect(boar.dodged).toBe(1);
+        expect(boar.how).toContain('таран'); expect(boar.horn).toContain('убегает'); expect(boar.dodged).toBe(1);
         expect(bestiaryCount(p)).toBe(1);
         const html = bestiaryHtml(p);
         expect(html).toContain('встречено 1 из ' + ORDER.length); expect(html).toContain('???');
