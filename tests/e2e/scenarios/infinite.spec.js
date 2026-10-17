@@ -560,7 +560,7 @@ test('«на волоске»: уход из полосы перед попут�
     await page.waitForTimeout(1500);
     await page.evaluate(() => {
         const g = window.__raceDebug;
-        g.cars.forEach((c, i) => { c.z = g.z - 300 - i * 40; c.x = 99; c.mesh.position.set(99, 0, c.z); });
+        g.cars.forEach((c, i) => { c.z = g.z - 300 - i * 40; c.x = 99; c.mesh.position.set(99, 0, c.z); }); window.__noBeasts = setInterval(() => (g.animals || []).forEach(a => { a.hit = true; }), 50); /* Пустошь: звери видны раньше — проверяем только «на волоске» у обломка */
         const c = g.cars[0]; c.x = g.x; c.lane = 1; c.targetLane = 1; c.laneChangeTimer = 99; c._avoidLock = 99; c.speed = 0.005; c.z = g.z - 30; c.mesh.position.set(c.x, 0.1, c.z); window.__nmCar = c;
     });
     await page.evaluate(() => new Promise(res => { const g = window.__raceDebug; const t = setInterval(() => { if (g.z - window.__nmCar.z < 8) { clearInterval(t); document.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', code: 'KeyD' })); setTimeout(() => { document.dispatchEvent(new KeyboardEvent('keyup', { key: 'd', code: 'KeyD' })); res(); }, 400); } }, 10); }));

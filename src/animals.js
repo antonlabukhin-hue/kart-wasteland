@@ -268,7 +268,7 @@ class AnimalSpawner {
             // Пустошь: зверь виден с появления — спокойным на обочине (showIdle, src/beast-behavior.js), в тумане его не видно
             if (this.showIdle && !animal.mesh.visible && distanceAhead > 1.2 && distanceAhead < 160) animal.mesh.visible = true;
             // Пустошь: за TELL_S до выхода зверь уже виден на обочине и подаёт голос — честная подсказка (src/modes/infinite-run.js)
-            if (this.onTell && !animal.told && distanceAhead > 1.2 && distanceAhead <= animal._trigDist * (this._k || 1) + (this._v || 0) * TELL_S) {
+            if (this.onTell && !animal.told && !animal.hit && distanceAhead > 1.2 && distanceAhead <= animal._trigDist * (this._k || 1) + (this._v || 0) * TELL_S) {
                 animal.told = true; animal.mesh.visible = true;
                 try { this.onTell(animal); } catch (e) {}
             }
