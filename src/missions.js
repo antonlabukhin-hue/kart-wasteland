@@ -7,8 +7,21 @@
  * засчитывается равноценное (1 км в бесконечной, побег от ГАИ), метры и «Е» считаются во всех заездах.
  */
 
-/** stat — какое поле итога заезда копится (см. raceStat) */
+/**
+ * stat — какое поле итога заезда копится (см. raceStat). Пустошь: задания — про зверей (стряхни, увернись, уйди от гиганта),
+ * плюс дальность, заезд без аварий и «Е». Старые (щиты, посадки, сердечки, нитро) — LEGACY_MISSIONS; у кого они были — заменятся.
+ */
 export const MISSION_POOL = [
+    { id: 'shake', text: 'Стряхни зверей с капота', stat: 'shook', targets: [3, 5, 8] },
+    { id: 'dodge', text: 'Увернись от нападений зверей', stat: 'dodges', targets: [5, 10, 16] },
+    { id: 'giant', text: 'Уйди от гигантов', stat: 'giants', targets: [2, 3, 5] },
+    { id: 'dist', text: 'Проедь за один заезд, м', stat: 'distance', targets: [1000, 2500, 5000], best: true },
+    { id: 'clean', text: 'Без аварий: первые 500 м', stat: 'cleanWins', targets: [1, 2, 3] },
+    { id: 'echips', text: 'Заработай железные «Е»', stat: 'eChips', targets: [40, 120, 250] }
+];
+
+/** Задания прежней игры (щиты, посадки, нитро…) — в Пустоши не выдаются, оставлены для истории */
+export const LEGACY_MISSIONS = [
     { id: 'jump', text: 'Перепрыгни зверей', stat: 'animalsJumped', targets: [2, 4, 7] },
     { id: 'near', text: 'Проскочи «на волоске»', stat: 'nearMiss', targets: [4, 7, 12] },
     { id: 'land', text: 'Чистые посадки после трамплина', stat: 'cleanLandings', targets: [2, 4, 6] },
@@ -55,9 +68,14 @@ function tierFor(done) {
     return done >= 12 ? 2 : done >= 4 ? 1 : 0;
 }
 
+/** Задания про зверей — лицо Пустоши: из трёх на виду минимум два — такие */
+export const BEAST_MISSIONS = ['shake', 'dodge', 'giant'];
+
 function newMission(exclude, done, rnd) {
     const r = rnd || Math.random;
-    const free = MISSION_POOL.filter(function(x) { return exclude.indexOf(x.id) < 0; });
+    const beasts = exclude.filter(function(id) { return BEAST_MISSIONS.indexOf(id) >= 0; }).length;
+    let free = MISSION_POOL.filter(function(x) { return exclude.indexOf(x.id) < 0; });
+    if (beasts < 2) { const bf = free.filter(function(x) { return BEAST_MISSIONS.indexOf(x.id) >= 0; }); if (bf.length) free = bf; }
     const def = free[Math.floor(r() * free.length) % free.length];
     const tier = tierFor(done);
     return { id: def.id, target: def.targets[tier], progress: 0, tier: tier };
