@@ -7,7 +7,8 @@
 export const BOARD_KEY = 'kw_road_racing_board_v1';
 export const BOARD_SIZE = 10;
 
-// соперники из лора 90-х: дальность в метрах (часть — на неделе тоже «катаются»)
+// соперники из лора 90-х (Димон с Промзоны, Дед Митяй, Шурик-видеосалон…) — в Пустоши выключены: выдуманные имена
+// выскакивали «🏁 ОБОГНАЛ: …» посреди заезда и давали фальшивое «место на неделе». Гонишься только за настоящими рекордами.
 export const RIVALS = [
     { name: 'Димон с Промзоны', dist: 9400, car: 'turbo' },
     { name: 'Тётя Зина (такси)', dist: 6200, car: 'shestisot' },
@@ -16,6 +17,8 @@ export const RIVALS = [
     { name: 'Дед Митяй', dist: 1500, car: 'gorbaty' },
     { name: 'Шурик-видеосалон', dist: 800, car: 'pirozhok' }
 ];
+/** Какие соперники подмешиваются в таблицу: в Пустоши — никакие */
+export const ACTIVE_RIVALS = [];
 
 /** Понедельник недели для даты — ключ недели 'ГГГГ-ММ-ДД' */
 export function weekKey(date) {
@@ -50,7 +53,7 @@ export function topRuns(list, scope, now, me) {
         if (scope === 'week' && weekKey(r.at) !== wk) return;
         if (!best[r.name] || r.dist > best[r.name].dist) best[r.name] = { name: r.name, dist: r.dist, car: r.car };
     });
-    RIVALS.forEach(function(rv) {
+    ACTIVE_RIVALS.forEach(function(rv) {
         const dist = scope === 'week' ? Math.round(rv.dist * 0.5) : rv.dist;
         if (!best[rv.name]) best[rv.name] = { name: rv.name, dist: dist, car: rv.car, rival: true };
     });

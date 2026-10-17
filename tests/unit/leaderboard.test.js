@@ -19,12 +19,12 @@ describe('таблица рекордов', () => {
         expect(all[0]).toMatchObject({ name: 'Боря', dist: 12000 });
         expect(all.filter(r => r.name === 'Аня')).toHaveLength(1);
         expect(all.find(r => r.name === 'Аня')).toMatchObject({ dist: 5000, me: true });
-        expect(all.length).toBe(2 + RIVALS.length);
+        expect(all.length).toBe(2); // Пустошь: выдуманных соперников нет (ACTIVE_RIVALS)
         all.forEach((r, i) => { if (i) expect(r.dist).toBeLessThanOrEqual(all[i - 1].dist); });
         const week = topRuns(list, 'week', now, 'Аня');
         expect(week.find(r => r.name === 'Боря')).toBeUndefined();
         expect(rankOf(week, 'Аня')).toBe(1); // соперники на неделе — вполовину
-        expect(rankOf(all, 'Аня')).toBe(4);
+        expect(rankOf(all, 'Аня')).toBe(2);
         expect(rankOf(all, 'Никто')).toBe(0);
     });
     it('хранится и читается', () => {

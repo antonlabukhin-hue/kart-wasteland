@@ -41,6 +41,7 @@ import { prepAttack, stepAttack, attackLead } from '../animal-attack.js';
 import { TELL_S } from '../animals.js';
 import { warnSfx } from '../beast-sfx.js';
 import { hintDue, loadHints, saveHints } from '../attack-hints.js';
+import { CUT } from '../wasteland-cut.js';
 import { createLatch, HOLD } from '../hood-latch.js';
 import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
 
@@ -55,7 +56,7 @@ export function createInfiniteRun(ctx) {
     const me = player ? player.name : '', best = player && player.infinite ? player.infinite.best || 0 : 0;
     const rule = ctx.rule || {};
     const warm = rule.warm != null ? rule.warm : ctx.fair ? 0 : warmStart(best); // «горячий старт»: сложность — от рекорда (в честном заезде — нет)
-    const weekTh = weekTheme().theme; // пейзаж недели: «Е» за две
+    const weekTh = CUT.weekTheme ? null : weekTheme().theme; // пейзаж недели: «Е» за две (в Пустоши — нет, src/wasteland-cut.js)
     const patEnds = [], patHit = new Set(); // узоры: где кончаются и какие задеты
     const roots = [], box = new THREE.Box3(); // объекты кругов в сцене — для уборки позади
     const police = createPolice(scene, function() { ctx.say('police'); }, function() { const s = ctx.stats; s.escapes = (s.escapes || 0) + 1; if (ctx.onEscape) ctx.onEscape(); }, ctx.chaseTime); // ctx.chaseTime, ctx.onEscape — правило провала A/B (src/fail-rules.js)
@@ -88,7 +89,7 @@ export function createInfiniteRun(ctx) {
     // Пустошь: звери нападают (src/animal-attack.js), прыгнувший вцепляется в капот (src/hood-latch.js)
     let attackWired = false, runDist = 0;
     const hintSeen = loadHints();
-    const latch = createLatch({ plaque: function(t, s, c) { ctx.plaque(t, s, c); }, popup: function(t) { ctx.popup(t); }, onShook: function() { riskEvent(ctx.risk, 'dodge'); } });
+    const latch = createLatch({ plaque: function(t, s, c) { ctx.plaque(t, s, c); }, popup: function(t) { ctx.popup(t); }, onShook: function() { riskEvent(ctx.risk, 'dodge'); ctx.stats.shook = (ctx.stats.shook || 0) + 1; } });
     /**
      * Зверь вцепился в капот: впереди пусто на ~2.7 с хода (на 35% меньше всего захвата + 1.5 с) (src/wrecks.js latchClear).
      * Обломки уезжают дальше по дороге, звери впереди — тоже; стряхиваешь рулём, не думая об объезде.
@@ -145,7 +146,7 @@ export function createInfiniteRun(ctx) {
             }
             if (a.dodged !== 'new') continue;
             a.dodged = 'done';
-            if (ctx.state === 'racing') { const rv = riskEvent(ctx.risk, 'dodge'); try { ctx.popup((a.giant ? '🦣 Ушёл от гиганта!' : a.role === 'charge' ? '🐗 Ушёл от тарана!' : '🐺 Увернулся!') + ' ×' + rv.mult); } catch (e) {} }
+            if (ctx.state === 'racing') { const st = ctx.stats; st.dodges = (st.dodges || 0) + 1; if (a.giant) st.giants = (st.giants || 0) + 1; const rv = riskEvent(ctx.risk, 'dodge'); /* счётчики для заданий (src/missions.js) */ try { ctx.popup((a.giant ? '🦣 Ушёл от гиганта!' : a.role === 'charge' ? '🐗 Ушёл от тарана!' : '🐺 Увернулся!') + ' ×' + rv.mult); } catch (e) {} }
         }
     }
     const lapOff = ctx.seed ? 0 : Math.floor(Math.random() * 3); // Пустошь: круги — в своём порядке каждый заезд
@@ -310,7 +311,7 @@ export function createInfiniteRun(ctx) {
             // Пустошь: обочины и асфальт — на 190 м вперёд, по 40 м за раз
             if (d + 190 > wasteTo) { planWaste(wasteTo, wasteTo + 40, Math.random).forEach(spawnWaste); wasteTo += 40; }
             // мемы: следующий — за 170 м впереди (до тумана), не над разломом
-            if (d + 170 > nextMeme) {
+            if (!CUT.memes && d + 170 > nextMeme) { // в Пустоши мемов 90-х нет (src/wasteland-cut.js)
                 if (!L.gaps.some(function(g) { const gd = START_Z - g.zNear; return nextMeme > gd - 25 && nextMeme < gd + 20; })) spawnMeme(nextMeme);
                 nextMeme += MEME_EVERY[0] + Math.random() * (MEME_EVERY[1] - MEME_EVERY[0]);
             }
