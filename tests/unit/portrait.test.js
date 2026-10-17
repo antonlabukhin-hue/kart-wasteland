@@ -33,3 +33,16 @@ describe('машина в кадре на любой скорости', () => {
         expect(chaseLag(0.5, 0)).toBe(0);
     });
 });
+
+import { portraitView, PORTRAIT_ZOOM } from '../../src/portrait.js';
+describe('вертикально — картинка крупнее (вырезка кадра)', () => {
+    it('вырезка в k раз меньше экрана, по центру по ширине, с top по высоте; боком — без вырезки', () => {
+        const v = portraitView(390, 844, { k: 1.25, top: 0.125 });
+        expect(v.w).toBeCloseTo(390 / 1.25); expect(v.h).toBeCloseTo(844 / 1.25);
+        expect(v.x).toBeCloseTo((390 - 312) / 2); expect(v.y).toBeCloseTo(844 * 0.125);
+        // низ машины был на 0.75 высоты — станет ~0.78 (как на согласованном кадре)
+        expect((0.75 * 844 - v.y) / v.h).toBeCloseTo(0.78, 2);
+        expect(portraitView(844, 390)).toBe(null);
+        expect(PORTRAIT_ZOOM.k).toBeGreaterThan(1);
+    });
+});

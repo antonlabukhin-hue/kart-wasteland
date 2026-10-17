@@ -54,3 +54,22 @@ export const DOLLY_LOOK = 1;
 export function chaseLag(maxSpeed, follow) {
     return follow > 0 ? maxSpeed * (1 - follow) / follow : 0;
 }
+
+/**
+ * Вертикально — картинка крупнее: тот же кадр камеры, но «вырезка» из него, растянутая на весь экран (как кадрировать скриншот).
+ * Меньше пустого неба по краям, крупнее машина, обломки и звери; перспектива та же. k — во сколько раз крупнее,
+ * top — откуда по высоте начинается вырезка (доля): низ машины был на ~0.75 высоты, станет ~0.78 — как на согласованном кадре.
+ */
+export const PORTRAIT_ZOOM = { k: 1.25, top: 0.125 };
+/** Вырезка для camera.setViewOffset(fullW, fullH, x, y, w, h) или null (экран боком — без увеличения) */
+export function portraitView(w, h, z) {
+    const o = z || (typeof window !== 'undefined' && window.__portraitZoom) || PORTRAIT_ZOOM; // __portraitZoom — подбор на скриншотах
+    if (!(w > 0) || !(h > 0) || w >= h || !(o.k > 1)) return null;
+    const vw = w / o.k, vh = h / o.k;
+    return { x: (w - vw) / 2, y: Math.min(h - vh, Math.max(0, h * o.top)), w: vw, h: vh };
+}
+/** Применить к камере: вертикально — вырезка, боком — весь кадр */
+export function applyPortraitView(camera, w, h) {
+    const v = portraitView(w, h);
+    if (v) camera.setViewOffset(w, h, v.x, v.y, v.w, v.h); else camera.clearViewOffset();
+}
