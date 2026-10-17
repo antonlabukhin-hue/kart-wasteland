@@ -6653,3 +6653,28 @@ body.crash-cine :is(#nitro-btn, .police-hud, .rt, #latch-bar, #power-slot, #armo
 
 /* Пустошь: подзаголовок заставки */
 .splash-title .splash-sub { display: block; font-size: 0.82em; letter-spacing: 0.3em; color: #ff6a2a; text-shadow: 0 0 18px rgba(255,90,20,.8), 0 3px 0 #2a0a00; margin-top: 2px; }
+
+/* ===== Заезд вертикально — крупная картинка (src/portrait.js PORTRAIT_ZOOM) и HUD по краям =====
+   сверху: слева — время и сердца, по центру — «Е» и метры одной плашкой, справа — «☰ Меню» (под ним пауза и камера);
+   снизу: слева — спидометр, справа — нитро, одного размера и на одном расстоянии от углов; надписи — под верхним рядом */
+@media (orientation: portrait) {
+    :root { --hud-edge: 10px; --hud-corner: 92px; }
+    :root body.race-mode #game-hud.hud-v2#game-hud { top: calc(max(var(--hud-edge), env(safe-area-inset-top)) + 0px) !important; left: max(var(--hud-edge), env(safe-area-inset-left)) !important; }
+    :root body.race-mode #e-counter#e-counter { top: max(var(--hud-edge), env(safe-area-inset-top)) !important; left: 50% !important; right: auto !important;
+        transform: translateX(-50%) !important; min-width: 0 !important; max-width: 27vw; padding: 4px 12px !important; }
+    :root body.race-mode #e-counter i, :root body.race-mode #e-counter b { font-size: 24px !important; }
+    :root body.race-mode #e-counter .ec-m { font-size: 14px !important; }
+    :root body.race-mode #hud-menu-btn#hud-menu-btn { top: max(var(--hud-edge), env(safe-area-inset-top)) !important; right: max(var(--hud-edge), env(safe-area-inset-right)) !important;
+        min-height: 44px; padding: 9px 13px !important; font-size: 17px !important; }
+    :root body.race-mode #hud-speedo#hud-speedo { left: max(var(--hud-edge), env(safe-area-inset-left)) !important; bottom: calc(env(safe-area-inset-bottom, 0px) + var(--hud-edge) + 6px) !important;
+        transform: scale(.94) !important; transform-origin: bottom left !important; } /* круг спидометра — как кнопка нитро */
+    :root body.race-mode #nitro-btn#nitro-btn { right: max(var(--hud-edge), env(safe-area-inset-right)) !important; bottom: calc(env(safe-area-inset-bottom, 0px) + var(--hud-edge) + 6px) !important;
+        width: var(--hud-corner) !important; height: var(--hud-corner) !important; }
+    :root body.race-mode .rt.rt.rt { top: calc(max(var(--hud-edge), env(safe-area-inset-top)) + 72px) !important; }
+}
+@media (orientation: portrait) and (max-width: 370px) { /* узкий телефон: верхний ряд мельче, чтобы три плашки не налезали */
+    :root body.race-mode #e-counter#e-counter { padding: 3px 8px !important; }
+    :root body.race-mode #game-hud.hud-v2#game-hud { transform: scale(.88) !important; transform-origin: top left !important; }
+    :root body.race-mode #e-counter i, :root body.race-mode #e-counter b { font-size: 21px !important; }
+    :root body.race-mode #hud-menu-btn#hud-menu-btn { font-size: 15px !important; padding: 8px 10px !important; }
+}
