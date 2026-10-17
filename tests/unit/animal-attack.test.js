@@ -45,6 +45,8 @@ describe('Пустошь: звери нападают', () => {
     it('таран: бежит навстречу по своей полосе, не сворачивает', () => {
         const a = prepAttack(animal('BOAR', -4.5, -40), () => 0.1, 15);
         for (let i = 0; i < 40; i++) stepAttack(a, 1 / 60, 0, 2);
+        expect(a.phase).toBe('prep'); // кабан сначала скребёт землю (src/beast-behavior.js)
+        for (let i = 0; i < 60; i++) stepAttack(a, 1 / 60, 0, 2);
         expect(a.phase).toBe('charge');
         const x = a.x, z = a.z;
         for (let i = 0; i < 30; i++) stepAttack(a, 1 / 60, 0, -2);
@@ -121,7 +123,7 @@ describe('Пустошь: гигант несётся навстречу', () =>
         expect(a.mesh.scale.k).toBe(GIANT_SCALE);
         expect(a.radius).toBeGreaterThan(1);
         expect(GIANT_VZ).toBeGreaterThan(CHARGE_VZ);
-        for (let i = 0; i < 60; i++) stepAttack(a, 1 / 60, 0, 0);
+        for (let i = 0; i < 100; i++) stepAttack(a, 1 / 60, 0, 0);
         expect(a.phase).toBe('charge');
         expect(a.roar).toBe('new');
         expect(pickRole('DOG', () => 0.1)).not.toBe('giant');

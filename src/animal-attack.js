@@ -11,6 +11,8 @@
  * stepAttack(a, dt, pz, px) — движение после выхода (true — шаг сделан здесь, false — обычная перебежка src/animals.js).
  * Увернулся от прыжка или тарана — a.dodged = 'new' (src/modes/infinite-run.js показывает «Увернулся!»).
  */
+import { signatureOf, prepTime, poseSignature } from './beast-behavior.js';
+
 export const LUNGE = ['DOG', 'FOX', 'CAT', 'LION', 'MONKEY'];
 export const CHARGE = ['BOAR', 'RHINO', 'DEER', 'ZEBRA', 'DINO'];
 export const BLOCK = ['BEAR', 'ELEPHANT', 'HIPPO', 'CROC', 'GIRAFFE'];
@@ -26,7 +28,9 @@ export const HIT_R_MAX = 1.1;
 /** Доля нападающих среди зверей своей группы (остальные — просто перебегают) */
 export const ATTACK_SHARE = 0.7;
 /** На какой дальности (× порог перебежки) выскакивает зверь каждой роли */
-export const TRIG_K = { lunge: 1.3, charge: 1.9, block: 1.6, cross: 0.85, giant: 3.4 };
+// Пустошь (этап «звери-персонажи»): у нападения появилась подготовка (src/beast-behavior.js, 0.5–0.9 с) — выходят раньше,
+// чтобы подпись вида (кабан скребёт землю, медведь встаёт на дыбы…) успела показаться до того, как машина подъедет
+export const TRIG_K = { lunge: 2.4, charge: 3.2, block: 3.0, cross: 0.85, giant: 4.0 };
 export const LANES = [-2, 0, 2];
 
 /**
@@ -74,7 +78,7 @@ export function prepAttack(a, r, base, dist) {
 export function attackLead(trigDist, k, v, tell) { return trigDist * (k || 1) + (v || 0) * (tell || 0) + 4; }
 
 /** Фазы, с) */
-export const RUN_IN = 0.4, CROUCH = 0.28, LEAP = 0.85, LEAP_VZ = 5, LEAP_TURN = 1.4, CHARGE_VZ = 7.5, BLOCK_IN = 0.75;
+export const RUN_IN = 0.4, CROUCH = 0.28, LEAP = 0.85, LEAVE_VX = 5, LEAP_VZ = 5, LEAP_TURN = 1.4, CHARGE_VZ = 7.5, BLOCK_IN = 0.75;
 
 const ease = function(t) { return t * t * (3 - 2 * t); };
 function legs(a, cycle) {
@@ -102,10 +106,11 @@ export function stepAttack(a, dt, pz, px) {
         face(a.tx > a.x0 ? Math.PI / 2 : -Math.PI / 2);
         m.position.y = Math.abs(Math.sin(a.pt * 18)) * 0.08;
         legs(a, a.pt * 18);
-        if (t >= 1) { a.phase = a.role === 'lunge' ? 'crouch' : (a.role === 'charge' || a.role === 'giant') ? 'charge' : 'stand'; a.pt = 0; if (a.role === 'giant') a.roar = 'new'; }
-    } else if (a.phase === 'crouch') { // присел — сейчас прыгнет
-        face(0); m.position.y = 0; m.rotation.x = 0.25;
-        if (a.pt >= CROUCH) { a.phase = 'leap'; a.pt = 0; m.rotation.x = 0; }
+        if (t >= 1) { a.phase = a.role === 'lunge' ? 'crouch' : (a.role === 'charge' || a.role === 'giant') ? 'prep' : 'stand'; a.pt = 0; if (a.role === 'giant') a.roar = 'new'; }
+    } else if (a.phase === 'crouch' || a.phase === 'prep') { // подготовка — подпись вида (src/beast-behavior.js): прыгун приседает, таран роет землю…
+        const T = prepTime(a) || CROUCH;
+        a.dust = poseSignature(signatureOf(a), m, a.pt, T, 0);
+        if (a.pt >= T) { a.phase = a.phase === 'crouch' ? 'leap' : 'charge'; a.pt = 0; m.rotation.x = 0; m.position.y = 0; }
     } else if (a.phase === 'leap') { // прыжок навстречу машине, чуть доворачивает
         const t = Math.min(1, a.pt / LEAP);
         a.z += LEAP_VZ * dt;
@@ -118,16 +123,25 @@ export function stepAttack(a, dt, pz, px) {
     } else if (a.phase === 'land' || a.phase === 'charge') { // бежит навстречу
         a.z += (a.phase === 'charge' ? (a.giant ? GIANT_VZ : CHARGE_VZ) : 2.5) * dt;
         face(0);
-        m.position.y = Math.abs(Math.sin(a.pt * 16)) * 0.1;
+        const hop = a.speciesKey === 'DEER' ? 0.28 : 0.1; // олень несётся прыжками
+        m.position.y = Math.abs(Math.sin(a.pt * 16)) * hop;
         m.rotation.x = Math.sin(a.pt * 8) * 0.06;
         legs(a, a.pt * 16);
-    } else if (a.phase === 'stand') { // встал на дыбы в полосе
-        face(0);
-        m.rotation.x = -0.22 - Math.sin(a.pt * 3) * 0.06;
-        m.position.y = 0;
+    } else if (a.phase === 'stand') { // встаёт на дыбы в полосе и стоит
+        const T = prepTime(a) || 0.6;
+        a.dust = poseSignature(signatureOf(a), m, Math.min(a.pt, T), T, 0);
+        if (a.pt > T) m.rotation.x += Math.sin(a.pt * 3) * 0.05;
+    } else if (a.phase === 'leave') { // отступает: убегает с дороги на обочину
+        const side = a.side || 1;
+        a.x += side * LEAVE_VX * dt;
+        face(side * Math.PI / 2);
+        m.rotation.x = 0; m.position.y = Math.abs(Math.sin(a.pt * 16)) * 0.08;
+        legs(a, a.pt * 16);
     }
     m.position.x = a.x; m.position.z = a.z;
     // проскочил мимо нападающего — увернулся
     if (!a.hit && !a.dodged && (a.phase === 'leap' || a.phase === 'land' || a.phase === 'charge') && a.z > pz + 1.5 && Math.abs(a.x - px) < 3.2) a.dodged = 'new';
+    // машина проехала — зверь уходит с дороги (живой, а не исчезающий)
+    if (!a.hit && a.phase !== 'leave' && a.phase !== 'run' && a.z > pz + 2.5) { a.phase = 'leave'; a.pt = 0; a.side = a.x >= 0 ? 1 : -1; }
     return true;
 }
