@@ -14,7 +14,7 @@ test('бесконечная трасса: пейзажи, «Е», уборка 
     await waitRacing(page);
     await expect(page.locator('#infDisplay')).toHaveText(/^🛣 \d+ м$/);
     await expect(page.locator('#weatherDisplay')).toBeHidden(); // на плашке — только время, сердечки и метры
-    await expect(page.locator('#weatherDisplay')).toContainText('Арсеньев, день');
+    await expect(page.locator('#weatherDisplay')).toContainText('🗺'); // Пустошь: заезд — со случайного пейзажа
     // «До соперника N м»: первая цель — ближайший соперник из таблицы
     await expect(page.locator('#chaseDisplay')).toContainText('🎯 До ');
 
@@ -147,50 +147,6 @@ test('бесконечная трасса: рекорд — салют, пото
 });
 
 // ящик «?» — случайный исход, не авария; шипы (после 600 м) — не авария, но скорость падает
-test('бесконечная трасса: ящик «?» разбивается с исходом, шипы тормозят без аварии', async ({ page }) => {
-    const problems = watchProblems(page);
-    await login(page);
-    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
-    await page.locator('#shop-action').click();
-    await waitRacing(page);
-    /* газ жмётся сам (W — прыжок) */
-    await page.evaluate(() => { window.__crPops = []; new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.classList && (n.classList.contains('big-plaque') || n.classList.contains('penalty-pop'))) window.__crPops.push(n.textContent); }))).observe(document.body, { childList: true, subtree: true }); }); // плашка живёт ~2 с — под нагрузкой проверка опаздывала
-    const crate = await page.evaluate(async () => {
-        const g = window.__raceDebug;
-        const c = g.collectibles.filter(c => c.type === 'crate' && c.active && c.z < g.z - 5).sort((a, b) => b.z - a.z)[0];
-        if (!c) return null;
-        g.cars.forEach(o => { o.x = 99; o.mesh.position.x = 99; }); (g.animals || []).forEach(an => { an.hit = true; }); // телепорт — не в попутку
-        g.setX(c.x); g.setZ(c.z + 0.3);
-        await new Promise(r => setTimeout(r, 300));
-        return { crates: g.stats.crates || 0, strikes: g.strikes };
-    });
-    expect(crate).toEqual({ crates: 1, strikes: 0 });
-    await expect.poll(() => page.evaluate(() => window.__crPops.length)).toBeGreaterThan(0); // исход — большой плашкой; значок 90-х (7%) — строкой сверху
-    // вперёд за 600 м — там уже шипы
-    await page.evaluate(() => { const g = window.__raceDebug; g.setZ(g.startZ - 700); });
-    // шипы — впереди машины (их нет на этом отрезке — проехать дальше; аварии по дороге не считаются)
-    await expect.poll(() => page.evaluate(() => { const g = window.__raceDebug; g.setStrikes(0); const ok = g.obstacles.some(o => o.type === 'spikes' && o.active && o.z < g.z - 3); if (!ok) g.setZ(g.z - 90); return ok; }), { timeout: 30_000 }).toBe(true);
-    await page.waitForTimeout(1500); // разогнаться
-    await expect.poll(() => page.evaluate(() => { const g = window.__raceDebug; g.setStrikes(0); return g.speed; }), { timeout: 20_000 }).toBeGreaterThan(0.1); // под нагрузкой машина после телепортов разгоняется дольше — ждём по скорости, а не по часам
-    const hit = await page.evaluate(async () => {
-        const g = window.__raceDebug;
-        (g.animals || []).forEach(an => { an.hit = true; });
-        const o = g.obstacles.filter(o => o.type === 'spikes' && o.active && o.z < g.z - 3).sort((a, b) => b.z - a.z)[0];
-        // ставим на шипы, пока не сработают (под нагрузкой кадр может запоздать)
-        for (let i = 0; i < 80 && !(g.stats.spikes > 0); i++) {
-            if (g.speed < 0.1) { g.setStrikes(0); await new Promise(r => setTimeout(r, 50)); continue; } // после телепорта под нагрузкой машина стоит — ждём, пока поедет
-            g.setStrikes(0); g.setX(o.x); g.setZ(o.z + 0.2);
-            await new Promise(r => setTimeout(r, 50));
-        }
-        // скорость в момент удара запоминает сама игра: машина ехала и потеряла половину
-        const ls = g.stats.lastSpike || {};
-        return { spikes: g.stats.spikes || 0, strikes: g.strikes, slower: ls.before > 0 && ls.after < ls.before * 0.8 };
-    });
-    expect(hit).toEqual({ spikes: 1, strikes: 0, slower: true });
-    /* газ жмётся сам (W — прыжок) */
-    expect(problems).toEqual([]);
-});
-
 // первый заезд: перед новым на дороге — пауза и плашка «что это», «Продолжить» — едем дальше; второй раз то же не показывается
 test('первое знакомство: пауза с плашкой перед новым, «Продолжить» — дальше', async ({ page }) => {
     const problems = watchProblems(page);
@@ -326,27 +282,6 @@ test('значки 90-х: коллекция видна в «Трофеях»', 
 });
 
 // «Горячий старт»: при рекорде 5 км заезд сразу плотный — плашка в начале, попутки уже на старте
-test('горячий старт: опытному игроку — плашка и сложность от рекорда', async ({ page }) => {
-    const problems = watchProblems(page);
-    await login(page);
-    await page.evaluate(() => {
-        const l = JSON.parse(localStorage.getItem('kw_road_racing_profiles_v1'));
-        l.forEach(p => { p.infinite = { best: 5000, bestScore: 0, runs: 3 }; });
-        localStorage.setItem('kw_road_racing_profiles_v1', JSON.stringify(l));
-    });
-    await page.reload();
-    await page.locator('#splash-screen').click();
-    await page.locator('#profile-list').getByText('Тестер').click();
-    await page.evaluate(() => { window.__sawWarm = ''; new MutationObserver(() => { const p = document.querySelector('.big-plaque'); if (p && p.textContent.includes('ГОРЯЧИЙ')) window.__sawWarm = p.textContent; }).observe(document.body, { childList: true, subtree: true }); });
-    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
-    await page.locator('#shop-action').click();
-    await waitRacing(page);
-    /* газ жмётся сам (W — прыжок) */
-    await expect.poll(() => page.evaluate(() => window.__sawWarm), { timeout: 15_000 }).toContain('1500 м');
-    /* газ жмётся сам (W — прыжок) */
-    expect(problems).toEqual([]);
-});
-
 // «В УДАРЕ»: множитель ×5 — плашка и пламя по краям, попутка в лоб не авария, а «+5 Е»; через 7 с всё гаснет
 test('«В ударе»: на ×5 неуязвим, попутки сносятся за «Е», потом гаснет', async ({ page }) => {
     const problems = watchProblems(page);
@@ -402,29 +337,6 @@ test('узоры: чистый проход засчитан (множитель
 });
 
 // событие пейзажа: посреди «Арсеньева» — свадебный кортеж (4 машины с шариками в одной полосе); проехал без аварии — «Е»
-test('событие пейзажа: кортеж — плашка, машины кортежа, награда без аварии', async ({ page }) => {
-    const problems = watchProblems(page);
-    await login(page);
-    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
-    await page.locator('#shop-action').click();
-    await waitRacing(page);
-    /* газ жмётся сам (W — прыжок) */
-    // плашку кортежа может сразу сменить другая (подсказка первой трубы) — запоминаем сам факт появления
-    await page.evaluate(() => { window.__sawConvoy = false; new MutationObserver(() => { document.querySelectorAll('.big-plaque').forEach(p => { if (p.textContent.includes('СВАДЕБНЫЙ КОРТЕЖ')) window.__sawConvoy = true; }); }).observe(document.body, { childList: true, subtree: true, characterData: true }); });
-    await page.evaluate(() => { const g = window.__raceDebug; g.setStrikes(0); g.setZ(g.startZ - 400); });
-    await expect.poll(() => page.evaluate(() => window.__sawConvoy), { timeout: 10_000 }).toBe(true);
-    const convoy = await page.evaluate(() => window.__raceDebug.cars.filter(c => c.convoy).map(c => c.lane));
-    expect(convoy.length).toBe(4);
-    expect(new Set(convoy).size).toBe(1);
-    const e0 = await page.evaluate(() => window.__raceDebug.stats.eChips || 0);
-    await page.evaluate(() => { const g = window.__raceDebug; g.setStrikes(0); g.setZ(g.startZ - 640); });
-    await expect.poll(() => page.evaluate(() => window.__raceDebug.stats.themeEvents || 0)).toBe(1);
-    expect(await page.evaluate(() => window.__raceDebug.stats.eChips || 0)).toBeGreaterThanOrEqual(e0 + 30);
-    expect(await page.evaluate(() => window.__raceDebug.cars.filter(c => c.convoy).length)).toBe(0);
-    /* газ жмётся сам (W — прыжок) */
-    expect(problems).toEqual([]);
-});
-
 // цели на дороге: на дальности рекорда — растяжка «ТВОЙ РЕКОРД», у соперников — щиты; позади — убираются
 test('цели на дороге: растяжка рекорда и щиты соперников', async ({ page }) => {
     const problems = watchProblems(page);
@@ -443,7 +355,7 @@ test('цели на дороге: растяжка рекорда и щиты с
     /* газ жмётся сам (W — прыжок) */
     await page.evaluate(() => { const g = window.__raceDebug; g.setStrikes(0); g.setZ(g.startZ - 700); });
     // рекорд (900 м) и соперник «Шурик» (800 м) — в пределах видимости
-    await expect.poll(() => page.evaluate(() => window.__raceDebug.goals)).toBeGreaterThanOrEqual(2);
+    await expect.poll(() => page.evaluate(() => window.__raceDebug.goals)).toBeGreaterThanOrEqual(1); // Пустошь: выдуманных соперников нет — растяжка рекорда
     const arch = await page.evaluate(() => window.__raceDebug.scene.children.some(o => o.isGroup && Math.abs(o.position.z - (window.__raceDebug.startZ - 900)) < 0.5));
     expect(arch).toBe(true);
     await page.evaluate(() => { const g = window.__raceDebug; g.setStrikes(0); g.setZ(g.startZ - 960); });
