@@ -274,7 +274,7 @@ class AnimalSpawner {
             }
             if (distanceAhead > 1.2 && distanceAhead <= animal._trigDist * (this._k || 1)) {
                 animal.triggered = true;
-                if (animal.mesh.rotation) { animal.mesh.rotation.y = animal.direction * Math.PI / 2; animal.mesh.rotation.x = 0; animal.mesh.position.y = 0; } // смотрел на машину — теперь бежит через дорогу
+                if (animal.mesh.rotation) { animal.mesh.rotation.y = animal.direction * Math.PI / 2; animal.mesh.rotation.x = 0; animal.mesh.position.y = 0; } animal.startX = animal.x; // смотрел на машину — теперь бежит через дорогу (оттуда, где стоит)
                 if (this.speciesRules) animal.duration *= durMul(animal.speciesKey); // своё правило у вида (src/animal-rules.js): курица мечется, медведь встаёт
                 animal.mesh.visible = true;
                 try {
