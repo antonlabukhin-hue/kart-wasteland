@@ -1,3 +1,4 @@
+import { carVisible } from './wasteland-cut.js';
 import { FUN_ACHIEVEMENTS } from './fun-achievements.js';
 /**
  * Контент мета-игры: карты, реплики злодея, достижения, трофеи, детали и краски,
@@ -57,9 +58,11 @@ export const ACHIEVEMENTS = [
 
 export const CAR_SHOP_ORDER = ['cheburashka', 'kirpich', 'gorbaty', 'turbo', 'pirozhok', 'buhanka', 'rafik', 'saray', 'gazel', 'shestisot', 'raketa', 'thief', 'trike', 'neon', 'bull', 'ghostcar', 'cyborg', 'avenger', 'zubilo', 'mechta', 'moped', 'chariot', 'timecar', 'carpet'];
 // новинки последнего выпуска: в витрине — первыми и с подсветкой, при входе в меню — плашка «Появились новые машины» (метка — раз на выпуск)
-export const NEW_CARS = ['trike', 'ghostcar', 'moped', 'chariot', 'timecar', 'carpet'];
+// Пустошь: прошлые новинки (трайк, призрачный патруль, мопед, колесница, машина времени, ковёр) — фантазийные, спрятаны (src/wasteland-cut.js)
+export const NEW_CARS = [];
 export const NEW_CARS_TAG = 'cars-2026-10';
-export function shopOrder() { return NEW_CARS.concat(CAR_SHOP_ORDER.filter(function(id) { return NEW_CARS.indexOf(id) < 0; })); }
+/** Порядок витрины: только машины Пустоши (src/wasteland-cut.js) и уже купленные (owned) */
+export function shopOrder(owned) { return NEW_CARS.concat(CAR_SHOP_ORDER.filter(function(id) { return NEW_CARS.indexOf(id) < 0 && carVisible(id, owned); })); }
 
 export const CAR_PARTS = [
     { id: 'spoiler', name: 'Спойлер «Кирпич»', price: 800, slot: 'spoiler' },

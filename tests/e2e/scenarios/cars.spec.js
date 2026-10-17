@@ -15,7 +15,7 @@ for (const id of CAR_SHOP_ORDER) {
         await page.reload();
         await page.locator('#splash-screen').click();
         await page.locator('#profile-list').getByText('Тестер').click();
-        await page.locator('.menu-card[data-menu="infinite"]').click();
+        await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
         await page.locator('#shop-action').click(); // витрина перед заездом: на выбранной — «Поехали»
         await waitRacing(page);
         expect(await page.evaluate(() => window.__raceDebug.car.userData.carId)).toBe(id);

@@ -72,7 +72,7 @@ export function renderMenuExtras(o) {
     if (!b) return;
     const show = function(online) {
         const rows = topRuns((online || []).concat(o.list), 'week', o.now, o.me), my = rankOf(rows, o.me);
-        b.textContent = my ? '#' + my + (online ? ' в мире за неделю' : ' на неделе') : 'соперники ждут';
+        b.textContent = my ? '#' + my + (online ? ' в мире за неделю' : ' на неделе') : 'твои рекорды'; // Пустошь: выдуманных соперников нет
     };
     show(worldCache && worldCache.list);
     if (!o.fetchOnline || (worldCache && Date.now() - worldCache.at < 60000)) return;

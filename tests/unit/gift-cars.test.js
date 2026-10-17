@@ -24,10 +24,10 @@ describe('машины в подарок', () => {
         expect(p.unlockedCars.filter(c => c === 'trike').length).toBe(1);
     });
     it('король недели: первым в таблице «Неделя» прошлой недели — «Призрачный патруль»', () => {
-        const top = Math.round(RIVALS[0].dist * 0.5); // на неделе у соперников — половина
+        const top = 1000; // Пустошь: выдуманных соперников нет — король недели среди настоящих игроков
         const lastWeek = MON - 3 * DAY;
         expect(wonWeek([{ name: 'Тестер', dist: top + 100, at: lastWeek }], 'Тестер', lastWeek)).toBe(true);
-        expect(wonWeek([{ name: 'Тестер', dist: top - 100, at: lastWeek }], 'Тестер', lastWeek)).toBe(false);
+        expect(wonWeek([{ name: 'Тестер', dist: top - 100, at: lastWeek }, { name: 'Вася', dist: top, at: lastWeek }], 'Тестер', lastWeek)).toBe(false);
         expect(wonWeek([{ name: 'Тестер', dist: top + 100, at: lastWeek }, { name: 'Вася', dist: top + 500, at: lastWeek }], 'Тестер', lastWeek)).toBe(false);
         const p = P();
         expect(checkGiftCars(p, { now: MON, board: [{ name: 'Тестер', dist: top + 100, at: lastWeek }] })).toEqual([{ car: 'ghostcar', reason: 'weekTop', dup: false }]);
@@ -40,7 +40,7 @@ describe('машины в подарок', () => {
         expect(isGiftCar('trike')).toBe(true);
         expect(isGiftCar('neon')).toBe(false);
         expect(giftProgress(P({ streak: { count: 3 } }), 'trike', {}).left).toBe('У тебя 3 из 7 дней');
-        expect(giftProgress(P(), 'ghostcar', { board: [], now: MON }).left).toContain(RIVALS[0].name);
+        expect(giftProgress(P(), 'ghostcar', { board: [], now: MON }).left).toContain('Первый на неделе');
         expect(giftProgress(P(), 'neon', {})).toBe(null);
     });
 });

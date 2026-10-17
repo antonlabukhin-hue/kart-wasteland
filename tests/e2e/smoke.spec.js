@@ -49,16 +49,6 @@ test('свободный заезд: машина едет, звери крич�
     expect(problems).toEqual([]);
 });
 
-test('кампания: первая трасса стартует, газ стрелкой', async ({ page }) => {
-    const problems = watchProblems(page);
-    await login(page);
-    await startCampaign(page);
-    await page.keyboard.down('ArrowUp');
-    await expect.poll(() => progress(page), { timeout: 30_000 }).toBeGreaterThan(1);
-    await page.keyboard.up('ArrowUp');
-    expect(problems).toEqual([]);
-});
-
 test('пауза и выход в меню посреди заезда', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
@@ -113,9 +103,10 @@ test('сборка для сайта не знает про ?start тестов�
 test('экраны меню открываются без ошибок', { tag: '@smoke' }, async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
+    // Пустошь: «Подарки» новичку не видны — появляются после 3 заездов (src/wasteland-cut.js)
+    await expect(page.locator('[data-menu="season"]')).toBeHidden();
     for (const [card, screen, back] of [
         ['garage', '#garage-screen', '#garage-close-btn'],
-        ['season', '#rewards-screen', null],
         ['trophies', '#garage-panel-trophies', '#garage-close-btn'],
     ]) {
         await page.locator(`[data-menu="${card}"]`).click();

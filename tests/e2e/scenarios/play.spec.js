@@ -4,7 +4,7 @@ import { login, watchProblems, waitRacing } from '../helpers.js';
 test('«▶ ПОЕХАЛИ»: сразу в бесконечную трассу — без витрины машин, качества и лора', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
-    await expect(page.locator('#main-menu-play-sub')).toContainText('Бесконечная трасса');
+    await expect(page.locator('#main-menu-play-sub')).toContainText('Пустошь'); // Пустошь: один режим
     await page.locator('#main-menu-play').click();
     await waitRacing(page);
     await expect(page.locator('#infDisplay')).toHaveText(/^🛣 \d+ м$/);

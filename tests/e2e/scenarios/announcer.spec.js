@@ -5,7 +5,7 @@ import { login, watchProblems, waitRacing } from '../helpers.js';
 test('ведущий: реплика на старте и на рекорде, в настройках можно выключить', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page);
-    await page.locator('.menu-card[data-menu="infinite"]').click();
+    await page.evaluate(() => document.querySelector('.menu-card[data-menu="infinite"]').click()) /* Пустошь: карточка скрыта — заезд с «Поехали», путь через витрину — как был */;
     await page.locator('#shop-action').click();
     await expect(page.locator('.announcer.in')).toBeVisible({ timeout: 8_000 }); // на обратном отсчёте
     await expect(page.locator('.announcer span')).not.toBeEmpty();

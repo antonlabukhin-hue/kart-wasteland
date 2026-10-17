@@ -8,6 +8,7 @@ import { weekState, addWeekDist, WEEK_GOAL } from '../week-car.js';
 import { PLATE_DAYS, plateText } from '../name-plate.js';
 import { claimComeback } from '../comeback.js';
 import { weekKey } from '../leaderboard.js';
+import { CUT } from '../wasteland-cut.js';
 
 const esc = function(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 const hex = function(c) { return '#' + (c >>> 0).toString(16).padStart(6, '0'); };
@@ -15,6 +16,7 @@ const hex = function(c) { return '#' + (c >>> 0).toString(16).padStart(6, '0'); 
 /** Кружки секретных красок: заработанные — с эффектом, остальные — «?» с условием и прогрессом */
 export function secretSwatchesHtml(profile, current, today) {
     return SECRET_PAINTS.map(function(sp) {
+        if (CUT.secretPaints && !hasSecretPaint(profile, sp.id)) return ''; // Пустошь: незаработанных «?» нет (src/wasteland-cut.js)
         if (hasSecretPaint(profile, sp.id)) return '<div class="color-swatch secret fx-' + sp.fx + (current === sp.id ? ' active' : '') + '" data-paint="' + sp.id + '" style="--c:' + hex(sp.color) + '" title="' + sp.icon + ' ' + esc(sp.name) + ' — секретная, твоя"></div>';
         const pr = paintProgress(profile, sp, today);
         return '<div class="secret-lock" data-secret="' + sp.id + '" title="Секретная краска: ' + esc(sp.how) + ' (' + pr[0] + '/' + pr[1] + ')"><b>?</b><small>' + pr[0] + '/' + pr[1] + '</small></div>';
@@ -32,6 +34,8 @@ export function secretHint(profile, id, today) {
 /** Плашки на итогах: новые секретные краски и билеты тест-драйва */
 export function hooksFinishHtml(paints, tks, names) {
     let h = '';
+    if (CUT.secretPaints) paints = []; // Пустошь: краски и тест-драйвы выключены (src/wasteland-cut.js)
+    if (CUT.testDrive) tks = [];
     (paints || []).forEach(function(sp) {
         h += '<div class="fin-hook fin-paint" role="button" tabindex="0" data-go="paint"><i class="hook-swatch fx-' + sp.fx + '" style="--c:' + hex(sp.color) + '"></i><div><b>Секретная краска «' + esc(sp.name) + '»!</b><small>' + esc(sp.how) + ' — бесплатно для всех твоих машин, в гараже сияет</small></div></div>';
     });
@@ -106,6 +110,7 @@ const goalOf = function(w) { return (w && w.goal) || WEEK_GOAL; };
 
 /** После заезда по бесконечной: прибавить метры к машине недели; плашка — награда или прогресс */
 export function weekRaceExtra(profile, dist, presets, isGift, names, now) {
+    if (CUT.weekCar) return null; // Пустошь: машины недели нет (src/wasteland-cut.js)
     const wk = weekKey(now || new Date());
     const before = weekState(profile, wk, presets, isGift);
     if (before.done || !before.car) return null;
@@ -126,7 +131,7 @@ export function friendExtra(g, name) {
 export function moreForYou(profile, presets, isGift, names, now) {
     const rows = [];
     const w = weekState(profile, weekKey(now || new Date()), presets, isGift);
-    if (w.car && !w.done) rows.push({ icon: '🚗', text: 'Машина недели «' + names(w.car) + '»: ' + m(w.dist) + ' / ' + m(goalOf(w)) + ' м', act: 'week' });
+    if (!CUT.weekCar && w.car && !w.done) rows.push({ icon: '🚗', text: 'Машина недели «' + names(w.car) + '»: ' + m(w.dist) + ' / ' + m(goalOf(w)) + ' м', act: 'week' });
     if (!(profile.namePlate && profile.namePlate.got)) {
         const c = (profile.streak && profile.streak.count) || 0;
         if (c >= 2) rows.push({ icon: '🏷', text: 'Именной номер: ' + c + ' / ' + PLATE_DAYS + ' дней подряд' });

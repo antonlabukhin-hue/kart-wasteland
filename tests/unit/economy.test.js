@@ -13,10 +13,10 @@ describe('экономика «Е»', () => {
         expect(p.season.chips).toBe(100);
         expect(ensureProfileFields({}).season.chips).toBe(0);
     });
-    it('цены в «Е»: машины — сотни, прокачка — десятки–сотни, «Зубило» — только за кассеты', () => {
+    it('цены в «Е»: машины — сотни, прокачка — десятки–сотни, «Зубило» — за «Е» (кассет в Пустоши нет)', () => {
         // машины — от 3000 Е (кроме бесплатного «Ушастика» и машин за кассеты)
         Object.keys(CAR_PRESETS).forEach(id => { const c = CAR_PRESETS[id]; if (id !== 'cheburashka' && !c.priceVhs) expect(c.priceChips).toBeGreaterThanOrEqual(3000); });
-        expect(CAR_PRESETS.zubilo).toMatchObject({ priceChips: 0, priceVhs: 5 });
+        expect(CAR_PRESETS.zubilo).toMatchObject({ priceChips: 9000, priceVhs: 0 });
         UPGRADES.forEach(u => u.cost.forEach(c => expect(c).toBeGreaterThanOrEqual(500)));
     });
 });

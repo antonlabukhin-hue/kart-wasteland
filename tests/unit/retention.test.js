@@ -15,16 +15,16 @@ describe('задания: три на виду', () => {
     });
     it('прогресс копится между заездами; выполнил — фишки и сразу новое', () => {
         const p = prof();
-        p.missions = { active: [{ id: 'jump', target: 2, progress: 0, tier: 0 }, { id: 'wins', target: 2, progress: 0, tier: 0 }, { id: 'gum', target: 3, progress: 0, tier: 0 }], done: 0 };
-        let r = applyMissionProgress(p, { state: 'crash', animalsJumped: 1, gumPicked: 0 }, seq(0.5));
+        p.missions = { active: [{ id: 'shake', target: 2, progress: 0, tier: 0 }, { id: 'giant', target: 2, progress: 0, tier: 0 }, { id: 'dodge', target: 3, progress: 0, tier: 0 }], done: 0 };
+        let r = applyMissionProgress(p, { state: 'crash', shook: 1, dodges: 0 }, seq(0.5));
         expect(r.completed).toHaveLength(0);
-        expect(p.missions.active.find(a => a.id === 'jump').progress).toBe(1);
-        r = applyMissionProgress(p, { state: 'win', animalsJumped: 3, strikes: 1 }, seq(0.5));
-        expect(r.completed.map(c => c.text)).toContain('Перепрыгни зверей');
+        expect(p.missions.active.find(a => a.id === 'shake').progress).toBe(1);
+        r = applyMissionProgress(p, { state: 'win', shook: 3, strikes: 1 }, seq(0.5));
+        expect(r.completed.map(c => c.text)).toContain('Стряхни зверей с капота');
         expect(r.chips).toBe(30);
         expect(p.season.chips).toBe(30);
         expect(p.missions.active).toHaveLength(3);
-        expect(p.missions.active.some(a => a.id === 'jump')).toBe(false);
+        expect(p.missions.active.some(a => a.id === 'shake')).toBe(false);
         expect(p.missions.done).toBe(1);
     });
     it('чем больше выполнено — тем выше цель', () => {
@@ -93,10 +93,10 @@ describe('множитель очков за задания', () => {
         expect(scoreMult({ missions: { done: 0 } })).toBe(1);
         expect(scoreMult({ missions: { done: 7 } })).toBe(3);
         expect(scoreMult({ missions: { done: 999 } })).toBe(30);
-        const p = { season: { chips: 0 }, missions: { active: [{ id: 'dist', target: 1000, progress: 0, tier: 0 }, { id: 'echips', target: 40, progress: 0, tier: 0 }, { id: 'powers', target: 2, progress: 0, tier: 0 }], done: 0 } };
-        applyMissionProgress(p, { state: 'crash', distance: 600, eChips: 30, powers: 1 }, () => 0.5);
-        applyMissionProgress(p, { state: 'crash', distance: 700, eChips: 15, powers: 1 }, () => 0.5);
-        expect(p.missions.done).toBe(2); // «Е» 30+15 ≥ 40 и усиления 1+1 — выполнены; дистанция — нет (лучший заезд 700 < 1000)
+        const p = { season: { chips: 0 }, missions: { active: [{ id: 'dist', target: 1000, progress: 0, tier: 0 }, { id: 'echips', target: 40, progress: 0, tier: 0 }, { id: 'dodge', target: 2, progress: 0, tier: 0 }], done: 0 } };
+        applyMissionProgress(p, { state: 'crash', distance: 600, eChips: 30, dodges: 1 }, () => 0.5);
+        applyMissionProgress(p, { state: 'crash', distance: 700, eChips: 15, dodges: 1 }, () => 0.5);
+        expect(p.missions.done).toBe(2); // «Е» 30+15 ≥ 40 и уклонения 1+1 — выполнены; дистанция — нет (лучший заезд 700 < 1000)
         expect(p.missions.active.find(a => a.id === 'dist').progress).toBe(700);
     });
 });
@@ -115,9 +115,20 @@ describe('задания выполнимы в любом режиме', () => {
         expect(raceStat('powers', { state: 'win', powers: 0, nitroPicked: 3 })).toBe(3);
     });
     it('итог заезда кампании двигает «проедь» и «заработай «Е»»', () => {
-        const p = { season: { chips: 0 }, missions: { active: [{ id: 'dist', target: 1000, progress: 0, tier: 0 }, { id: 'echips', target: 40, progress: 0, tier: 0 }, { id: 'wins', target: 2, progress: 0, tier: 0 }], done: 0 } };
+        const p = { season: { chips: 0 }, missions: { active: [{ id: 'dist', target: 1000, progress: 0, tier: 0 }, { id: 'echips', target: 40, progress: 0, tier: 0 }, { id: 'giant', target: 2, progress: 0, tier: 0 }], done: 0 } };
         const r = applyMissionProgress(p, { state: 'win', distance: 0, runDist: 1500, earnedE: 60, strikes: 2 }, () => 0.5);
         expect(r.completed.map(c => c.text)).toEqual(['Проедь за один заезд, м', 'Заработай железные «Е»']);
-        expect(p.missions.active.find(a => a.id === 'wins').progress).toBe(1);
+        expect(p.missions.active.find(a => a.id === 'giant').progress).toBe(0); // гигантов в итоге нет — задание стоит
+    });
+});
+
+import { BEAST_MISSIONS } from '../../src/missions.js';
+describe('Пустошь: задания про зверей', () => {
+    it('из трёх новых заданий минимум два — про зверей', () => {
+        for (let k = 0; k < 20; k++) {
+            const p = { missions: { active: [], done: 0 } };
+            ensureMissions(p, Math.random);
+            expect(p.missions.active.filter(a => BEAST_MISSIONS.includes(a.id)).length).toBeGreaterThanOrEqual(2);
+        }
     });
 });
