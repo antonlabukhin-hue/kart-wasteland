@@ -6685,3 +6685,20 @@ body.crash-cine :is(#nitro-btn, .police-hud, .rt, #latch-bar, #power-slot, #armo
 #main-menu-screen .mm-extras { grid-template-columns: 1fr; }
 #main-menu-screen .mm-dock:has(.mm-tab[hidden]) { display: flex !important; } #main-menu-screen .mm-dock:has(.mm-tab[hidden]) > .mm-tab { flex: 1 1 0; min-width: 0; } /* без «Подарков» — разделы в один ряд поровну */
 #main-menu-screen .mm-tab[hidden] { display: none !important; }
+
+/* ===== Пустошь: «Звери пустоши» — бестиарий (src/ui/bestiary-screen.js) ===== */
+#bestiary-screen { position: fixed; inset: 0; z-index: 9000; display: none; overflow-y: auto; padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px calc(env(safe-area-inset-bottom, 0px) + 16px); background: radial-gradient(ellipse at top, #3c1e0c, #0a0806); color: #f2e6d8; font: 14px/1.35 system-ui, 'Segoe UI', sans-serif; }
+#bestiary-screen.open { display: block; }
+#bestiary-screen .bst-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; max-width: 980px; margin: 0 auto 12px; }
+#bestiary-screen .bst-head h2 { margin: 0; font: 900 24px "Russo One", system-ui, sans-serif; color: #ffcf6a; letter-spacing: 1px; }
+#bestiary-screen .bst-head span { color: #cdb59a; font-weight: 700; }
+#bestiary-screen .bst-close { margin-left: auto; min-height: 42px; padding: 8px 16px; border-radius: 12px; border: 2px solid rgba(255,210,60,0.55); background: rgba(40,26,0,0.85); color: #ffe7a8; font: 800 16px system-ui, sans-serif; cursor: pointer; }
+#bestiary-screen .bst-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; max-width: 980px; margin: 0 auto; }
+#bestiary-screen .bst-card { padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,190,90,0.3); }
+#bestiary-screen .bst-card i { font-style: normal; font-size: 30px; float: right; }
+#bestiary-screen .bst-card b { display: block; font: 900 16px "Russo One", system-ui, sans-serif; color: #ffd890; margin-bottom: 4px; }
+#bestiary-screen .bst-card b em { font: 700 11px system-ui, sans-serif; color: #ff9a6a; font-style: normal; }
+#bestiary-screen .bst-card p { margin: 3px 0; font-size: 13px; }
+#bestiary-screen .bst-card .bst-how { color: #ffb39a; } #bestiary-screen .bst-card .bst-horn { color: #a8d8ff; }
+#bestiary-screen .bst-card small { display: block; margin-top: 4px; color: #b9a99a; font-weight: 700; }
+#bestiary-screen .bst-card.locked { opacity: 0.55; } #bestiary-screen .bst-card.locked i { filter: grayscale(1) brightness(0.3); }

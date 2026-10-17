@@ -44,7 +44,7 @@ export function applyHorn(a, react) {
 }
 
 /**
- * o: { animals() → [звери], z() → z машины, popup(text), sfx(name, vol, pitch) }
+ * o: { animals() → [звери], z() → z машины, popup(text), sfx(name, vol, pitch), onReact(a, react) }
  * → { fire(): true — прогудел, tick(dt), state() → { charge 0..1, ready } для кнопки }
  */
 export function createHorn(o) {
@@ -62,6 +62,7 @@ export function createHorn(o) {
                 const r = hornReact(a);
                 if (!r) return;
                 applyHorn(a, r);
+                if (o.onReact) o.onReact(a, r); // бестиарий: «спугнул» (src/bestiary.js)
                 if (!best || RANK[r] > RANK[best]) best = r;
             });
             if (best && o.popup) o.popup(HORN_SAY[best]);
