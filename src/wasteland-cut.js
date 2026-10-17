@@ -24,7 +24,8 @@ export const CUT = {
     testDrive: true,
     secretPaints: true,
     giftCars: true,
-    artifacts: true
+    artifacts: true,
+    horn: true // кнопка нитро — гудок, слипстрима за обломками нет (src/horn.js)
 };
 
 /** Пропустить ли предмет плана трассы (src/plan-place.js): кассета, ящик «?», выключенное усиление */

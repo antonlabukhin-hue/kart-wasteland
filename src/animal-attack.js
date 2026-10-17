@@ -12,6 +12,7 @@
  * Увернулся от прыжка или тарана — a.dodged = 'new' (src/modes/infinite-run.js показывает «Увернулся!»).
  */
 import { signatureOf, prepTime, poseSignature } from './beast-behavior.js';
+import { FREEZE_T, ANGRY_K } from './horn.js';
 
 export const LUNGE = ['DOG', 'FOX', 'CAT', 'LION', 'MONKEY'];
 export const CHARGE = ['BOAR', 'RHINO', 'DEER', 'ZEBRA', 'DINO'];
@@ -95,7 +96,7 @@ function legs(a, cycle) {
  * Возвращает true, если зверя двигал этот модуль.
  */
 export function stepAttack(a, dt, pz, px) {
-    if (!a.role || a.role === 'cross') return false;
+    if (!a.role || (a.role === 'cross' && a.phase !== 'leave' && a.phase !== 'freeze')) return false; // перебежчика двигает спавнер — кроме спугнутого гудком (src/horn.js)
     const m = a.mesh;
     if (!a.phase) { a.phase = 'run'; a.pt = 0; a.x0 = a.x; a.tx = a.role === 'block' ? LANES[Math.floor(Math.abs(Math.sin(a.z * 12.9898)) * 3) % 3] : laneNear(px); }
     a.pt += dt;
@@ -108,7 +109,7 @@ export function stepAttack(a, dt, pz, px) {
         legs(a, a.pt * 18);
         if (t >= 1) { a.phase = a.role === 'lunge' ? 'crouch' : (a.role === 'charge' || a.role === 'giant') ? 'prep' : 'stand'; a.pt = 0; if (a.role === 'giant') a.roar = 'new'; }
     } else if (a.phase === 'crouch' || a.phase === 'prep') { // подготовка — подпись вида (src/beast-behavior.js): прыгун приседает, таран роет землю…
-        const T = prepTime(a) || CROUCH;
+        const T = a.angry ? 0.05 : (prepTime(a) || CROUCH); // разозлённый гудком — без подготовки
         a.dust = poseSignature(signatureOf(a), m, a.pt, T, 0);
         if (a.pt >= T) { a.phase = a.phase === 'crouch' ? 'leap' : 'charge'; a.pt = 0; m.rotation.x = 0; m.position.y = 0; }
     } else if (a.phase === 'leap') { // прыжок навстречу машине, чуть доворачивает
@@ -121,7 +122,7 @@ export function stepAttack(a, dt, pz, px) {
         face(0);
         if (t >= 1) { a.phase = 'land'; a.pt = 0; m.rotation.x = 0; m.position.y = 0; }
     } else if (a.phase === 'land' || a.phase === 'charge') { // бежит навстречу
-        a.z += (a.phase === 'charge' ? (a.giant ? GIANT_VZ : CHARGE_VZ) : 2.5) * dt;
+        a.z += (a.phase === 'charge' ? (a.giant ? GIANT_VZ : CHARGE_VZ) * (a.angry ? ANGRY_K : 1) : 2.5) * dt; // разозлённый гудком — быстрее (src/horn.js)
         face(0);
         const hop = a.speciesKey === 'DEER' ? 0.28 : 0.1; // олень несётся прыжками
         m.position.y = Math.abs(Math.sin(a.pt * 16)) * hop;
@@ -131,6 +132,10 @@ export function stepAttack(a, dt, pz, px) {
         const T = prepTime(a) || 0.6;
         a.dust = poseSignature(signatureOf(a), m, Math.min(a.pt, T), T, 0);
         if (a.pt > T) m.rotation.x += Math.sin(a.pt * 3) * 0.05;
+    } else if (a.phase === 'freeze') { // олень замер от гудка: стоит, смотрит, дрожит — потом убегает (src/horn.js)
+        face(Math.atan2(px - a.x, Math.max(1, pz - a.z)) + Math.sin(a.pt * 45) * 0.025);
+        m.rotation.x = -0.1; m.position.y = 0;
+        if (a.pt >= FREEZE_T) { a.phase = 'leave'; a.pt = 0; a.fled = true; a.side = a.x >= 0 ? 1 : -1; }
     } else if (a.phase === 'leave') { // отступает: убегает с дороги на обочину
         const side = a.side || 1;
         a.x += side * LEAVE_VX * dt;
