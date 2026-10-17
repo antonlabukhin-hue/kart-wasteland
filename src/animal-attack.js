@@ -29,11 +29,19 @@ export const ATTACK_SHARE = 0.7;
 export const TRIG_K = { lunge: 1.3, charge: 1.9, block: 1.6, cross: 0.85, giant: 3.4 };
 export const LANES = [-2, 0, 2];
 
-/** Роль зверя: по виду и случаю r() */
-export function pickRole(species, r) {
-    if (GIANT.indexOf(species) >= 0 && r() < GIANT_SHARE) return 'giant';
+/**
+ * Обучающий отрезок: с какого метра заезда появляется каждое нападение (раньше — всё сразу со старта, новичок погибал за 20–30 с).
+ * До 400 м — только обломки и перебежки; прыгун — с 400, таран — с 700, «встал в полосе» — с 900, гиганты — с 1200.
+ */
+export const ROLE_FROM = { cross: 0, lunge: 400, charge: 700, block: 900, giant: 1200 };
+/** Открыто ли нападение role на метре dist (dist не задан — всё открыто) */
+export function roleOpen(role, dist) { return dist == null || dist >= (ROLE_FROM[role] || 0); }
+
+/** Роль зверя: по виду и случаю r(); dist — метр заезда (закрытые нападения — перебежка) */
+export function pickRole(species, r, dist) {
+    if (GIANT.indexOf(species) >= 0 && r() < GIANT_SHARE && roleOpen('giant', dist)) return 'giant';
     const g = LUNGE.indexOf(species) >= 0 ? 'lunge' : CHARGE.indexOf(species) >= 0 ? 'charge' : BLOCK.indexOf(species) >= 0 ? 'block' : 'cross';
-    return g !== 'cross' && r() < ATTACK_SHARE ? g : 'cross';
+    return g !== 'cross' && r() < ATTACK_SHARE && roleOpen(g, dist) ? g : 'cross';
 }
 
 /** Ближайшая полоса к x */
@@ -43,9 +51,9 @@ export function laneNear(x) {
     return best;
 }
 
-/** При создании зверя: роль и дальность выхода (base — порог перебежки спавнера, ед.) */
-export function prepAttack(a, r, base) {
-    a.role = pickRole(a.speciesKey, r);
+/** При создании зверя: роль и дальность выхода (base — порог перебежки спавнера, ед.; dist — метр заезда) */
+export function prepAttack(a, r, base, dist) {
+    a.role = pickRole(a.speciesKey, r, dist);
     a._trigDist = (base || 15) * TRIG_K[a.role] * (0.9 + r() * 0.2);
     a.phase = null; a.pt = 0;
     a.radius = Math.min(a.radius || 0.5, HIT_R_MAX); // крупный зверь бьёт только в своей полосе — соседняя безопасна
@@ -56,6 +64,14 @@ export function prepAttack(a, r, base) {
     }
     return a;
 }
+
+/**
+ * На каком расстоянии впереди (ед.) зверь должен появиться, чтобы до выхода успеть его увидеть и услышать:
+ * порог выхода (trigDist × k — множитель скорости спавнера) + путь за tell секунд (v — скорость, ед./с) + запас.
+ * Спавнер ставит зверей на ~1.5 порога перебежки, а прыгун выходит с 1.3, таран — с 1.9, гигант — с 3.4:
+ * они срабатывали сразу при появлении, и предупреждения (src/animals.js TELL_S) не было.
+ */
+export function attackLead(trigDist, k, v, tell) { return trigDist * (k || 1) + (v || 0) * (tell || 0) + 4; }
 
 /** Фазы, с) */
 export const RUN_IN = 0.4, CROUCH = 0.28, LEAP = 0.85, LEAP_VZ = 5, LEAP_TURN = 1.4, CHARGE_VZ = 7.5, BLOCK_IN = 0.75;

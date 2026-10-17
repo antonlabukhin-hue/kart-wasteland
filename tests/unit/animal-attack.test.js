@@ -134,3 +134,29 @@ describe('Пустошь: гигант несётся навстречу', () =>
         [giant, block].forEach((a) => { expect(a.radius).toBeLessThanOrEqual(HIT_R_MAX); expect(a.radius + 0.45).toBeLessThan(gap - 0.4); });
     });
 });
+
+import { ROLE_FROM, roleOpen } from '../../src/animal-attack.js';
+describe('Пустошь: обучающий отрезок — нападения по метрам', () => {
+    const yes = () => 0.1;
+    it('до 400 м только перебежки, дальше по одному новому виду: прыгун, таран, «встал в полосе», гигант', () => {
+        expect(['DOG', 'BOAR', 'BEAR', 'ELEPHANT'].map((k) => pickRole(k, yes, 100))).toEqual(['cross', 'cross', 'cross', 'cross']);
+        expect(pickRole('DOG', yes, 450)).toBe('lunge');
+        expect(pickRole('BOAR', yes, 450)).toBe('cross');
+        expect(pickRole('BOAR', yes, 750)).toBe('charge');
+        expect(pickRole('BEAR', yes, 750)).toBe('cross');   // гигант ещё закрыт, «встал в полосе» — тоже
+        expect(pickRole('BEAR', yes, 950)).toBe('block');   // гигант закрыт — встаёт в полосе
+        expect(pickRole('BEAR', yes, 1300)).toBe('giant');
+        expect(ROLE_FROM.lunge).toBeLessThan(ROLE_FROM.charge);
+        expect(ROLE_FROM.charge).toBeLessThan(ROLE_FROM.giant);
+        expect(roleOpen('giant')).toBe(true);               // метр не задан — всё открыто (как было)
+    });
+});
+
+import { attackLead } from '../../src/animal-attack.js';
+describe('Пустошь: нападающий появляется заранее', () => {
+    it('до выхода — секунда, чтобы увидеть и услышать: дальше порога на путь за эту секунду', () => {
+        expect(attackLead(19.5, 1, 25, 1)).toBeCloseTo(19.5 + 25 + 4);
+        expect(attackLead(51, 2, 50, 1)).toBeGreaterThan(51 * 2 + 50);
+        expect(attackLead(20, 1, 0, 1)).toBe(24);
+    });
+});
