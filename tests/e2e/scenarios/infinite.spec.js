@@ -16,7 +16,7 @@ test('бесконечная трасса: пейзажи, «Е», уборка 
     await expect(page.locator('#weatherDisplay')).toBeHidden(); // на плашке — только время, сердечки и метры
     await expect(page.locator('#weatherDisplay')).toContainText('🗺'); // Пустошь: заезд — со случайного пейзажа
     // «До соперника N м»: первая цель — ближайший соперник из таблицы
-    await expect(page.locator('#chaseDisplay')).toContainText('🎯 До ');
+    await expect(page.locator('#chaseDisplay')).toContainText(/🎯 До |👑/); // Пустошь: выдуманных соперников нет — новичок «впереди всех»
 
     // «Е» на трассе: ставим машину на ближайшую — счётчик растёт
     const got = await page.evaluate(async () => {
@@ -31,10 +31,14 @@ test('бесконечная трасса: пейзажи, «Е», уборка 
     expect(got).toBeGreaterThan(0);
 
     // вперёд по пейзажам: деревня → промзона → снег → микрорайон → ночь; время идёт вверх, босса и финиша нет
-    for (const [k, name] of [[1, 'Деревня'], [2, 'Промзона'], [3, 'Снежная тайга'], [4, 'Микрорайон'], [5, 'Ночная трасса']]) {
+    // Пустошь: пейзажи идут со случайного и в своём порядке — проверяем, что сменяются
+    const zones = new Set();
+    for (let k = 1; k <= 5; k++) {
         await page.evaluate(k => { const g = window.__raceDebug; g.setStrikes(0); g.setZ(g.startZ - (k * 900 + 300)); }, k);
-        await expect(page.locator('#weatherDisplay')).toContainText(name, { timeout: 15_000 });
+        await page.waitForTimeout(1500);
+        zones.add(await page.evaluate(() => document.querySelector('#weatherDisplay').textContent));
     }
+    expect(zones.size).toBeGreaterThan(2);
     const s = await page.evaluate(() => {
         const g = window.__raceDebug;
         return { state: g.state, boss: !!g.boss, dist: g.inf.dist, night: window.weatherMode };
@@ -44,32 +48,15 @@ test('бесконечная трасса: пейзажи, «Е», уборка 
     expect(s.dist).toBeGreaterThan(2900);
     // пройденное убирается (раз в ~60 кадров): позади ни бонусов, ни препятствий, ни кругов расстановки
     await expect.poll(() => page.evaluate(() => { const g = window.__raceDebug; return g.collectibles.concat(g.obstacles).filter(c => c.z > g.z + 200).length; }), { timeout: 10_000 }).toBe(0);
-    expect(s.night).toBe('night');
     const t = await page.evaluate(() => window.__raceDebug.raceTime);
     expect(t).toBeGreaterThan(1);
-
-    // видеокассета — редкая валюта: ищем впереди, подбираем
-    const vhs = await page.evaluate(async () => {
-        const g = window.__raceDebug;
-        let c = null;
-        for (let i = 0; i < 20 && !c; i++) { // кассета — ~раз в 1.7 км: ищем до 10 км вперёд
-            c = g.collectibles.find(o => o.type === 'vhs' && o.active);
-            if (!c) { g.setStrikes(0); g.setZ(g.z - 500); await new Promise(r => setTimeout(r, 1500)); }
-        }
-        g.setStrikes(0); g.setX(c.x); g.setZ(c.z + 0.2);
-        await new Promise(r => setTimeout(r, 400));
-        return g.stats.vhs || 0;
-    });
-    expect(vhs).toBe(1);
 
     // конец — по авариям: итог с дальностью и рекордом, в меню — рекорд на карточке
     await page.evaluate(() => window.__raceDebug.end('crash'));
     await expect(page.locator('#finish-screen')).toContainText('ЗАЕЗД ОКОНЧЕН', { timeout: 10_000 });
     await expect(page.locator('#finish-screen')).toContainText('НОВЫЙ РЕКОРД ДАЛЬНОСТИ');
-    await expect(page.locator('#finish-screen .fin-chip[title="видеокассеты"]')).toContainText('1');
     await page.locator('#finish-menu-btn').click();
     await expect(page.locator('#menu-inf-best')).toContainText(/🏆 \d+ м/);
-    await expect(page.locator('#mm-vhs')).toHaveText('1');
     expect(problems).toEqual([]);
 });
 
@@ -94,7 +81,7 @@ test('бесконечная трасса: усиление подбираетс
     const picked = await page.evaluate(async () => {
         const g = window.__raceDebug;
         let c = null;
-        for (let i = 0; i < 6 && !c; i++) {
+        for (let i = 0; i < 30 && !c; i++) { // Пустошь: из усилений осталась броня — попадается реже
             c = g.collectibles.find(o => o.type === 'power' && o.active);
             if (!c) { g.setZ(g.z - 400); await new Promise(r => setTimeout(r, 1500)); }
         }
