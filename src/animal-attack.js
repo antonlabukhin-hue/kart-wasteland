@@ -70,6 +70,14 @@ export function prepAttack(a, r, base, dist) {
     return a;
 }
 
+/** Задать роль зверю сцены (src/beast-scenes.js): порог выхода — по роли; гиганта — обратно в обычный размер */
+export function forceRole(a, role, base, r) {
+    a.role = role; a.phase = null; a.pt = 0;
+    a._trigDist = (base || 15) * TRIG_K[role] * (0.9 + (r || Math.random)() * 0.2);
+    if (a.giant && role !== 'giant') { a.giant = false; if (a.mesh && a.mesh.scale && a.mesh.scale.setScalar) a.mesh.scale.setScalar(1); a.radius = Math.min(a.radius || 0.5, HIT_R_MAX); }
+    return a;
+}
+
 /**
  * На каком расстоянии впереди (ед.) зверь должен появиться, чтобы до выхода успеть его увидеть и услышать:
  * порог выхода (trigDist × k — множитель скорости спавнера) + путь за tell секунд (v — скорость, ед./с) + запас.
@@ -128,6 +136,7 @@ export function stepAttack(a, dt, pz, px) {
         m.position.y = Math.abs(Math.sin(a.pt * 16)) * hop;
         m.rotation.x = Math.sin(a.pt * 8) * 0.06;
         legs(a, a.pt * 16);
+        if (a.phase === 'charge' && Math.sin(a.pt * 16) > (a.giant ? 0.9 : 0.97)) a.dust = true; // топот: пыль из-под копыт (гигант — каждый шаг)
     } else if (a.phase === 'stand') { // встаёт на дыбы в полосе и стоит
         const T = prepTime(a) || 0.6;
         a.dust = poseSignature(signatureOf(a), m, Math.min(a.pt, T), T, 0);

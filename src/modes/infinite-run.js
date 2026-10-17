@@ -37,7 +37,9 @@ import * as Decor from '../decor.js';
 import { pickMeme, createSideMeme, decorateMemeCar, MEME_EVERY, MEMES } from '../memes.js';
 import { buildShowroomCar } from '../cars.js';
 import { wreckCount, latchClear, spreadZ, WRECK_GAP } from '../wrecks.js';
-import { prepAttack, stepAttack, attackLead } from '../animal-attack.js';
+import { prepAttack, stepAttack, attackLead, forceRole, roleOpen } from '../animal-attack.js';
+import { planScene, SCENE_FROM, SCENE_EVERY } from '../beast-scenes.js';
+import { buildAccent } from '../zone-accents.js';
 import { TELL_S } from '../animals.js';
 import { warnSfx } from '../beast-sfx.js';
 import { hintDue, loadHints, saveHints } from '../attack-hints.js';
@@ -46,6 +48,8 @@ import { eyeLevel, poseIdle, poseAlert, IDLE_S } from '../beast-behavior.js';
 import { setEyes } from '../beast-kit.js';
 import { createDust } from '../beast-fx.js';
 import { createHorn } from '../horn.js';
+import { createAmbient } from '../ambient-beasts.js';
+import { makeAnimal } from '../zombie-look.js';
 import { createLatch, HOLD } from '../hood-latch.js';
 import { planWaste, buildWaste, wasteX, isStaticWaste } from '../wasteland-decor.js';
 
@@ -91,7 +95,8 @@ export function createInfiniteRun(ctx) {
     // мем-моменты 90-х (src/memes.js): попутка с коровой или шкафом, бабка с тележкой, рыбак, гаишник — раз в 475–775 м
     let nextMeme = 375 + Math.random() * 250, lastMeme = null;
     // Пустошь: звери нападают (src/animal-attack.js), прыгнувший вцепляется в капот (src/hood-latch.js)
-    let attackWired = false, runDist = 0, dust = null;
+    let attackWired = false, runDist = 0, dust = null, ambient = null;
+    let nextScene = SCENE_FROM + Math.random() * 150, lastScene = null; // звериные сценки (src/beast-scenes.js)
     const hintSeen = loadHints();
     /** «Рывок»: стряхнул или увернулся — короткое ускорение, награда за прочитанного зверя (вместо слипстрима за обломками) */
     const RUSH_T = 0.8;
@@ -125,6 +130,8 @@ export function createInfiniteRun(ctx) {
             sp.mandatoryPool = (sp.mandatoryPool || []).filter(function(k) { return k !== 'HUMAN' && k !== 'CHICKEN' && k !== 'PEACOCK'; }); // стартовый набор зверей — без людей, кур и павлинов
             sp.prep = function(a) {
                 prepAttack(a, Math.random, sp.triggerLookahead, runDist + (warm || 0)); // нападения открываются по метрам (src/animal-attack.js ROLE_FROM)
+                // пасётся в поле, дальше от дороги; насторожившись — подходит к обочине (выход «из-за обочины», а не из ниоткуда)
+                a.x = (a.startX >= 0 ? 1 : -1) * (ctx.TRACK_WIDTH / 2 + 3.5 + Math.random() * 2.5); if (a.mesh) a.mesh.position.x = a.x;
                 if (a.role !== 'cross') { // нападающий — дальше: успеть увидеть его на обочине и услышать до броска
                     const need = attackLead(a._trigDist, sp._k, sp._v, TELL_S + IDLE_S); // ещё и спокойным на обочине — до того, как насторожится
                     if (ctx.z - a.z < need) { a.z = ctx.z - need; if (a.mesh) a.mesh.position.z = a.z; sp._lastSpawnZ = Math.min(sp._lastSpawnZ == null ? a.z : sp._lastSpawnZ, a.z); }
@@ -154,7 +161,11 @@ export function createInfiniteRun(ctx) {
             setEyes(a.mesh, eyeLevel(a), now); // глаза: тусклые у спокойного, горят перед броском (src/beast-kit.js)
             if (!a.triggered && a.mesh.visible) { // спокоен — пасётся; заметил машину — поднял голову и смотрит на неё
                 if (!a.told) poseIdle(a.mesh, now, a.z * 0.37);
-                else poseAlert(a.mesh, now, Math.atan2(ctx.x - a.x, Math.max(1, ctx.z - a.z)));
+                else {
+                    const edge = (a.x >= 0 ? 1 : -1) * (ctx.TRACK_WIDTH / 2 + 1.4), gap = edge - a.x;
+                    if (Math.abs(gap) > 0.05) { a.x += Math.sign(gap) * Math.min(Math.abs(gap), 5 * dt); a.mesh.position.x = a.x; }
+                    poseAlert(a.mesh, now, Math.atan2(ctx.x - a.x, Math.max(1, ctx.z - a.z)));
+                }
             }
             if (a.dust) { a.dust = false; if (dust) dust.puff(a.x + (Math.random() - 0.5) * 0.4, 0.08, a.z + (a.giant ? 1.2 : 0.55), a.giant ? 0.9 : 0.38); } // пыль из-под копыт и лап (src/beast-fx.js)
             if (a.roar === 'new') { // гигант выбежал на полосу: рёв и надпись — видно издалека
@@ -175,6 +186,25 @@ export function createInfiniteRun(ctx) {
         scene.add(g);
         if (isStaticWaste(it.kind)) freezeStatic(g);
         track([g]);
+    }
+    /** Звериная сценка на дальности dAt: реквизит у обочины и звери, которые там живут (src/beast-scenes.js) */
+    function spawnScene(dAt) {
+        const sp = ctx.animals; if (!sp || !sp.createAnimal) return;
+        const plan = planScene(theme && theme.id, Math.random, lastScene); lastScene = plan.kind;
+        const z = START_Z - dAt, W = ctx.TRACK_WIDTH;
+        if (plan.prop) {
+            const g = plan.prop === 'pool' ? buildAccent({ kind: 'toxicPool' }, Math.random) : buildWaste({ kind: plan.prop, side: plan.side, off: 5.5 }, Math.random);
+            if (plan.prop === 'pool') g.scale.setScalar(1.7);
+            g.position.set(plan.side * (W / 2 + 5.5), 0, z); scene.add(g); track([g]);
+        }
+        plan.beasts.forEach(function(b) {
+            sp._planFromLeft = plan.side < 0;
+            const a = sp.createAnimal(z - b.dz, b.sp);
+            forceRole(a, roleOpen(b.role, runDist + (warm || 0)) ? b.role : 'cross', sp.triggerLookahead, Math.random); // нападение закрыто по метрам — просто перебегает
+            a.z = z - b.dz; a.x = plan.side * (W / 2 + b.off); a.scene = plan.kind;
+            if (a.mesh) a.mesh.position.set(a.x, 0, a.z);
+            sp.animals.push(a);
+        });
     }
     const memeWalkers = [];
     function spawnMeme(d, forcedId) {
@@ -249,6 +279,8 @@ export function createInfiniteRun(ctx) {
         startWorld: function(o) {
             world = createInfWorld({ scene: scene, startZ: START_Z, trackWidth: ctx.TRACK_WIDTH, rig: o.rig, ground: o.ground, hills: o.hills, lights: ctx.lights, lite: o.lite, sky: o.sky, onEvent: o.onEvent });
             world.tick(ctx.z, true);
+            // живой фон: спокойные звери пасутся в поле и разбегаются от машины (src/ambient-beasts.js)
+            ambient = createAmbient({ scene: scene, make: function(sp) { try { return makeAnimal(sp); } catch (e) { return null; } }, trackWidth: ctx.TRACK_WIDTH, lite: !!o.lite });
             return world;
         },
         /** Плотность зверей по километрам — для src/animals.js densityFn */
@@ -271,6 +303,7 @@ export function createInfiniteRun(ctx) {
                 try { ctx.plaque('📯 ГУДОК', 'Волки, лисы и обезьяны от него убегают, кабан и медведь — звереют, олень замирает', 'crate-good attack-hint'); } catch (e) {}
             }
             animalsTick(dt);
+            if (ambient) try { ambient.tick(dt, ctx.z, performance.now() / 1000, ctx.animals && ctx.animals.animalPool); } catch (e) { ambient = null; console.warn('ambient', e); }
             themeEv.tick(d, z, dt);
             if (roadGoals) roadGoals.tick(d);
             tickPowers(powers, dt);
@@ -334,6 +367,10 @@ export function createInfiniteRun(ctx) {
             // Пустошь: обочины и асфальт — на 190 м вперёд, по 40 м за раз
             if (d + 190 > wasteTo) { planWaste(wasteTo, wasteTo + 40, Math.random).forEach(spawnWaste); wasteTo += 40; }
             // мемы: следующий — за 170 м впереди (до тумана), не над разломом
+            if (d + 140 > nextScene) { // звериная сценка — не над разломом
+                if (!L.gaps.some(function(g) { const gd = START_Z - g.zNear; return nextScene > gd - 40 && nextScene < gd + 40; })) try { spawnScene(nextScene); } catch (e) { console.warn('scene', e); }
+                nextScene += SCENE_EVERY[0] + Math.random() * (SCENE_EVERY[1] - SCENE_EVERY[0]);
+            }
             if (!CUT.memes && d + 170 > nextMeme) { // в Пустоши мемов 90-х нет (src/wasteland-cut.js)
                 if (!L.gaps.some(function(g) { const gd = START_Z - g.zNear; return nextMeme > gd - 25 && nextMeme < gd + 20; })) spawnMeme(nextMeme);
                 nextMeme += MEME_EVERY[0] + Math.random() * (MEME_EVERY[1] - MEME_EVERY[0]);

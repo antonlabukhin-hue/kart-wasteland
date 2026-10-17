@@ -12,7 +12,7 @@ export const THEMES = [ // Пустошь: небо в пыли и дыму, з�
     { id: 'village', name: 'Брошенная деревня', style: 'village', accent: 0xc8d84a, sky: 0xbcb49a, zenith: 0x6a6f6a, fog: 0xaea48a, fogNear: 45, fogFar: 185, ground: 0x6e6e46, light: 0.95, slide: 'oil',
         animals: ['DOG', 'BOAR', 'FOX', 'DEER', 'CAT', 'BEAR', 'ZEBRA'] },
     { id: 'promzona', name: 'Промзона', style: 'industrial', accent: 0xff4a3a, sky: 0x8a7a68, zenith: 0x4c4a52, fog: 0x7a6a58, fogNear: 38, fogFar: 165, ground: 0x6a645a, light: 0.85, slide: 'acid',
-        animals: ['CROC', 'RHINO', 'DINO', 'DOG', 'BOAR', 'LION'] },
+        animals: ['CROC', 'RHINO', 'ELEPHANT', 'DOG', 'BOAR', 'CROC'] }, // Пустошь: промзона — крокодилы в кислоте, носороги и мамонты у бетона
     { id: 'snow', name: 'Пепельная тайга', style: 'forest', accent: 0xc8c0b8, snow: true, sky: 0xaaa69e, zenith: 0x6a6a70, fog: 0xa09c94, fogNear: 40, fogFar: 175, ground: 0x9a968e, light: 0.85, slide: 'ice',
         animals: ['BEAR', 'FOX', 'DEER', 'BOAR', 'DOG', 'ELEPHANT'] },
     { id: 'city', name: 'Пустой микрорайон', style: 'city', accent: 0xff8a3a, sky: 0xc6a684, zenith: 0x6a6070, fog: 0xb8966e, fogNear: 42, fogFar: 180, ground: 0x7a7466, light: 0.9, slide: 'oil',
@@ -20,7 +20,7 @@ export const THEMES = [ // Пустошь: небо в пыли и дыму, з�
     { id: 'night', name: 'Ночь пожаров', style: 'arsenev', accent: 0xff5a2a, night: true, sky: 0x1e0e0a, zenith: 0x070304, fog: 0x2a1410, fogNear: 22, fogFar: 120, ground: 0x3a2c28, light: 0.45, slide: 'oil',
         animals: ['BEAR', 'BOAR', 'DOG', 'CAT', 'FOX', 'DEER', 'LION'] },
     { id: 'svalka', name: 'Свалка «Надежда»', style: 'junk', accent: 0xffa03a, sky: 0xa89470, zenith: 0x6a6a74, fog: 0x9c8a68, fogNear: 42, fogFar: 175, ground: 0x7e6a48, light: 0.9, slide: 'tar',
-        animals: ['LION', 'MONKEY', 'ZEBRA', 'HIPPO', 'GIRAFFE', 'DOG', 'BOAR'] },
+        animals: ['MONKEY', 'MONKEY', 'ZEBRA', 'HIPPO', 'GIRAFFE', 'DOG', 'BOAR'] }, // Пустошь: свалка — обезьяны-мародёры, бегемоты в грязи, зебры и жирафы над кучами
     { id: 'rain', name: 'Кислотный дождь', style: 'arsenev', accent: 0x9aff5a, rain: true, sky: 0x5e6a56, zenith: 0x343c32, fog: 0x5e6a56, fogNear: 25, fogFar: 110, ground: 0x56604e, light: 0.72, slide: 'acid',
         animals: ['DOG', 'DEER', 'FOX', 'CAT', 'BOAR', 'CROC', 'HIPPO'] },
     { id: 'jungle', name: 'Сбежавший зоопарк', style: 'forest', accent: 0x5aff7a, sky: 0x5a6a44, zenith: 0x34503e, fog: 0x4a5a3a, fogNear: 30, fogFar: 140, ground: 0x5a6a3e, light: 0.85, slide: 'tar',
