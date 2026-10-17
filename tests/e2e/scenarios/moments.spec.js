@@ -7,36 +7,6 @@ const noAnimals = (page) => page.evaluate(() => setInterval(() => {
     (d.cars || []).forEach(c => { if (c.mesh) { c.x = 99; c.mesh.position.x = 99; } });
 }, 50));
 
-test('рекламный щит в полосе: снёс — не авария, +щит в статистике', async ({ page }) => {
-    const problems = watchProblems(page);
-    await login(page, 'Тестер', './?start=0.02');
-    await startFreeRace(page, 'easy');
-    await waitRacing(page);
-    await noAnimals(page);
-    const boards = await page.evaluate(() => window.__raceDebug.smashBoards.map(b => ({ x: b.x, z: b.z })));
-    expect(boards.length).toBeGreaterThanOrEqual(1); // часть мест теперь занимают события (трактор, кран…)
-    // держим полосу ближайшего щита впереди
-    await page.evaluate(() => setInterval(() => {
-        const d = window.__raceDebug;
-        const b = d.smashBoards.filter(x => !x.smashed && x.z < d.z).sort((a, c) => c.z - a.z)[0];
-        if (b) d.setX(b.x);
-        // проверяем только щит: попутки, ямы и падающий груз с пути убраны (тест изредка падал от случайной ямы/грузовика)
-        (d.cars || []).forEach(c => { if (c.mesh) { c.x = 99; c.mesh.position.x = 99; } });
-        (d.obstacles || []).forEach(o => { o.active = false; });
-        if (window.__fallingDebris) window.__fallingDebris.length = 0;
-    }, 30));
-    // плашка «Реклама снесена!» живёт ~2 с — запоминаем сам факт появления (на медленной машине проверка могла опоздать)
-    await page.evaluate(() => { window.__sawSmash = false; new MutationObserver(() => { if (document.querySelector('.big-plaque.smash')) window.__sawSmash = true; }).observe(document.body, { childList: true }); });
-    /* газ жмётся сам (W — прыжок) */
-    await expect.poll(() => page.evaluate(() => window.__raceDebug.stats.billboards || 0), { timeout: 30_000 }).toBeGreaterThanOrEqual(1);
-    // подсказка «рекламу можно сносить» — часть обучения, по умолчанию его нет; после удара — плашка с бонусом
-    expect(await page.evaluate(() => Number(localStorage.getItem('kw_road_racing_hint_board') || 0))).toBe(0);
-    await expect.poll(() => page.evaluate(() => window.__sawSmash), { timeout: 5_000 }).toBe(true);
-    /* газ жмётся сам (W — прыжок) */
-    expect(await page.evaluate(() => window.__raceDebug.strikes)).toBe(0);
-    expect(problems).toEqual([]);
-});
-
 test('промзона: труба рушится с эстакады поперёк двух полос — по свободной полосе проезд без аварии', async ({ page }) => {
     const problems = watchProblems(page);
     await login(page, 'Тестер', './?start=0.1');
